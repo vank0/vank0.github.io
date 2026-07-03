@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="96" y1="128" x2="416" y2="392" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c5cff"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="256" cy="248" r="205" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c5cff" stop-opacity="0.55"/>
+      <stop offset="0.6" stop-color="#22d3ee" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gloss" x1="0" y1="164" x2="0" y2="296" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- The dumbbell silhouette: two rounded weights joined by a thick grip. -->
+    <clipPath id="bell">
+      <rect x="104" y="160" width="88" height="192" rx="34"/>
+      <rect x="320" y="160" width="88" height="192" rx="34"/>
+      <rect x="168" y="222" width="176" height="68" rx="34"/>
+    </clipPath>
+  </defs>
+  <!-- app-tile background + faint tinted panel + focal glow -->
+  <rect width="512" height="512" rx="112" fill="#0b1020"/>
+  <rect x="18" y="18" width="476" height="476" rx="102" fill="url(#g)" opacity="0.10"/>
+  <ellipse cx="256" cy="248" rx="205" ry="176" fill="url(#glow)"/>
+  <!-- the mark, filled with the brand gradient + a soft top gloss -->
+  <g clip-path="url(#bell)">
+    <rect x="104" y="160" width="304" height="192" fill="url(#g)"/>
+    <rect x="104" y="160" width="304" height="150" fill="url(#gloss)"/>
+  </g>
+</svg>

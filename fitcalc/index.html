@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <!-- maximum-scale + user-scalable=no disables pinch-zoom AND the iOS
+         auto-zoom that fires when focusing an input under 16px. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0b1020" />
+    <!-- Defense-in-depth: nothing loads from or talks to any external host.
+         'unsafe-inline' script-src is required by Vite's dev-mode refresh
+         preamble; ws:/wss: connect-src is required by dev HMR. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws: wss:; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      name="description"
+      content="Offline-first, scientifically-grounded fitness calculators. Your data never leaves your device."
+    />
+    <title>FitCalc — Fitness Calculators</title>
+    <script type="module" crossorigin src="./assets/index-_EeJYo_e.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DAw5iaYO.css">
+  <link rel="manifest" href="./manifest.webmanifest"></head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

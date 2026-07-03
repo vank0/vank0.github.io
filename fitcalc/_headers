@@ -1,0 +1,10 @@
+# Security headers for static hosts that honour a _headers file (Netlify,
+# Cloudflare Pages, etc.). The Content-Security-Policy is also set via a <meta>
+# tag in index.html; where possible, promote it to a real response header here.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), usb=(), payment=()
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
