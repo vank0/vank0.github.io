@@ -42,11 +42,15 @@
   --blob-2: rgba(59, 130, 246, 0.24);
   --blob-3: rgba(168, 85, 247, 0.18);
 
-  --glass: rgba(255, 255, 255, 0.07);
-  --glass-strong: rgba(255, 255, 255, 0.11);
-  --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-highlight: rgba(255, 255, 255, 0.28);
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  /* Dark glass = translucent DARK tint, not white. Layering white over a
+     blurred vibrant backdrop produces a milky/hazy pane; a dark tint keeps
+     the panel clean and readable, with the border + faint highlight giving
+     the glass edge. */
+  --glass: rgba(17, 24, 38, 0.62);
+  --glass-strong: rgba(17, 24, 38, 0.76);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.1);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 
   --text: #ecf2f8;
   --muted: #9fb1c3;
@@ -60,8 +64,8 @@
   --wave-idle: #566b7d;
   --wave-guide: rgba(236, 242, 248, 0.18);
   --wave-bg: rgba(0, 0, 0, 0.25);
-  --control: rgba(255, 255, 255, 0.09);
-  --control-border: rgba(255, 255, 255, 0.14);
+  --control: rgba(255, 255, 255, 0.08);
+  --control-border: rgba(255, 255, 255, 0.12);
 }
 
 /* ---------------------------------------------------------------- base */
