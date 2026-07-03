@@ -79,37 +79,26 @@ html, body {
 }
 
 /* Vibrant layered background the glass blurs against.
-   Blobs are painted as soft radial-gradients (no `filter: blur`) — on iOS
-   Safari a `filter`ed layer behind a `backdrop-filter` element makes the whole
-   page render as a milky white wash, so we avoid `filter` entirely and let the
-   gradient falloff do the softening. Drift is animated with transform only. */
+   The colored blobs are painted directly on `body` as soft radial-gradients
+   (no `filter: blur`, no animated/composited layer). Two iOS Safari traps this
+   avoids: (1) a `filter`ed layer behind a `backdrop-filter` element paints the
+   whole page as a milky white wash; (2) a transform-animated / will-change
+   pseudo-element gets promoted to a cached GPU layer that WebKit does NOT
+   re-rasterize when a theme swap only changes the CSS variables it paints with
+   — freezing the background in the old theme's colors. `body`'s own background
+   is painted into the page canvas and always repaints on a theme change. */
 body {
   min-height: 100dvh;
-  background: linear-gradient(160deg, var(--bg-a), var(--bg-b));
+  background:
+    radial-gradient(38% 42% at 20% 12%, var(--blob-1), transparent 72%),
+    radial-gradient(46% 46% at 84% 30%, var(--blob-2), transparent 72%),
+    radial-gradient(50% 50% at 40% 96%, var(--blob-3), transparent 72%),
+    linear-gradient(160deg, var(--bg-a), var(--bg-b));
+  background-repeat: no-repeat;
   position: relative;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: -25%;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(38% 38% at 22% 20%, var(--blob-1), transparent 70%),
-    radial-gradient(42% 42% at 82% 72%, var(--blob-2), transparent 70%),
-    radial-gradient(40% 40% at 30% 88%, var(--blob-3), transparent 70%);
-  animation: drift 34s var(--ease) infinite alternate;
-  will-change: transform;
-}
-
-@keyframes drift {
-  from { transform: translate3d(-3%, -2%, 0) scale(1); }
-  to   { transform: translate3d(4%, 3%, 0) scale(1.08); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  body::before { animation: none; }
   * { transition-duration: 0.01ms !important; }
 }
 
