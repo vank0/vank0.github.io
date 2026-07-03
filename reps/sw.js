@@ -1,43 +1,50 @@
-/* Service worker — cache the app shell so the timer works fully offline. */
-const CACHE = 'tabata-v37';
+const CACHE = "repcount-v1";
 const ASSETS = [
-  './',
-  './index.html',
-  './styles.css',
-  './app.js',
-  './qrcode.js',
-  './i18n.js',
-  './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
+  ".",
+  "index.html",
+  "styles.css",
+  "app.js",
+  "manifest.webmanifest",
+  "icon.svg",
+  "icon-192.png",
+  "icon-512.png",
+  "apple-touch-icon.png",
 ];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+self.addEventListener("install", (e) => {
+  e.waitUntil(
+    caches.open(CACHE).then((c) =>
+      // Add one-by-one so a missing optional asset doesn't fail the whole install
+      Promise.allSettled(ASSETS.map((a) => c.add(a)))
+    ).then(() => self.skipWaiting())
+  );
 });
 
-self.addEventListener('activate', (e) => {
+self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-// Cache-first for app shell; network fallback populates cache for anything new.
-self.addEventListener('fetch', (e) => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
+// Network-first with cache fallback: always fresh while online (no stale app
+// after updates), fully functional offline from the precached copy.
+self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
   e.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req)
-        .then((res) => {
+    fetch(e.request)
+      .then((res) => {
+        if (res.ok && new URL(e.request.url).origin === location.origin) {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-          return res;
-        })
-        .catch(() => caches.match('./index.html'));
-    })
+          caches.open(CACHE).then((c) => c.put(e.request, copy));
+        }
+        return res;
+      })
+      .catch(() =>
+        caches.match(e.request, { ignoreSearch: true }).then(
+          (cached) => cached || caches.match("index.html")
+        )
+      )
   );
 });

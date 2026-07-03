@@ -2,354 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-  <meta name="theme-color" content="#0b1020" />
-  <meta name="description" content="A configurable Tabata / HIIT interval timer that works fully offline." />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0b0f14" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Tabata" />
+  <meta name="apple-mobile-web-app-title" content="RepCount" />
+  <title>RepCount — sensor rep counter</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <link rel="icon" href="icons/icon-192.png" />
-  <title>Tabata Timer</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Resolve theme before first paint to avoid a flash of the wrong theme.
+    (function () {
+      try {
+        var pref = localStorage.getItem("rc.theme"); // "light" | "dark" | "auto" | null
+        var dark = pref === "dark" ||
+          ((!pref || pref === "auto") && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      } catch (_) { document.documentElement.dataset.theme = "light"; }
+    })();
+  </script>
 </head>
 <body>
-  <!-- Ambient background blobs for glassmorphism -->
-  <div class="bg" aria-hidden="true">
-    <span class="blob blob-1"></span>
-    <span class="blob blob-2"></span>
-    <span class="blob blob-3"></span>
-  </div>
-
-  <!-- ===================== SETUP SCREEN ===================== -->
-  <main id="setup" class="screen setup-screen">
-    <header class="app-head">
-      <h1>Tabata<span class="dot">.</span></h1>
-      <div class="head-actions">
-        <select id="langSelect" class="glass lang-select" aria-label="Language"></select>
-        <button id="shareBtn" class="glass btn-ghost small" data-icon="share"><span data-i18n="share">Share</span></button>
-        <button id="installBtn" class="glass btn-ghost small" hidden data-i18n="install">Install</button>
+  <main id="app">
+    <header>
+      <h1>RepCount</h1>
+      <div class="header-actions">
+        <button id="themeBtn" class="chip" aria-label="Theme">
+          <svg id="themeIconAuto" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 3 a9 9 0 0 1 0 18 z" fill="currentColor" stroke="none"/>
+          </svg>
+          <svg id="themeIconLight" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <svg id="themeIconDark" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <button id="langBtn" class="chip" aria-label="Language">EN</button>
       </div>
     </header>
 
-    <nav class="tabs glass" role="tablist" aria-label="Sections">
-      <button class="tab active" id="tabbtn-workout" data-tab="workout" role="tab" aria-selected="true" aria-controls="tab-workout" data-i18n="workout">Workout</button>
-      <button class="tab" id="tabbtn-history" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history" tabindex="-1" data-i18n="history">History</button>
-      <button class="tab" id="tabbtn-settings" data-tab="settings" role="tab" aria-selected="false" aria-controls="tab-settings" tabindex="-1" data-i18n="settingsTab">Settings</button>
-    </nav>
-
-    <div class="tab-panels">
-    <section class="tab-panel" id="tab-workout" role="tabpanel" aria-labelledby="tabbtn-workout">
-    <section class="glass card presets-card">
-      <div class="card-title">
-        <h2 data-i18n="presets">Presets</h2>
-        <button id="savePresetBtn" class="glass btn-ghost small" data-icon="plus"><span data-i18n="saveCurrent">Save current</span></button>
+    <!-- Big counter -->
+    <section id="counterCard" class="card">
+      <div id="repDisplay" aria-live="off">
+        <span id="repCount">0</span>
+        <span id="repTarget" class="target">/ 12</span>
       </div>
-      <div id="presetList" class="preset-list"></div>
-      <button id="presetsMore" class="glass btn-ghost small show-more" hidden></button>
-      <div id="editBar" class="edit-bar" hidden>
-        <span id="editBarLabel">Editing</span>
-        <div class="edit-bar-actions">
-          <button id="editCancel" class="glass btn-ghost small" data-i18n="cancel">Cancel</button>
-          <button id="editSave" class="glass btn-primary small" data-i18n="saveChanges">Save changes</button>
-        </div>
-      </div>
+      <div id="stateLine" data-i18n="state.idle">Ready — place phone on the weight stack</div>
+      <canvas id="wave" width="640" height="120" aria-hidden="true"></canvas>
     </section>
 
-    <section class="glass card config-card">
-      <h2 data-i18n="workout">Workout</h2>
-      <div class="grid" id="workoutGrid">
-        <label class="field">
-          <span data-i18n="sets">Sets</span>
-          <div class="stepper" data-key="sets">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="1" max="50" step="1" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-
-        <label class="field">
-          <span data-i18n="roundsPerSet">Rounds / set</span>
-          <div class="stepper" data-key="rounds">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="1" max="99" step="1" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-
-        <label class="field">
-          <span data-i18n="setRepeat">Set repeat</span>
-          <div class="stepper" data-key="setRepeat">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="1" max="20" step="1" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-
-        <label class="field">
-          <span data-i18n="work" data-unit="sec">Work</span>
-          <div class="stepper" data-key="work">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="1" max="600" step="1" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-
-        <label class="field">
-          <span data-i18n="rest" data-unit="sec">Rest</span>
-          <div class="stepper" data-key="rest">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="0" max="600" step="1" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-
-        <label class="field">
-          <span data-i18n="restBetweenSets" data-unit="sec">Rest between sets</span>
-          <div class="stepper" data-key="restSet">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="0" max="900" step="5" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-
-        <label class="field adv">
-          <span data-i18n="prepare" data-unit="sec">Prepare</span>
-          <div class="stepper" data-key="prepare">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="0" max="60" step="1" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-
-        <label class="field adv">
-          <span data-i18n="warmup" data-unit="sec">Warmup</span>
-          <div class="stepper" data-key="warmup">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="0" max="900" step="5" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-
-        <label class="field adv">
-          <span data-i18n="cooldown" data-unit="sec">Cooldown</span>
-          <div class="stepper" data-key="cooldown">
-            <button class="dec" aria-label="decrease" data-icon="minus"></button>
-            <input type="number" min="0" max="900" step="5" inputmode="numeric" />
-            <button class="inc" aria-label="increase" data-icon="plus"></button>
-            <em></em>
-          </div>
-        </label>
-      </div>
-
-      <button id="configMore" class="glass btn-ghost small show-more"></button>
+    <!-- Controls -->
+    <section class="card controls">
+      <button id="startBtn" class="primary" data-i18n="btn.start">▶ Start set</button>
+      <button id="resetBtn" data-i18n="btn.reset">Reset</button>
     </section>
 
-    <section class="glass card exercises-card">
-      <div class="card-title">
-        <h2 data-i18n="exercises">Exercises</h2>
-        <input id="exercisesOn" type="checkbox" class="switch" aria-label="name exercises" />
-      </div>
-      <p id="exercisesHint" class="hint" data-i18n="exercisesHint">Toggle on to name each round. With multiple sets, use the tabs to set names per set.</p>
-      <div id="exerciseTabs" class="ex-tabs" hidden></div>
-      <div id="exerciseList" class="exercise-list" hidden></div>
-      <div id="exActions" class="ex-actions" hidden>
-        <button id="shuffleBtn" class="glass btn-ghost small" data-icon="shuffle"><span data-i18n="shuffle">Shuffle</span></button>
-        <button id="copySetsBtn" class="glass btn-ghost small copy-sets" hidden></button>
-      </div>
-      <datalist id="exerciseOptions"></datalist>
-    </section>
-    </section>
+    <!-- Settings -->
+    <section class="card settings">
+      <h2 data-i18n="settings.title">Settings</h2>
 
-    <section class="tab-panel" id="tab-history" role="tabpanel" aria-labelledby="tabbtn-history" hidden>
-    <section class="glass card history-card">
-      <div class="card-title">
-        <h2 data-i18n="history">History</h2>
-        <button id="clearHistoryBtn" class="glass btn-ghost small" data-i18n="clearHistory" hidden>Clear</button>
-      </div>
-      <div id="historyList" class="history-list"></div>
-    </section>
-    </section>
-
-    <section class="tab-panel" id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings" hidden>
-    <section class="glass card cues-card">
-      <h2 data-i18n="cues">Cues</h2>
       <label class="row">
-        <span data-i18n="volume">Volume</span>
-        <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" />
+        <span data-i18n="settings.target">Target reps</span>
+        <span class="stepper">
+          <button class="step" data-step="-1" aria-label="decrease">−</button>
+          <input id="targetInput" type="number" inputmode="numeric" min="1" max="200" value="12" />
+          <button class="step" data-step="1" aria-label="increase">+</button>
+        </span>
       </label>
-      <label class="toggle-row">
-        <span data-i18n="voice">Voice announcements</span>
-        <input id="voiceOn" type="checkbox" class="switch" checked />
-      </label>
-      <label class="toggle-row">
-        <span data-i18n="countdown">Countdown beeps (3-2-1)</span>
-        <input id="countdownOn" type="checkbox" class="switch" checked />
-      </label>
-      <label class="toggle-row">
-        <span data-i18n="spokenCountdown">Spoken 3-2-1</span>
-        <input id="spokenCountdownOn" type="checkbox" class="switch" />
-      </label>
-      <label class="toggle-row">
-        <span data-i18n="halfway">Halfway alert</span>
-        <input id="halfwayOn" type="checkbox" class="switch" checked />
-      </label>
-      <label class="toggle-row" id="vibrateRow">
-        <span class="row-label"><span data-i18n="vibration">Vibration (mobile)</span><small id="vibrateNote" class="sub-note" data-i18n="notSupported" hidden>Not supported on this device</small></span>
-        <input id="vibrateOn" type="checkbox" class="switch" checked />
-      </label>
-      <label class="toggle-row">
-        <span data-i18n="wakeLock">Keep screen awake</span>
-        <input id="wakeOn" type="checkbox" class="switch" checked />
-      </label>
-    </section>
 
-    <section class="glass card appearance-card">
-      <h2 data-i18n="appearance">Appearance</h2>
       <label class="row">
-        <span data-i18n="themeLabel">Theme</span>
-        <select id="themeSelect" class="glass mini-select">
-          <option value="auto" data-i18n="themeAuto">Auto</option>
-          <option value="dark" data-i18n="themeDark">Dark</option>
-          <option value="light" data-i18n="themeLight">Light</option>
-        </select>
+        <span data-i18n="settings.sensitivity">Sensitivity</span>
+        <input id="sensInput" type="range" min="1" max="10" step="1" value="5" />
       </label>
-      <div class="row">
-        <span data-i18n="accent">Accent</span>
-        <div id="accentSwatches" class="accent-swatches"></div>
-      </div>
-    </section>
 
-    <section class="glass card backup-card">
-      <h2 data-i18n="backup">Backup</h2>
-      <div class="backup-actions">
-        <button id="exportBtn" class="glass btn-ghost small"><span data-i18n="exportData">Export</span></button>
-        <button id="importBtn" class="glass btn-ghost small"><span data-i18n="importData">Import</span></button>
-        <input id="importFile" type="file" accept="application/json,.json" hidden />
-      </div>
-    </section>
-
-    <section class="glass card video-card">
-      <h2 data-i18n="bgVideo">Background video</h2>
-      <input id="videoUrl" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="videoPlaceholder" placeholder="Paste a YouTube link (optional)" />
-      <p id="videoStatus" class="hint">Plays and loops behind the timer during your workout.</p>
       <label class="row">
-        <span data-i18n="videoVolume">Video volume</span>
-        <input id="videoVolume" type="range" min="0" max="100" step="1" value="50" />
+        <span data-i18n="settings.minRep">Min. seconds per rep</span>
+        <span class="stepper">
+          <button class="step2" data-step="-0.5" aria-label="decrease">−</button>
+          <input id="minRepInput" type="number" inputmode="decimal" min="0.5" max="10" step="0.5" value="1.5" />
+          <button class="step2" data-step="0.5" aria-label="increase">+</button>
+        </span>
+      </label>
+
+      <label class="row toggle">
+        <span data-i18n="settings.voice">Speak the count</span>
+        <input id="voiceToggle" type="checkbox" />
+      </label>
+
+      <label class="row toggle">
+        <span data-i18n="settings.beep">Beep on each rep</span>
+        <input id="beepToggle" type="checkbox" checked />
       </label>
     </section>
 
+    <section class="card help">
+      <h2 data-i18n="help.title">How to use</h2>
+      <ol>
+        <li data-i18n="help.1">Set your target reps, press <b>Start set</b>, then place the phone flat on the machine's weight stack (screen up).</li>
+        <li data-i18n="help.2">Each full up-and-down movement counts as one rep, with a beep.</li>
+        <li data-i18n="help.3">When you reach the target you'll hear a distinct fanfare; extra reps get a lower tone.</li>
+        <li data-i18n="help.4">If reps are missed or double-counted, adjust <b>Sensitivity</b> — the graph shows what the sensor sees.</li>
+      </ol>
     </section>
-    </div>
-
-    <p id="setupHint" class="kbd-hint" aria-hidden="true"></p>
-    <p class="foot" data-i18n="footNote">Works offline · Add to Home Screen for full-screen mode</p>
-    <p class="foot copyright">Developed by Ivan. M. Ivanov &lt;/&gt; 2026</p>
-
-    <div class="start-bar">
-      <div class="start-bar-inner">
-        <div class="start-stats">
-          <div><span id="sumTotal">4:00</span><small data-i18n="total">total</small></div>
-          <div><span id="sumRounds">8</span><small data-i18n="intervals">intervals</small></div>
-          <div><span id="sumWork">2:40</span><small data-i18n="workSummary">work</small></div>
-        </div>
-        <button id="startBtn" class="glass btn-primary" data-i18n="startWorkout">Start workout</button>
-      </div>
-    </div>
   </main>
 
-  <!-- ===================== TIMER SCREEN ===================== -->
-  <section id="timer" class="screen timer-screen" hidden>
-    <div class="yt-bg" id="ytBg" hidden><div id="ytPlayer"></div></div>
-    <div class="yt-scrim" id="ytScrim" hidden></div>
-    <div class="timer-top">
-      <button id="backBtn" class="glass btn-ghost small" data-icon="close"><span data-i18n="end">End</span></button>
-      <div class="phase-label" id="phaseLabel">Prepare</div>
-      <button id="muteBtn" class="glass btn-ghost small" aria-label="mute" data-icon="volume"></button>
-    </div>
-
-    <div class="exercise-name" id="exerciseName" hidden></div>
-    <div class="timer-core">
-      <div class="round-info">
-        <span id="roundInfo">Round 1 / 8</span>
-        <span id="setInfo" class="set-info"></span>
-      </div>
-      <div class="count-ring">
-        <div class="progress-ring-wrap">
-          <svg class="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
-            <circle class="ring-bg" cx="60" cy="60" r="54" />
-            <circle class="ring-fg" id="ring" cx="60" cy="60" r="54" />
-          </svg>
-        </div>
-        <div class="big-count" id="bigCount">00</div>
-      </div>
-      <div class="next-up" id="nextUp">Next: Rest</div>
-    </div>
-
-    <div class="totals">
-      <div><small data-i18n="elapsed">Elapsed</small><span id="elapsed">0:00</span></div>
-      <div class="bar"><span id="totalBar"></span></div>
-      <div><small data-i18n="remaining">Remaining</small><span id="remaining">4:00</span></div>
-    </div>
-
-    <div class="controls">
-      <button id="resetBtn" class="glass ctrl" aria-label="reset" data-icon="reset"></button>
-      <button id="playBtn" class="glass ctrl ctrl-main" aria-label="play/pause" data-icon="pause"></button>
-      <button id="skipBtn" class="glass ctrl" aria-label="skip" data-icon="skip"></button>
-    </div>
-    <div id="timerHint" class="kbd-hint" aria-hidden="true"></div>
-  </section>
-
-  <!-- ===================== SAVE PRESET MODAL ===================== -->
-  <div id="modal" class="modal-backdrop" hidden>
-    <div class="glass modal">
-      <h3 id="modalTitle" data-i18n="savePreset">Save preset</h3>
-      <input id="presetName" type="text" data-i18n-ph="presetNamePh" placeholder="Preset name" maxlength="30" />
-      <div class="modal-actions">
-        <button id="modalCancel" class="glass btn-ghost" data-i18n="cancel">Cancel</button>
-        <button id="modalOk" class="glass btn-primary small" data-i18n="save">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================== SHARE MODAL ===================== -->
-  <div id="shareModal" class="modal-backdrop" hidden>
-    <div class="glass modal share-modal">
-      <h3 data-i18n="shareTitle">Share workout</h3>
-      <p class="hint" data-i18n="shareDesc">Scan the code or copy the link. Opening it loads these settings.</p>
-      <div id="qrBox" class="qr-box"></div>
-      <label class="toggle-row share-extras">
-        <span data-i18n="includeExtras">Include cues &amp; video settings</span>
-        <input id="shareExtras" type="checkbox" class="switch" />
-      </label>
-      <input id="shareUrlField" type="text" readonly aria-label="share link" />
-      <div class="modal-actions">
-        <button id="shareClose" class="glass btn-ghost small" data-i18n="close">Close</button>
-        <button id="copyUrlBtn" class="glass btn-primary small" data-i18n="copyLink">Copy link</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast" class="toast" hidden></div>
-
-  <div id="updateBanner" class="update-banner" hidden>
-    <span data-i18n="updateAvailable">New version available</span>
-    <button id="refreshBtn" class="glass btn-primary small" data-i18n="refresh">Refresh</button>
-  </div>
-
-  <div id="srAnnounce" class="sr-only" role="status" aria-live="assertive" aria-atomic="true"></div>
-
-  <script src="qrcode.js"></script>
-  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
