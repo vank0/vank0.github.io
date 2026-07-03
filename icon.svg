@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0b0f14"/>
+  <!-- dumbbell -->
+  <g fill="#34d399">
+    <rect x="96" y="196" width="40" height="120" rx="12"/>
+    <rect x="148" y="166" width="40" height="180" rx="12"/>
+    <rect x="324" y="166" width="40" height="180" rx="12"/>
+    <rect x="376" y="196" width="40" height="120" rx="12"/>
+    <rect x="188" y="238" width="136" height="36" rx="10"/>
+  </g>
+  <!-- motion wave -->
+  <path d="M96 400 q40 -48 80 0 t80 0 t80 0 t80 0" fill="none" stroke="#8fa3b8" stroke-width="18" stroke-linecap="round"/>
+</svg>
