@@ -11,12 +11,17 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="theme-color" content="#0b1020" />
+    <!-- Installed-PWA behaviour on iOS/iPadOS (full-screen, themed status bar). -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FitCalc" />
     <!-- Defense-in-depth: nothing loads from or talks to any external host.
          'unsafe-inline' script-src is required by Vite's dev-mode refresh
          preamble; ws:/wss: connect-src is required by dev HMR. -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws: wss:; object-src 'none'; base-uri 'self'; form-action 'none'"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"
     />
     <meta name="referrer" content="no-referrer" />
     <meta
@@ -24,8 +29,9 @@
       content="Offline-first, scientifically-grounded fitness calculators. Your data never leaves your device."
     />
     <title>FitCalc — Fitness Calculators</title>
-    <script type="module" crossorigin src="./assets/index-Cczefvvk.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DAw5iaYO.css">
+    <script type="module" crossorigin src="./assets/index-PSf_c-sN.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/react-SIwY82C9.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-CYUarLAt.css">
   <link rel="manifest" href="./manifest.webmanifest"></head>
   <body>
     <div id="root"></div>

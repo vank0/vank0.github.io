@@ -2,6 +2,7 @@
 # Cloudflare Pages, etc.). The Content-Security-Policy is also set via a <meta>
 # tag in index.html; where possible, promote it to a real response header here.
 /*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   X-Frame-Options: DENY
