@@ -41,1373 +41,339 @@
             --progress-bg: rgba(0, 0, 0, 0.05);
             --progress-fill: #2d6fb0;
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: var(--font);
             background: var(--bg);
             color: var(--text);
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
+            height: 100vh; width: 100vw; overflow: hidden;
+            user-select: none; -webkit-user-select: none;
             transition: background 0.4s, color 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
-        #app {
-            width: 100%;
-            height: 100%;
-            max-width: 620px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+        #app { width: 100%; height: 100%; max-width: 620px; display: flex; flex-direction: column; position: relative; }
         .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--border);
-            border-radius: var(--card-radius);
-            box-shadow: var(--shadow);
-            transition: all var(--transition);
+            background: var(--glass); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border); border-radius: var(--card-radius); box-shadow: var(--shadow);
         }
-        .glass-card2 {
-            background: var(--glass2);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border2);
-            border-radius: var(--card-radius);
-            box-shadow: var(--shadow);
-        }
-
-        #setup-screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 16px 16px 20px;
-            gap: 8px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .setup-top-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px 8px;
-            flex-shrink: 0;
-        }
-        .brand {
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            color: var(--text);
-        }
-        .brand span {
-            color: var(--accent);
-        }
+        #setup-screen { flex: 1; display: flex; flex-direction: column; padding: 16px 16px 20px; gap: 8px; overflow-y: auto; }
+        .setup-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; flex-shrink: 0; }
+        .brand { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
+        .brand span { color: var(--accent); }
         .icon-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--transition);
-            flex-shrink: 0;
+            width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text); display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: all var(--transition); flex-shrink: 0;
         }
-        .icon-btn:hover {
-            background: var(--surface2);
-            border-color: var(--border2);
-            transform: scale(1.04);
-        }
-        .icon-btn svg {
-            width: 17px;
-            height: 17px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        .lang-btn {
-            font-weight: 700;
-            font-size: 0.82rem;
-            letter-spacing: 0.04em;
-            width: 42px;
-        }
-
-        .setup-card {
-            padding: 22px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            flex-shrink: 0;
-        }
-        .setup-section {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .setup-section .section-question {
-            font-size: 1.05rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            color: var(--text);
-            line-height: 1.3;
-        }
-        .setup-section .section-hint {
-            font-size: 0.72rem;
-            color: var(--text2);
-            letter-spacing: 0.03em;
-            margin-top: -6px;
-        }
-        .option-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+        .icon-btn:hover { background: var(--surface2); border-color: var(--border2); transform: scale(1.04); }
+        .icon-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .lang-btn { font-weight: 700; font-size: 0.82rem; letter-spacing: 0.04em; width: 42px; }
+        .setup-card { padding: 22px 20px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; }
+        .setup-section { display: flex; flex-direction: column; gap: 10px; }
+        .setup-section .section-question { font-size: clamp(0.9rem, 2.5vw, 1.1rem); font-weight: 600; color: var(--text); }
+        .setup-section .section-hint { font-size: 0.7rem; color: var(--text2); }
+        .option-row { display: flex; flex-wrap: wrap; gap: 8px; }
         .option-btn {
-            padding: 10px 16px;
-            border-radius: var(--btn-radius);
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 0.88rem;
-            font-weight: 500;
-            letter-spacing: 0.02em;
-            transition: all var(--transition);
-            font-family: var(--font);
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            padding: 10px 16px; border-radius: var(--btn-radius); border: 1px solid var(--border);
+            background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.88rem;
+            font-weight: 500; transition: all var(--transition); font-family: var(--font);
+            display: flex; align-items: center; gap: 6px; white-space: nowrap;
         }
-        .option-btn:hover {
-            background: var(--surface2);
-            border-color: var(--border2);
-            transform: translateY(-1px);
-        }
-        .option-btn.selected {
-            background: rgba(200, 160, 60, 0.12);
-            border-color: var(--accent);
-            color: var(--accent);
-            font-weight: 600;
-            box-shadow: 0 0 20px rgba(200, 150, 50, 0.12);
-        }
-        .option-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            flex-shrink: 0;
-        }
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 8px;
-        }
+        .option-btn:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-1px); }
+        .option-btn.selected { background: rgba(200,160,60,0.12); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
         .category-btn {
-            padding: 12px 8px;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 500;
-            letter-spacing: 0.02em;
-            transition: all var(--transition);
-            font-family: var(--font);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            justify-content: center;
-            text-align: center;
+            padding: 12px 8px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface);
+            color: var(--text); cursor: pointer; font-size: 0.8rem; font-weight: 500;
+            transition: all var(--transition); font-family: var(--font); display: flex;
+            align-items: center; gap: 6px; justify-content: center;
         }
-        .category-btn:hover {
-            background: var(--surface2);
-            border-color: var(--border2);
-            transform: translateY(-2px);
-        }
-        .category-btn.selected {
-            background: rgba(200, 160, 60, 0.12);
-            border-color: var(--accent);
-            color: var(--accent);
-            font-weight: 600;
-            box-shadow: 0 0 24px rgba(200, 150, 50, 0.12);
-        }
-        .category-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            flex-shrink: 0;
-        }
+        .category-btn:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); }
+        .category-btn.selected { background: rgba(200,160,60,0.12); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+        .category-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
         #start-btn {
-            padding: 15px 32px;
-            border-radius: 30px;
-            border: none;
-            background: linear-gradient(135deg, #c9a84c, #a07828);
-            color: #fff;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            font-family: var(--font);
-            transition: all var(--transition);
-            box-shadow: 0 6px 24px rgba(180, 130, 40, 0.3);
-            width: 100%;
-            margin-top: 4px;
+            padding: 15px 32px; border-radius: 30px; border: none; background: linear-gradient(135deg, #c9a84c, #a07828);
+            color: #fff; cursor: pointer; font-size: 1rem; font-weight: 600; letter-spacing: 0.04em;
+            font-family: var(--font); width: 100%; transition: all var(--transition); box-shadow: 0 6px 24px rgba(180,130,40,0.3);
         }
-        #start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(200, 150, 50, 0.4);
-            background: linear-gradient(135deg, #dbb858, #b88630);
-        }
+        #start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(200,150,50,0.4); }
 
-        #distraction-screen {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: #000;
-            flex-direction: column;
-            z-index: 50;
-        }
-        #distraction-screen.active {
-            display: flex;
-        }
-        #progress-bar-wrap {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: rgba(255, 255, 255, 0.06);
-            z-index: 100;
-        }
-        #progress-bar {
-            height: 100%;
-            width: 100%;
-            background: var(--progress-fill);
-            transition: width 0.12s linear;
-        }
-        #progress-bar.warning {
-            background: #e8a040;
-            animation: pulse 0.5s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.4;
-            }
-        }
-        #distraction-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        #time-badge {
-            position: absolute;
-            top: 14px;
-            right: 56px;
-            z-index: 102;
-            font-size: 0.75rem;
-            color: #bbb;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 5px 11px;
-            border-radius: 16px;
-            pointer-events: none;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            font-family: var(--font);
-            letter-spacing: 0.04em;
-        }
-        #skip-btn {
-            position: absolute;
-            top: 12px;
-            right: 14px;
-            z-index: 105;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition);
-        }
-        #skip-btn:hover {
-            background: rgba(220, 80, 70, 0.7);
-            border-color: #e05555;
-        }
-        #skip-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .text-content-wrap {
-            text-align: center;
-            padding: 30px 24px;
-            max-width: 650px;
-            width: 100%;
-        }
-        .text-content-wrap .main-text {
-            font-size: clamp(1.1rem, 2.8vw, 1.55rem);
-            font-weight: 500;
-            color: #eee;
-            line-height: 1.5;
-            letter-spacing: 0.01em;
-        }
-        .text-content-wrap .reveal-text {
-            margin-top: 20px;
-            font-size: clamp(0.95rem, 2.2vw, 1.3rem);
-            font-weight: 700;
-            color: #e0c874;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.45s ease;
-        }
-        .text-content-wrap .reveal-text.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .text-content-wrap .reveal-hint {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #888;
-            margin-bottom: 6px;
-        }
-        .millionaire-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 750px;
-            padding: 16px;
-            gap: 16px;
-        }
-        .millionaire-qbox {
-            background: rgba(10, 14, 28, 0.8);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 14px;
-            padding: 18px 22px;
-            text-align: center;
-            width: 100%;
-        }
-        .millionaire-qbox .q-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: #889;
-            margin-bottom: 6px;
-        }
-        .millionaire-answers {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-        }
-        .millionaire-ans {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 11px 14px;
-            border-radius: 12px;
-            background: rgba(18, 26, 50, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ccc;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.35s;
-        }
-        .millionaire-ans .ans-circle {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #1a3050;
-            border: 2px solid #345880;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.78rem;
-            flex-shrink: 0;
-            transition: all 0.35s;
-        }
-        .millionaire-ans.correct-glow {
-            border-color: #c9a84c !important;
-            background: rgba(180, 140, 40, 0.18) !important;
-            box-shadow: 0 0 28px rgba(200, 150, 50, 0.35);
-        }
-        .millionaire-ans.correct-glow .ans-circle {
-            background: #c9a84c !important;
-            border-color: #e0c874 !important;
-            color: #1a0e00 !important;
-        }
-        .video-wrap {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #000;
-        }
-        .video-wrap iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            pointer-events: none;
-        }
-        #visuals-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        #times-up-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.82);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
-        }
-        #times-up-overlay.show {
-            opacity: 1;
-            pointer-events: all;
-        }
-        #times-up-overlay .times-up-text {
-            font-size: 2.6rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 0.04em;
-            animation: popIn 0.4s ease-out;
-        }
-        @keyframes popIn {
-            0% {
-                transform: scale(0.6);
-                opacity: 0;
-            }
-            70% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        @media (max-width: 480px) {
-            .category-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 6px;
-            }
-            .category-btn {
-                padding: 10px 4px;
-                font-size: 0.72rem;
-                gap: 3px;
-                border-radius: 10px;
-            }
-            .category-btn svg {
-                width: 15px;
-                height: 15px;
-            }
-            .setup-card {
-                padding: 16px 14px;
-                gap: 14px;
-            }
-            .section-question {
-                font-size: 0.95rem !important;
-            }
-            .option-btn {
-                padding: 8px 12px;
-                font-size: 0.78rem;
-            }
-        }
+        #distraction-screen { display: none; position: fixed; inset: 0; background: #000; flex-direction: column; z-index: 50; }
+        #distraction-screen.active { display: flex; }
+        #progress-bar-wrap { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.06); z-index: 100; }
+        #progress-bar { height: 100%; width: 100%; background: var(--progress-fill); transition: width 0.12s linear; }
+        #progress-bar.warning { background: #e8a040; animation: pulse 0.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        #distraction-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        #time-badge { position: absolute; top: 14px; right: 56px; z-index: 102; font-size: 0.75rem; color: #bbb; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); padding: 5px 11px; border-radius: 16px; pointer-events: none; border: 1px solid rgba(255,255,255,0.15); }
+        #skip-btn { position: absolute; top: 12px; right: 14px; z-index: 105; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        #skip-btn:hover { background: rgba(220,80,70,0.7); border-color: #e05555; }
+        #next-btn { position: absolute; top: 12px; left: 14px; z-index: 105; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        #next-btn:hover { background: rgba(255,255,255,0.2); }
+        #fade-overlay { position: fixed; inset: 0; background: black; z-index: 150; opacity: 0; pointer-events: none; transition: opacity 0.3s linear; display: flex; align-items: center; justify-content: center; }
+        #fade-overlay .fade-text { font-size: clamp(2rem, 8vw, 4rem); font-weight: 700; color: #fff; opacity: 0; transition: opacity 0.5s ease; }
+        #fade-overlay .fade-text.show { opacity: 1; }
+        .text-content-wrap { text-align: center; padding: 30px 24px; max-width: 650px; width: 100%; }
+        .text-content-wrap .main-text { font-size: clamp(1rem, 2.8vw, 1.55rem); font-weight: 500; color: #eee; line-height: 1.5; }
+        .reveal-text { margin-top: 20px; font-size: clamp(0.9rem, 2.2vw, 1.3rem); font-weight: 700; color: #e0c874; opacity: 0; transform: translateY(10px); transition: all 0.45s ease; }
+        .reveal-text.visible { opacity: 1; transform: translateY(0); }
+        .reveal-hint { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 6px; }
+        .millionaire-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 750px; padding: 16px; gap: 16px; }
+        .millionaire-qbox { background: rgba(10,14,28,0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.14); border-radius: 14px; padding: 18px 22px; text-align: center; width: 100%; }
+        .millionaire-qbox .q-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.12em; color: #889; margin-bottom: 6px; }
+        .millionaire-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .millionaire-ans { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 12px; background: rgba(18,26,50,0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); color: #ccc; font-weight: 500; font-size: 0.9rem; transition: all 0.35s; }
+        .millionaire-ans .ans-circle { width: 28px; height: 28px; border-radius: 50%; background: #1a3050; border: 2px solid #345880; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.78rem; flex-shrink: 0; transition: all 0.35s; }
+        .millionaire-ans.correct-glow { border-color: #c9a84c !important; background: rgba(180,140,40,0.18) !important; }
+        .millionaire-ans.correct-glow .ans-circle { background: #c9a84c !important; border-color: #e0c874 !important; color: #1a0e00 !important; }
+        .video-wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; }
+        .video-wrap iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
+        #visuals-canvas { width: 100%; height: 100%; display: block; }
+        @media (min-width: 1400px) { .setup-card { padding: 32px 30px; gap: 24px; } .section-question { font-size: 1.3rem !important; } .option-btn { font-size: 1rem; padding: 14px 24px; } .category-btn { font-size: 0.95rem; padding: 16px 12px; } }
     </style>
 </head>
 <body>
-    <div id="app">
-        <div id="setup-screen">
-            <div class="setup-top-bar">
-                <div class="brand">Distraction<span>Timer</span></div>
-                <div style="display:flex;gap:6px;">
-                    <button class="icon-btn" id="theme-toggle" title="Toggle theme">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                    </button>
-                    <button class="icon-btn lang-btn" id="lang-toggle">EN</button>
-                </div>
-            </div>
-            <div class="glass-card2 setup-card" id="setup-card">
-                <div class="setup-section">
-                    <div class="section-question" id="q-time">How long should the timer run?</div>
-                    <div class="section-hint" id="h-time">Pick your total wait duration</div>
-                    <div class="option-row" id="time-options"></div>
-                </div>
-                <div class="setup-section">
-                    <div class="section-question" id="q-refresh">How often should content refresh?</div>
-                    <div class="section-hint" id="h-refresh">For text‑based distractions only</div>
-                    <div class="option-row" id="duration-options"></div>
-                </div>
-                <div class="setup-section">
-                    <div class="section-question" id="q-cat">What would you like to do?</div>
-                    <div class="section-hint" id="h-cat">Choose your distraction category</div>
-                    <div class="category-grid" id="category-options"></div>
-                </div>
-                <button id="start-btn">Start Timer</button>
+<div id="app">
+    <div id="setup-screen">
+        <div class="setup-top-bar">
+            <div class="brand">Distraction<span>Timer</span></div>
+            <div style="display:flex;gap:6px;">
+                <button class="icon-btn" id="theme-toggle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+                <button class="icon-btn lang-btn" id="lang-toggle">EN</button>
             </div>
         </div>
-        <div id="distraction-screen">
-            <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
-            <div id="time-badge"></div>
-            <button id="skip-btn" title="Skip"><svg viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
-            <div id="distraction-content"></div>
+        <div class="glass-card setup-card" id="setup-card">
+            <div class="setup-section"><div class="section-question" id="q-time">How long should the timer run?</div><div class="section-hint" id="h-time">Pick your total wait duration</div><div class="option-row" id="time-options"></div></div>
+            <div class="setup-section"><div class="section-question" id="q-refresh">How often should content refresh?</div><div class="section-hint" id="h-refresh">For text‑based distractions only</div><div class="option-row" id="duration-options"></div></div>
+            <div class="setup-section"><div class="section-question" id="q-cat">What would you like to do?</div><div class="section-hint" id="h-cat">Choose your distraction category</div><div class="category-grid" id="category-options"></div></div>
+            <button id="start-btn">Start Timer</button>
         </div>
-        <div id="times-up-overlay"><div class="times-up-text" id="times-up-msg">Time's Up</div></div>
     </div>
+    <div id="distraction-screen">
+        <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+        <div id="time-badge"></div>
+        <button id="next-btn" title="Next">⏭</button>
+        <button id="skip-btn" title="Skip">⏭️</button>
+        <div id="distraction-content"></div>
+        <div id="fade-overlay"><div class="fade-text" id="fade-text">Time's Up</div></div>
+    </div>
+</div>
+<script>
+(() => {
+    const shortVideos = [{id:"uNDxxAm86W4",duration:15},{id:"6ELDZo099VE",duration:22},{id:"_hU58WCIRMI",duration:18},{id:"SW3dCqRvFqQ",duration:45},{id:"xrHUyeYdz9E",duration:30},{id:"lDWH1Ac1bvU",duration:58},{id:"N9U5sR2VBjU",duration:55},{id:"hFooouyUhO8",duration:38},{id:"jNQXAC9IVRw",duration:19},{id:"_OBlgSz8sSM",duration:56},{id:"txqiwrbYGrs",duration:118},{id:"OQSNhk5ICTI",duration:210},{id:"k85mRPqvMbE",duration:172},{id:"KmtzQCSh6xk",duration:54},{id:"FzRH3iTQPrk",duration:17},{id:"a1Y73sPHKxw",duration:5},{id:"wZZ7oFKsKzY",duration:216},{id:"QH2-TGUlwu4",duration:216},{id:"9C_HReR_McQ",duration:45},{id:"Z19zFlPah-o",duration:35}];
+    const musicVideos = [{id:"kJQP7kiw5Fk",duration:281},{id:"JGwWNGJdvx8",duration:263},{id:"RgKAFK5djSk",duration:237},{id:"OPf0YbXqDm0",duration:270},{id:"9bZkp7q19f0",duration:252},{id:"09R8_2nJtjg",duration:301},{id:"CevxZvSJLk8",duration:269},{id:"hT_nvWreIhg",duration:283},{id:"fRh_vgS2dFE",duration:205}];
+    const hiddenCamVideos = [{id:"Cm3T1lAxy4s",duration:605},{id:"h9tea8FLde0",duration:580},{id:"Wx7Y27Gp-_A",duration:321},{id:"TUC6xK7QySg",duration:480},{id:"n5vGKJCJEcA",duration:940}];
+    const fitnessVideos = [{id:"4nPKyvKmFi0",duration:1800},{id:"ml6cT4AZdqI",duration:1800},{id:"wa0Jtlh3J2s",duration:900},{id:"u-G7oOVTyx8",duration:2400},{id:"2eC7TlC2NLs",duration:1800}];
 
-    <script>
-        (() => {
-            // ─────────────────── VIDEO DATABASE ───────────────────
-            const shortVideos = [
-                { id: "uNDxxAm86W4", duration: 15, title: "Funny Monday Motivation" }, { id: "6ELDZo099VE",
-                    duration: 22, title: "1900s is Crazy" }, { id: "_hU58WCIRMI", duration: 18,
-                    title: "Zverev is Everywhere" }, { id: "SW3dCqRvFqQ", duration: 45, title: "A True Artist" },
-                { id: "xrHUyeYdz9E", duration: 30, title: "Spot On Football" }, { id: "lDWH1Ac1bvU", duration: 58,
-                    title: "Insane Magic Trick" }, { id: "N9U5sR2VBjU", duration: 55, title: "URL Basics Short" },
-                { id: "hFooouyUhO8", duration: 38, title: "Why Wear an Apron" }, { id: "jNQXAC9IVRw", duration: 19,
-                    title: "Me at the zoo" }, { id: "_OBlgSz8sSM", duration: 56, title: "Charlie bit my finger" },
-                { id: "txqiwrbYGrs", duration: 118, title: "David After Dentist" }, { id: "OQSNhk5ICTI",
-                    duration: 210, title: "Double Rainbow" }, { id: "k85mRPqvMbE", duration: 172,
-                    title: "Crazy Frog" }, { id: "KmtzQCSh6xk", duration: 54, title: "Keyboard Cat" },
-                { id: "FzRH3iTQPrk", duration: 17, title: "Sneezing Panda" }, { id: "a1Y73sPHKxw", duration: 5,
-                    title: "Dramatic Chipmunk" }, { id: "wZZ7oFKsKzY", duration: 216, title: "Nyan Cat" },
-                { id: "QH2-TGUlwu4", duration: 216, title: "Nyan Cat Original" }, { id: "9C_HReR_McQ", duration: 45,
-                    title: "Hide and Seek Funny" }, { id: "Z19zFlPah-o", duration: 35, title: "Funny Cat Video" },
-                { id: "5dsGWM5XGdg", duration: 22, title: "Cat Jump Fail" }, { id: "tntOCGkgt98", duration: 48,
-                    title: "Keyboard Cat Reborn" }, { id: "nGeKSiCQkPw", duration: 129,
-                title: "Talking Twin Babies" }, { id: "AWtCittJyr0", duration: 44,
-                    title: "Ain't Nobody Got Time" }, { id: "bFEoMO0pc7k", duration: 12,
-                title: "Moth on screen" }, { id: "L_jWHffIx5E", duration: 200, title: "All Star Meme" },
-                { id: "J---aiyznGQ", duration: 31, title: "Keyboard Cat 2" }, { id: "dQw4w9WgXcQ", duration: 212,
-                    title: "Rickroll Prank Short" }, { id: "0Bmhjf0rKe8", duration: 17, title: "Surprised Kitty" },
-                { id: "qnydFmqHuVo", duration: 23, title: "Puppy yawns" }, { id: "YQHsXMglC9A", duration: 59,
-                    title: "Hello Meme Clip" }, { id: "JGwWNGJdvx8", duration: 60, title: "Shape of You snippet" },
-                { id: "fRh_vgS2dFE", duration: 45, title: "Sorry Dance clip" }, { id: "09R8_2nJtjg", duration: 55,
-                    title: "Sugar Wedding Crash" }, { id: "hT_nvWreIhg", duration: 40,
-                    title: "Counting Stars Hook" }, { id: "nfWlot6h_JM", duration: 35,
-                    title: "Shake It Off loop" }, { id: "e-ORhEE9VVg", duration: 50, title: "Blank Space edit" },
-                { id: "pRpeEdMmmQ0", duration: 55, title: "Waka Waka Dance" }, { id: "2vjPBrBU-TM", duration: 60,
-                    title: "Chandelier routine" }, { id: "kffacxfA7G4", duration: 45,
-                title: "Baby hook snippet" }, { id: "rYEDA3JcQqw", duration: 50,
-                    title: "Rolling in the Deep chorus" }, { id: "t4H_Zoh7G5A", duration: 40,
-                    title: "On The Floor dance" }, { id: "lY2yjAdbvdQ", duration: 35,
-                    title: "Treat You Better snip" }, { id: "7PCkvCPvDXk", duration: 40,
-                    title: "All About That Bass drop" }, { id: "450p7goxZqg", duration: 45,
-                title: "All of Me hook" }, { id: "IcrbM1l_BoI", duration: 50, title: "Wake Me Up drop" },
-                { id: "DK_0jXPuIr0", duration: 35, title: "What Do You Mean loop" }, { id: "rtOvBOTyX00",
-                    duration: 55, title: "A Thousand Years clip" }, { id: "34Na4j8HLjc", duration: 40,
-                    title: "Starboy chorus" }, { id: "YBHQbu5rbdQ", duration: 30, title: "Worth It sax hook" },
-            ];
-            const musicVideos = [
-                { id: "kJQP7kiw5Fk", duration: 281, title: "Luis Fonsi - Despacito" }, { id: "JGwWNGJdvx8",
-                    duration: 263, title: "Ed Sheeran - Shape of You" }, { id: "RgKAFK5djSk", duration: 237,
-                    title: "Wiz Khalifa - See You Again" }, { id: "OPf0YbXqDm0", duration: 270,
-                    title: "Mark Ronson - Uptown Funk" }, { id: "9bZkp7q19f0", duration: 252,
-                    title: "PSY - GANGNAM STYLE" }, { id: "09R8_2nJtjg", duration: 301,
-                title: "Maroon 5 - Sugar" }, { id: "CevxZvSJLk8", duration: 269,
-                title: "Katy Perry - Roar" }, { id: "hT_nvWreIhg", duration: 283,
-                    title: "OneRepublic - Counting Stars" }, { id: "fRh_vgS2dFE", duration: 205,
-                    title: "Justin Bieber - Sorry" }, { id: "lp-EO5I60KA", duration: 296,
-                    title: "Ed Sheeran - Thinking Out Loud" }, { id: "0KSOMA3QBU0", duration: 224,
-                    title: "Katy Perry - Dark Horse" }, { id: "60ItHLz5WEA", duration: 212,
-                    title: "Alan Walker - Faded" }, { id: "YqeW9_5kURI", duration: 176,
-                    title: "Major Lazer - Lean On" }, { id: "nfWlot6h_JM", duration: 241,
-                    title: "Taylor Swift - Shake It Off" }, { id: "e-ORhEE9VVg", duration: 272,
-                    title: "Taylor Swift - Blank Space" }, { id: "pRpeEdMmmQ0", duration: 210,
-                    title: "Shakira - Waka Waka" }, { id: "wnJ6LuUFpMo", duration: 185,
-                    title: "J Balvin - Mi Gente" }, { id: "YQHsXMglC9A", duration: 366,
-                title: "Adele - Hello" }, { id: "2vjPBrBU-TM", duration: 231,
-                title: "Sia - Chandelier" }, { id: "kffacxfA7G4", duration: 225,
-                title: "Justin Bieber - Baby" }, { id: "5GL9JoH4Sws", duration: 219,
-                    title: "Fifth Harmony - Work from Home" }, { id: "uelHwf8o7_U", duration: 266,
-                    title: "Eminem - Love The Way You Lie" }, { id: "kOkQ4T5OEQs", duration: 240,
-                    title: "Calvin Harris - This Is What You Came For" }, { id: "7wtfhZwyrcc", duration: 216,
-                    title: "Imagine Dragons - Believer" }, { id: "rYEDA3JcQqw", duration: 233,
-                    title: "Adele - Rolling in the Deep" }, { id: "t4H_Zoh7G5A", duration: 266,
-                    title: "Jennifer Lopez - On The Floor" }, { id: "lY2yjAdbvdQ", duration: 256,
-                    title: "Shawn Mendes - Treat You Better" }, { id: "7PCkvCPvDXk", duration: 194,
-                    title: "Meghan Trainor - All About That Bass" }, { id: "450p7goxZqg", duration: 307,
-                    title: "John Legend - All of Me" }, { id: "IcrbM1l_BoI", duration: 272,
-                    title: "Avicii - Wake Me Up" }, { id: "DK_0jXPuIr0", duration: 207,
-                    title: "Justin Bieber - What Do You Mean?" }, { id: "rtOvBOTyX00", duration: 287,
-                    title: "Christina Perri - A Thousand Years" }, { id: "34Na4j8HLjc", duration: 273,
-                    title: "The Weeknd - Starboy" }, { id: "YBHQbu5rbdQ", duration: 255,
-                    title: "Fifth Harmony - Worth It" }, { id: "PMivT7MJ41M", duration: 210,
-                    title: "Bruno Mars - That's What I Like" }, { id: "lWA2pjMjpBs", duration: 283,
-                    title: "Rihanna - Diamonds" }, { id: "l0U7CbUUct8", duration: 335,
-                    title: "Future - Life Is Good" }, { id: "SXiSVQZLje8", duration: 238,
-                    title: "Ariana Grande - Side To Side" }, { id: "8UVNT4wvIGY", duration: 243,
-                    title: "Gotye - Somebody That I Used To Know" }, { id: "8SbUC-UaAxE", duration: 556,
-                    title: "Guns N' Roses - November Rain" }, { id: "djV11Xbc914", duration: 243,
-                    title: "a-ha - Take On Me" }, { id: "hTWKbfoikeg", duration: 278,
-                    title: "Nirvana - Smells Like Teen Spirit" }, { id: "1w7OgIMMRc4", duration: 302,
-                    title: "Guns N' Roses - Sweet Child O' Mine" }, { id: "Zi_XLOBDo_Y", duration: 295,
-                    title: "Michael Jackson - Billie Jean" }, { id: "sOnqjkJTMaA", duration: 822,
-                    title: "Michael Jackson - Thriller" }, { id: "fJ9rUzIMcZQ", duration: 359,
-                    title: "Queen - Bohemian Rhapsody" }, { id: "kXYiU_JCYtU", duration: 186,
-                    title: "Linkin Park - Numb" }, { id: "eVTXPUF4Oz4", duration: 216,
-                    title: "Linkin Park - In The End" }, { id: "CSvFpBOe8eY", duration: 206,
-                    title: "System Of A Down - Chop Suey!" }, { id: "ktvTqknDobU", duration: 261,
-                    title: "Imagine Dragons - Radioactive" },
-            ];
-            const hiddenCamVideos = [
-                { id: "Cm3T1lAxy4s", duration: 605, title: "Our Stupidest Pranks | JFL Gags" },
-                { id: "h9tea8FLde0", duration: 580, title: "Pranks That Went Too Far" }, { id: "Wx7Y27Gp-_A",
-                    duration: 321, title: "Biggest Scare Prank Ever" }, { id: "TUC6xK7QySg", duration: 480,
-                    title: "Pranks that Backfired" }, { id: "n5vGKJCJEcA", duration: 940,
-                    title: "1,000 Pranks in 24 Hours" }, { id: "3Q5dFeucPVc", duration: 602,
-                    title: "12 Funny Pranks Compilation" }, { id: "zazlbczbBj4", duration: 550,
-                    title: "Best Pranks of the Week" }, { id: "FbN7aKYrtgk", duration: 620,
-                    title: "The Best Pranks of 2021" }, { id: "xeMUls8r64o", duration: 435,
-                    title: "April Fools Scares" }, { id: "cZNGtgAEwas", duration: 510,
-                    title: "New 2026 Funniest Prank Compilation" }, { id: "_-d9aucC914", duration: 700,
-                    title: "Best Crazy Pranks Ever" }, { id: "6ZfuNTqbHE8", duration: 145,
-                    title: "Public Scare Hidden Cam" }, { id: "TcMBFSGVi1c", duration: 142,
-                    title: "Crazy Reaction Hidden Prank" }, { id: "sGbxmsDFVnE", duration: 120,
-                    title: "Jumping out of trash can prank" }, { id: "rt-2crZzQZA", duration: 178,
-                    title: "Spider Prank Gone Wrong" }, { id: "mqqft2x_Aa4", duration: 160,
-                    title: "Scary Costume Hidden Cam" }, { id: "YoHD9XEInc0", duration: 140,
-                    title: "Mind Bending Street Magic Prank" }, { id: "zSWdZVtXT7E", duration: 155,
-                    title: "Space Alien Encounter Prank" }, { id: "zAGVQLHvwOY", duration: 144,
-                    title: "Creepy Clown Street Prank" }, { id: "9ix7TUGVYIo", duration: 170,
-                    title: "Matrix Glitch Public Prank" }, { id: "n9xhKv0xLw0", duration: 180,
-                    title: "Sandworm Beach Prank" }, { id: "XqZsoesa55w", duration: 136,
-                    title: "Shark Attack Beach Prank" }, { id: "e_04ZrNroTo", duration: 150,
-                    title: "Bus Driver Pranks Passengers" }, { id: "F4tHL8reNCs", duration: 110,
-                    title: "Dad Catching Son Sneaking Snacks" }, { id: "WRVsOCh907o", duration: 130,
-                    title: "Bathtub Overflow Prank" }, { id: "v7AYKMP6rOE", duration: 1200,
-                    title: "Yoga Instructor Fails Prank" }, { id: "j7rKKpwdXjc", duration: 600,
-                    title: "Classroom Ghost Prank" }, { id: "hJbRpHZr_d0", duration: 900,
-                    title: "Stressful Interview Prank" }, { id: "4pKly2JojMw", duration: 750,
-                    title: "Waking Up Roommate Airhorn" }, { id: "EwQkfoKxRvo", duration: 800,
-                    title: "Gym Stereotypes Prank" }, { id: "8EnylqXLAI8", duration: 400,
-                    title: "Fake Treadmill Speed Prank" }, { id: "2pLT-olgUJs", duration: 650,
-                    title: "Instant Muscle Suit Prank" }, { id: "2MoGxae-zyo", duration: 700,
-                    title: "Water Bottle Squeeze Prank" }, { id: "1919eTCoESo", duration: 600,
-                    title: "Fake Sweat Prank" }, { id: "cZnsLVArIt8", duration: 450,
-                    title: "Hot Pepper in Food Prank" }, { id: "4nPKyvKmFi0", duration: 1800,
-                    title: "Gym Equipment Malfunction Prank" }, { id: "ml6cT4AZdqI", duration: 1800,
-                    title: "Trainer Yells at Client Prank" }, { id: "wa0Jtlh3J2s", duration: 900,
-                    title: "Fake Health Inspector Prank" }, { id: "u-G7oOVTyx8", duration: 2400,
-                    title: "Statue Comes to Life Prank" }, { id: "2eC7TlC2NLs", duration: 1800,
-                    title: "Fake Dog Poop Prank" }, { id: "223czWgGnQg", duration: 600,
-                    title: "Doctor Gives Bad News Prank" }, { id: "vc1E5CfRfos", duration: 900,
-                    title: "Home Intruder Scare Prank" }, { id: "_rSW3GikiKs", duration: 420,
-                    title: "Fake Bug on Screen Prank" }, { id: "wZZ7oFKsKzY", duration: 216,
-                    title: "Flying Cat Prank" }, { id: "QH2-TGUlwu4", duration: 216,
-                title: "Rainbow Paint Prank" }, { id: "9C_HReR_McQ", duration: 45,
-                    title: "Scary Maze Game Reaction" }, { id: "Z19zFlPah-o", duration: 35,
-                    title: "Fake Spider Drop Prank" }, { id: "5dsGWM5XGdg", duration: 22,
-                    title: "Pie in the Face Prank" }, { id: "tntOCGkgt98", duration: 48,
-                    title: "Piano Surprise Prank" }, { id: "nGeKSiCQkPw", duration: 129,
-                    title: "Talking Mirrors Prank" },
-            ];
-            const fitnessVideos = [
-                { id: "4nPKyvKmFi0", duration: 1800, title: "30 Min Intense HIIT Workout" }, { id: "ml6cT4AZdqI",
-                    duration: 1800, title: "30-Minute HIIT Cardio Workout" }, { id: "wa0Jtlh3J2s", duration: 900,
-                    title: "Introduction to HIIT" }, { id: "u-G7oOVTyx8", duration: 2400,
-                    title: "40 Min Full Body Yoga Routine" }, { id: "2eC7TlC2NLs", duration: 1800,
-                    title: "30 Min Daily Yoga Flow" }, { id: "223czWgGnQg", duration: 600,
-                    title: "The BEST exercise for your heart" }, { id: "vc1E5CfRfos", duration: 900,
-                    title: "The PERFECT Home Workout" }, { id: "_rSW3GikiKs", duration: 420,
-                    title: "Full Body workout at Home - 7 minutes" }, { id: "v7AYKMP6rOE", duration: 1200,
-                    title: "Yoga For Complete Beginners" }, { id: "j7rKKpwdXjc", duration: 600,
-                    title: "10 Minute Yoga For Beginners" }, { id: "hJbRpHZr_d0", duration: 1500,
-                    title: "Yoga for Anxiety and Stress" }, { id: "4pKly2JojMw", duration: 900,
-                    title: "Morning Yoga Workout" }, { id: "EwQkfoKxRvo", duration: 600,
-                    title: "Victoria Secret Model Ab Workout" }, { id: "8EnylqXLAI8", duration: 300,
-                    title: "Fat Burning Cardio Warmup" }, { id: "2pLT-olgUJs", duration: 660,
-                    title: "Get Abs in 2 WEEKS" }, { id: "2MoGxae-zyo", duration: 800,
-                    title: "Do This Everyday To Lose Weight" }, { id: "1919eTCoESo", duration: 600,
-                    title: "10 Minute Abs Workout" }, { id: "cZnsLVArIt8", duration: 900,
-                    title: "Fat Burning HIIT Cardio" }, { id: "6ZfuNTqbHE8", duration: 145,
-                    title: "Avengers Superhero Workout" }, { id: "TcMBFSGVi1c", duration: 142,
-                    title: "Endgame Fitness Challenge" }, { id: "sGbxmsDFVnE", duration: 120,
-                    title: "Jedi Lightsaber Cardio" }, { id: "rt-2crZzQZA", duration: 178,
-                    title: "Spider-Man Agility Training" }, { id: "mqqft2x_Aa4", duration: 160,
-                    title: "Batman Strength Conditioning" }, { id: "YoHD9XEInc0", duration: 140,
-                    title: "Inception Core Routine" }, { id: "zSWdZVtXT7E", duration: 155,
-                    title: "Zero Gravity Yoga" }, { id: "zAGVQLHvwOY", duration: 144,
-                    title: "Stair Dance Cardio" }, { id: "9ix7TUGVYIo", duration: 170,
-                    title: "Martial Arts Warmup" }, { id: "n9xhKv0xLw0", duration: 180,
-                    title: "Desert Dune Sprints" }, { id: "XqZsoesa55w", duration: 136,
-                    title: "Kids Dance Fitness" }, { id: "e_04ZrNroTo", duration: 150,
-                    title: "Nursery Rhyme Zumba" }, { id: "F4tHL8reNCs", duration: 110,
-                    title: "Toddler Aerobics" }, { id: "WRVsOCh907o", duration: 130,
-                    title: "Water Resistance Exercises" }, { id: "kJQP7kiw5Fk", duration: 281,
-                    title: "Despacito Latin Dance Workout" }, { id: "JGwWNGJdvx8", duration: 263,
-                    title: "Shape of You Boxing Routine" }, { id: "RgKAFK5djSk", duration: 237,
-                    title: "See You Again Cool Down Stretch" }, { id: "OPf0YbXqDm0", duration: 270,
-                    title: "Uptown Funk Hip Hop Aerobics" }, { id: "9bZkp7q19f0", duration: 252,
-                    title: "Gangnam Style Horse Dance Cardio" }, { id: "09R8_2nJtjg", duration: 301,
-                    title: "Sugar Wedding Dance Prep" }, { id: "CevxZvSJLk8", duration: 269,
-                    title: "Roar Jungle Bootcamp" }, { id: "hT_nvWreIhg", duration: 283,
-                    title: "Counting Stars High Tempo Run" }, { id: "fRh_vgS2dFE", duration: 205,
-                    title: "Sorry Reggaeton Dance Workout" }, { id: "lp-EO5I60KA", duration: 296,
-                    title: "Thinking Out Loud Partner Yoga" }, { id: "0KSOMA3QBU0", duration: 224,
-                    title: "Dark Horse Core Power" }, { id: "60ItHLz5WEA", duration: 212,
-                    title: "Faded Meditation & Flexibility" }, { id: "YqeW9_5kURI", duration: 176,
-                    title: "Lean On Bollywood Fitness" }, { id: "nfWlot6h_JM", duration: 241,
-                    title: "Shake It Off Cheer Cardio" }, { id: "e-ORhEE9VVg", duration: 272,
-                    title: "Blank Space Mansion Walk" }, { id: "pRpeEdMmmQ0", duration: 210,
-                    title: "Waka Waka African Dance Fitness" }, { id: "wnJ6LuUFpMo", duration: 185,
-                    title: "Mi Gente Zumba Class" }, { id: "YQHsXMglC9A", duration: 366,
-                    title: "Hello Deep Breathing Exercises" },
-            ];
+    const dataEn = {
+        questions:[{q:"Capital of France?",answers:["London","Paris","Berlin","Madrid"],correct:1},{q:"Red Planet?",answers:["Venus","Jupiter","Mars","Saturn"],correct:2},{q:"Largest ocean?",answers:["Atlantic","Indian","Arctic","Pacific"],correct:3},{q:"Mona Lisa painter?",answers:["Van Gogh","Picasso","Da Vinci","Rembrandt"],correct:2},{q:"Gold symbol?",answers:["Ag","Fe","Au","Cu"],correct:2},{q:"Continents?",answers:["5","6","7","8"],correct:2},{q:"WWII end?",answers:["1943","1944","1945","1946"],correct:2},{q:"Fastest animal?",answers:["Lion","Gazelle","Cheetah","Horse"],correct:2},{q:"Atomic number 1?",answers:["Helium","Hydrogen","Lithium","Oxygen"],correct:1},{q:"Square root of 144?",answers:["10","11","12","13"],correct:2}],
+        riddles:[{riddle:"I speak without a mouth and hear without ears...",answer:"An echo"},{riddle:"The more you take, the more you leave behind.",answer:"Footsteps"},{riddle:"I have cities but no houses...",answer:"A map"},{riddle:"What has a head and a tail but no body?",answer:"A coin"},{riddle:"I'm tall when young, short when old.",answer:"A candle"}],
+        jokes:[{setup:"Why don't scientists trust atoms?",punchline:"They make up everything!"},{setup:"What do you call a fake noodle?",punchline:"An impasta!"},{setup:"Why did the scarecrow win an award?",punchline:"Outstanding in his field!"}],
+        movies:[{q:"Best Picture 1994?",answers:["Pulp Fiction","Forrest Gump","Shawshank","Lion King"],correct:1},{q:"E.T. director?",answers:["Spielberg","Lucas","Cameron","Scott"],correct:0}],
+        popculture:[{q:"Thriller artist?",answers:["Prince","Michael Jackson","Madonna","Whitney"],correct:1},{q:"First iPhone year?",answers:["2005","2006","2007","2008"],correct:2}]
+    };
+    const dataBg = {
+        questions:[{q:"Столица на Франция?",answers:["Лондон","Париж","Берлин","Мадрид"],correct:1},{q:"Червената планета?",answers:["Венера","Юпитер","Марс","Сатурн"],correct:2},{q:"Най-голям океан?",answers:["Атлантически","Индийски","Арктически","Тихи"],correct:3},{q:"Художник Мона Лиза?",answers:["Ван Гог","Пикасо","Да Винчи","Рембранд"],correct:2},{q:"Злато символ?",answers:["Ag","Fe","Au","Cu"],correct:2}],
+        riddles:[{riddle:"Говоря без уста, чувам без уши...",answer:"Ехо"},{riddle:"Колкото повече взимаш, толкова повече оставяш.",answer:"Стъпки"},{riddle:"Имам градове без къщи...",answer:"Карта"}],
+        jokes:[{setup:"Защо учените не вярват на атомите?",punchline:"Защото те съставят всичко!"},{setup:"Какво казва фалшивата юфка?",punchline:"Аз съм имитация!"}],
+        movies:[{q:"Оскар 1994?",answers:["Криминале","Форест Гъмп","Шоушенк","Цар Лъв"],correct:1}],
+        popculture:[{q:"Thriller изпълнител?",answers:["Принс","Майкъл Джексън","Мадона","Уитни"],correct:1}]
+    };
 
-            // ─────────────────── TEXT DATA (language‑independent riddles/jokes) ───────────────────
-            const dataEn = {
-                questions: [
-                    { q: "What is the capital of France?", answers: ["London", "Paris", "Berlin", "Madrid"],
-                        correct: 1 },
-                    { q: "Which planet is known as the Red Planet?", answers: ["Venus", "Jupiter", "Mars",
-                            "Saturn"
-                        ], correct: 2 },
-                    { q: "What is the largest ocean on Earth?", answers: ["Atlantic", "Indian", "Arctic",
-                            "Pacific"
-                        ], correct: 3 },
-                    { q: "Who painted the Mona Lisa?", answers: ["Van Gogh", "Picasso", "Da Vinci",
-                        "Rembrandt"], correct: 2 },
-                    { q: "What is the chemical symbol for gold?", answers: ["Ag", "Fe", "Au", "Cu"],
-                    correct: 2 },
-                    { q: "How many continents are there?", answers: ["5", "6", "7", "8"], correct: 2 },
-                    { q: "What year did WWII end?", answers: ["1943", "1944", "1945", "1946"], correct: 2 },
-                    { q: "What is the fastest land animal?", answers: ["Lion", "Gazelle", "Cheetah", "Horse"],
-                        correct: 2 },
-                    { q: "Which element has atomic number 1?", answers: ["Helium", "Hydrogen", "Lithium",
-                            "Oxygen"
-                        ], correct: 1 },
-                    { q: "What is the square root of 144?", answers: ["10", "11", "12", "13"], correct: 2 },
-                    { q: "What is H2O commonly known as?", answers: ["Oxygen", "Hydrogen", "Water", "Salt"],
-                        correct: 2 },
-                    { q: "What is the tallest mountain?", answers: ["K2", "Everest", "Kangchenjunga",
-                        "Lhotse"], correct: 1 },
-                    { q: "Who wrote Hamlet?", answers: ["Dickens", "Shakespeare", "Austen", "Tolstoy"],
-                        correct: 1 },
-                    { q: "What is the smallest country?", answers: ["Monaco", "Vatican City", "San Marino",
-                            "Liechtenstein"
-                        ], correct: 1 },
-                    { q: "What currency is used in Japan?", answers: ["Won", "Yuan", "Yen", "Ringgit"],
-                        correct: 2 },
-                ],
-                riddles: [
-                    { riddle: "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
-                        answer: "An echo" },
-                    { riddle: "The more you take, the more you leave behind. What am I?", answer: "Footsteps" },
-                    { riddle: "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
-                        answer: "A map" },
-                    { riddle: "What has a head and a tail but no body?", answer: "A coin" },
-                    { riddle: "I'm tall when I'm young and short when I'm old. What am I?", answer: "A candle" },
-                    { riddle: "What gets wetter the more it dries?", answer: "A towel" },
-                    { riddle: "I have keys but no locks. I have space but no room. What am I?",
-                    answer: "A keyboard" },
-                    { riddle: "What can travel around the world while staying in a corner?", answer: "A stamp" },
-                    { riddle: "I follow you all day long but disappear at night. What am I?",
-                    answer: "Your shadow" },
-                    { riddle: "What has a neck but no head?", answer: "A bottle" },
-                    { riddle: "The more you have of me, the less you see. What am I?", answer: "Darkness" },
-                    { riddle: "What can be broken but never held?", answer: "A promise" },
-                    { riddle: "What goes up but never comes down?", answer: "Your age" },
-                    { riddle: "I'm full of holes but still hold water. What am I?", answer: "A sponge" },
-                    { riddle: "What is always in front of you but can't be seen?", answer: "The future" },
-                ],
-                jokes: [
-                    { setup: "Why don't scientists trust atoms?", punchline: "Because they make up everything!" },
-                    { setup: "What do you call a fake noodle?", punchline: "An impasta!" },
-                    { setup: "Why did the scarecrow win an award?",
-                    punchline: "He was outstanding in his field!" },
-                    { setup: "What do you call a bear with no teeth?", punchline: "A gummy bear!" },
-                    { setup: "Why don't eggs tell jokes?", punchline: "They'd crack each other up!" },
-                    { setup: "What did the ocean say to the beach?", punchline: "Nothing, it just waved." },
-                    { setup: "Why did the bicycle fall over?", punchline: "Because it was two-tired." },
-                    { setup: "What do you call cheese that isn't yours?", punchline: "Nacho cheese." },
-                    { setup: "Why can't a leopard hide?", punchline: "Because he's always spotted." },
-                    { setup: "What's a skeleton's least favorite room?", punchline: "The living room." },
-                    { setup: "Why did the math book look sad?", punchline: "It had too many problems." },
-                    { setup: "What do you call a pig that does karate?", punchline: "A pork chop." },
-                    { setup: "Why did the coffee file a police report?", punchline: "It got mugged." },
-                    { setup: "How does a penguin build its house?", punchline: "Igloos it together." },
-                    { setup: "Why did the tomato turn red?", punchline: "Because it saw the salad dressing." },
-                ],
-                movies: [
-                    { q: "Which film won Best Picture in 1994?", answers: ["Pulp Fiction", "Forrest Gump",
-                            "The Shawshank Redemption", "The Lion King"
-                        ], correct: 1 },
-                    { q: "Who directed E.T.?", answers: ["Spielberg", "Lucas", "Cameron", "Scott"],
-                    correct: 0 },
-                    { q: "In The Matrix, what color pill does Neo take?", answers: ["Blue", "Red", "Green",
-                            "Yellow"
-                        ], correct: 1 },
-                    { q: "What is Frodo's last name?", answers: ["Baggins", "Gamgee", "Brandybuck", "Took"],
-                        correct: 0 },
-                    { q: "Which movie features Olaf?", answers: ["Tangled", "Frozen", "Moana", "Brave"],
-                        correct: 1 },
-                    { q: "Who played the Joker in 2008?", answers: ["Ledger", "Nicholson", "Leto",
-                        "Phoenix"], correct: 0 },
-                    { q: "Finish the quote: May the Force be...", answers: ["strong", "with you", "eternal",
-                            "within"
-                        ], correct: 1 },
-                    { q: "Highest-grossing film (not adjusted)?", answers: ["Avatar", "Avengers: Endgame",
-                            "Titanic", "Star Wars TFA"
-                        ], correct: 1 },
-                    { q: "What is the wizard's name in LotR?", answers: ["Gandalf", "Dumbledore", "Merlin",
-                            "Radagast"
-                        ], correct: 0 },
-                    { q: "In Titanic, what is the jewel called?", answers: ["Heart of the Ocean",
-                            "Neptune's Eye", "Blue Diamond", "Star of the Sea"
-                        ], correct: 0 },
-                ],
-                popculture: [
-                    { q: "Who released Thriller?", answers: ["Prince", "Michael Jackson", "Madonna",
-                            "Whitney Houston"
-                        ], correct: 1 },
-                    { q: "What year did the first iPhone launch?", answers: ["2005", "2006", "2007", "2008"],
-                        correct: 2 },
-                    { q: "Which app uses a ghost logo?", answers: ["Snapchat", "Instagram", "TikTok",
-                        "Twitter"], correct: 0 },
-                    { q: "Who is known as the Queen of Pop?", answers: ["Lady Gaga", "Madonna", "Beyoncé",
-                            "Rihanna"
-                        ], correct: 1 },
-                    { q: "What is Mario's profession?", answers: ["Plumber", "Carpenter", "Electrician",
-                            "Painter"
-                        ], correct: 0 },
-                    { q: "Which series has dragons and the Iron Throne?", answers: ["The Witcher",
-                            "Game of Thrones", "Lord of the Rings", "Harry Potter"
-                        ], correct: 1 },
-                    { q: "Justin Timberlake's boy band?", answers: ["Backstreet Boys", "*NSYNC",
-                            "One Direction", "98 Degrees"
-                        ], correct: 1 },
-                    { q: "Who painted Campbell's Soup Cans?", answers: ["Warhol", "Picasso", "Dali",
-                        "Kahlo"], correct: 0 },
-                    { q: "Which app is known for short dances?", answers: ["Vine", "TikTok", "YouTube",
-                            "Instagram"
-                        ], correct: 1 },
-                    { q: "Who sang Shape of You?", answers: ["Ed Sheeran", "Justin Bieber", "The Weeknd",
-                            "Drake"
-                        ], correct: 0 },
-                ],
-            };
+    let currentLang='en',theme='dark',timerDuration=60,textDistractionDuration=30,distractionType='random';
+    let timerInterval,animFrame,timeRemaining,totalTime,resolvedType;
+    let shuffledItems=[],currentShuffleIndex=0,typingTimeout,beeped=false,particles=[],breathPhase=0;
+    const TEXT_TYPES=['questions','riddles','jokes','movies','popculture'];
+    const VIDEO_TYPES=['shorts','music','hiddencam','fitness'];
 
-            const dataBg = {
-                questions: [
-                    { q: "Коя е столицата на Франция?", answers: ["Лондон", "Париж", "Берлин", "Мадрид"],
-                        correct: 1 },
-                    { q: "Коя планета е Червената?", answers: ["Венера", "Юпитер", "Марс", "Сатурн"],
-                    correct: 2 },
-                    { q: "Най-големият океан?", answers: ["Атлантически", "Индийски", "Арктически", "Тихи"],
-                        correct: 3 },
-                    { q: "Кой нарисува Мона Лиза?", answers: ["Ван Гог", "Пикасо", "Да Винчи", "Рембранд"],
-                        correct: 2 },
-                    { q: "Химичен символ на златото?", answers: ["Ag", "Fe", "Au", "Cu"], correct: 2 },
-                    { q: "Колко континента има?", answers: ["5", "6", "7", "8"], correct: 2 },
-                    { q: "Коя година свършва ВСВ?", answers: ["1943", "1944", "1945", "1946"], correct: 2 },
-                    { q: "Най-бързото сухоземно животно?", answers: ["Лъв", "Газела", "Гепард", "Кон"],
-                        correct: 2 },
-                    { q: "Атомен номер 1?", answers: ["Хелий", "Водород", "Литий", "Кислород"], correct: 1 },
-                    { q: "Корен квадратен от 144?", answers: ["10", "11", "12", "13"], correct: 2 },
-                ],
-                riddles: [
-                    { riddle: "Говоря без уста, чувам без уши. Нямам тяло, но оживявам с вятъра. Какво съм?",
-                        answer: "Ехо" },
-                    { riddle: "Колкото повече взимаш, толкова повече оставяш. Какво съм?", answer: "Стъпки" },
-                    { riddle: "Имам градове без къщи, планини без дървета, вода без риба. Какво съм?",
-                        answer: "Карта" },
-                    { riddle: "Какво има глава и опашка, но няма тяло?", answer: "Монета" },
-                    { riddle: "Висока съм когато съм млада, ниска когато остарея. Какво съм?", answer: "Свещ" },
-                    { riddle: "Какво става по-мокро като съхне?", answer: "Кърпа" },
-                    { riddle: "Имам клавиши без ключалки, пространство без стая. Какво съм?",
-                    answer: "Клавиатура" },
-                    { riddle: "Какво пътува по света, стоящо в ъгъл?", answer: "Марка" },
-                    { riddle: "Следвам те цял ден, изчезвам нощем. Какво съм?", answer: "Сянката" },
-                    { riddle: "Какво има врат без глава?", answer: "Бутилка" },
-                    { riddle: "Колкото повече имаш от мен, толкова по-малко виждаш. Какво съм?",
-                        answer: "Тъмнина" },
-                    { riddle: "Какво може да бъде счупено, но никога държано?", answer: "Обещание" },
-                    { riddle: "Какво се качва нагоре, но никога не слиза?", answer: "Възрастта" },
-                    { riddle: "Пълна съм с дупки, но задържам вода. Какво съм?", answer: "Гъба" },
-                    { riddle: "Какво винаги е пред теб, но не можеш да го видиш?", answer: "Бъдещето" },
-                ],
-                jokes: [
-                    { setup: "Защо учените не вярват на атомите?", punchline: "Защото те съставят всичко!" },
-                    { setup: "Какво казва фалшивата юфка?", punchline: "Аз съм имитация!" },
-                    { setup: "Защо плашилото спечели награда?",
-                    punchline: "Беше изключително в полето си!" },
-                    { setup: "Какво казва мечката без зъби?", punchline: "Мече с дъвка!" },
-                    { setup: "Защо яйцата не разказват вицове?", punchline: "Ще се спукат от смях!" },
-                    { setup: "Какво каза океанът на плажа?", punchline: "Нищо, само махна." },
-                    { setup: "Защо колелото падна?", punchline: "Беше двуизморено." },
-                    { setup: "Какво казва сиренето, което не е твое?", punchline: "Не е твое сирене." },
-                    { setup: "Защо леопардът не може да се скрие?", punchline: "Защото винаги е на петна." },
-                    { setup: "Коя е най-нелюбимата стая на скелета?", punchline: "Дневната." },
-                    { setup: "Защо учебникът по математика беше тъжен?", punchline: "Имаше твърде много задачи." },
-                    { setup: "Какво казва прасето, което тренира карате?", punchline: "Свински котлет." },
-                    { setup: "Защо кафето подаде сигнал в полицията?", punchline: "Беше ограбено." },
-                    { setup: "Как пингвинът строи къщата си?", punchline: "С иглу." },
-                    { setup: "Защо доматът се изчерви?", punchline: "Защото видя дресинга за салата." },
-                ],
-                movies: [
-                    { q: "Кой филм печели Оскар 1994?", answers: ["Криминале", "Форест Гъмп",
-                            "Изкуплението Шоушенк", "Цар Лъв"
-                        ], correct: 1 },
-                    { q: "Кой режисира Извънземното?", answers: ["Спилбърг", "Лукас", "Камерън", "Скот"],
-                        correct: 0 },
-                    { q: "В Матрицата Нео взима...", answers: ["Синьо", "Червено", "Зелено", "Жълто"],
-                    correct: 1 },
-                    { q: "Фродо от Властелинът?", answers: ["Торбинс", "Грабове", "Брендифут", "Тук"],
-                    correct: 0 },
-                    { q: "Олаф от кой филм?", answers: ["Рапунцел", "Замръзнало", "Моана", "Храбро"],
-                    correct: 1 },
-                    { q: "Жокера 2008 играе...", answers: ["Леджър", "Никълсън", "Лето", "Финикс"], correct: 0 },
-                    { q: "Нека Силата бъде...", answers: ["силна", "с теб", "вечна", "вътре"], correct: 1 },
-                ],
-                popculture: [
-                    { q: "Кой издава Thriller?", answers: ["Принс", "Майкъл Джексън", "Мадона", "Уитни"],
-                        correct: 1 },
-                    { q: "Първи iPhone година?", answers: ["2005", "2006", "2007", "2008"], correct: 2 },
-                    { q: "Приложение с призрак?", answers: ["Snapchat", "Instagram", "TikTok", "Twitter"],
-                        correct: 0 },
-                    { q: "Кралица на попа?", answers: ["Гага", "Мадона", "Бионсе", "Риана"], correct: 1 },
-                    { q: "Професия на Марио?", answers: ["Водопроводчик", "Дърводелец", "Електрик",
-                        "Бояджия"], correct: 0 },
-                    { q: "Дракони в...", answers: ["Вещерът", "Игра на тронове", "Властелинът",
-                        "Хари Потър"], correct: 1 },
-                ],
-            };
+    const i18n={en:{qTime:"How long should the timer run?",hTime:"Pick your total wait duration",qRefresh:"How often should content refresh?",hRefresh:"For text‑based distractions only",qCat:"What would you like to do?",hCat:"Choose your distraction category",start:"Start Timer",timesUp:"Time's Up",sec:"s",min:"m",questions:"Questions",riddles:"Riddles",jokes:"Jokes",moviesTrivia:"Movies",popCulture:"Pop Culture",shorts:"Shorts",music:"Music",hiddenCam:"Hidden Cam",fitness:"Fitness",visuals:"Visuals",random:"Random",revealHint:"Reveals soon...",qLabel:"Question"},bg:{qTime:"Колко време да тече таймерът?",hTime:"Избери обща продължителност",qRefresh:"На колко често да се сменя?",hRefresh:"Само за текстови категории",qCat:"Какво искаш да правиш?",hCat:"Избери категория",start:"Старт",timesUp:"Времето изтече",sec:"с",min:"м",questions:"Въпроси",riddles:"Гатанки",jokes:"Вицове",moviesTrivia:"Филми",popCulture:"Поп култура",shorts:"Shorts",music:"Музика",hiddenCam:"Скрита камера",fitness:"Фитнес",visuals:"Визуализации",random:"Случайно",revealHint:"Отговор скоро...",qLabel:"Въпрос"}};
+    function t(k){return i18n[currentLang][k]}
 
-            // ─────────────────── STATE ───────────────────
-            let currentLang = 'en';
-            let theme = 'dark';
-            let timerDuration = 60;
-            let textDistractionDuration = 30;
-            let distractionType = 'random';
-            let timerInterval = null;
-            let animFrame = null;
-            let timeRemaining = 0;
-            let totalTime = 0;
-            let resolvedType = null;
-            let shuffledItems = [];
-            let currentShuffleIndex = 0;
-            let particles = [];
-            const TEXT_TYPES = ['questions', 'riddles', 'jokes', 'movies', 'popculture'];
-            const VIDEO_TYPES = ['shorts', 'music', 'hiddencam', 'fitness'];
+    const setupScreen=document.getElementById('setup-screen'),distractionScreen=document.getElementById('distraction-screen'),
+          progressBar=document.getElementById('progress-bar'),distractionContent=document.getElementById('distraction-content'),
+          timeBadge=document.getElementById('time-badge'),fadeOverlay=document.getElementById('fade-overlay'),
+          fadeText=document.getElementById('fade-text'),skipBtn=document.getElementById('skip-btn'),
+          nextBtn=document.getElementById('next-btn'),themeToggle=document.getElementById('theme-toggle'),
+          langToggle=document.getElementById('lang-toggle'),startBtn=document.getElementById('start-btn');
 
-            // ─────────────────── I18N ───────────────────
-            const i18n = {
-                en: {
-                    qTime: "How long should the timer run?",
-                    hTime: "Pick your total wait duration",
-                    qRefresh: "How often should content refresh?",
-                    hRefresh: "For text‑based distractions only",
-                    qCat: "What would you like to do?",
-                    hCat: "Choose your distraction category",
-                    start: "Start Timer",
-                    timesUp: "Time's Up",
-                    sec: "s",
-                    min: "m",
-                    questions: "Questions",
-                    riddles: "Riddles",
-                    jokes: "Jokes",
-                    moviesTrivia: "Movies",
-                    popCulture: "Pop Culture",
-                    shorts: "Shorts",
-                    music: "Music",
-                    hiddenCam: "Hidden Cam",
-                    fitness: "Fitness",
-                    visuals: "Visuals",
-                    random: "Random",
-                    skipTitle: "Skip",
-                    revealHint: "Reveals soon...",
-                    qLabel: "Question",
-                },
-                bg: {
-                    qTime: "Колко време да тече таймерът?",
-                    hTime: "Избери обща продължителност",
-                    qRefresh: "На колко често да се сменя съдържанието?",
-                    hRefresh: "Само за текстови категории",
-                    qCat: "Какво искаш да правиш?",
-                    hCat: "Избери категория",
-                    start: "Старт",
-                    timesUp: "Времето изтече",
-                    sec: "с",
-                    min: "м",
-                    questions: "Въпроси",
-                    riddles: "Гатанки",
-                    jokes: "Вицове",
-                    moviesTrivia: "Филми",
-                    popCulture: "Поп култура",
-                    shorts: "Shorts",
-                    music: "Музика",
-                    hiddenCam: "Скрита камера",
-                    fitness: "Фитнес",
-                    visuals: "Визуализации",
-                    random: "Случайно",
-                    skipTitle: "Пропусни",
-                    revealHint: "Отговор скоро...",
-                    qLabel: "Въпрос",
-                },
-            };
+    function applyTheme(){document.body.classList.toggle('light-mode',theme==='light')}
+    themeToggle.onclick=()=>{theme=theme==='dark'?'light':'dark';applyTheme()};
 
-            function t(key) { return i18n[currentLang][key] || key; }
+    function renderSetup(){
+        document.getElementById('q-time').textContent=t('qTime');document.getElementById('h-time').textContent=t('hTime');
+        document.getElementById('q-refresh').textContent=t('qRefresh');document.getElementById('h-refresh').textContent=t('hRefresh');
+        document.getElementById('q-cat').textContent=t('qCat');document.getElementById('h-cat').textContent=t('hCat');
+        startBtn.textContent=t('start');
+        document.getElementById('time-options').innerHTML=[30,60,90,120,180,300].map(v=>`<button class="option-btn${timerDuration===v?' selected':''}" data-time="${v}">${v<60?v+t('sec'):v===60?'1'+t('min'):v/60+t('min')}</button>`).join('');
+        document.getElementById('duration-options').innerHTML=[15,30,45,60].map(v=>`<button class="option-btn${textDistractionDuration===v?' selected':''}" data-dur="${v}">${v}${t('sec')}</button>`).join('');
+        const cats=[{type:'questions',icon:'speech'},{type:'riddles',icon:'puzzle'},{type:'jokes',icon:'smile'},{type:'movies',icon:'film'},{type:'popculture',icon:'star'},{type:'shorts',icon:'play'},{type:'music',icon:'note'},{type:'hiddencam',icon:'eye'},{type:'fitness',icon:'dumbbell'},{type:'visuals',icon:'shapes'},{type:'random',icon:'shuffle'}];
+        const icons={speech:'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',puzzle:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>',smile:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>',film:'<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>',star:'<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>',play:'<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"/></svg>',note:'<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',eye:'<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',dumbbell:'<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/><rect x="2" y="8" width="4" height="8" rx="1.5"/><rect x="18" y="8" width="4" height="8" rx="1.5"/></svg>',shapes:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>',shuffle:'<svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>'};
+        document.getElementById('category-options').innerHTML=cats.map(c=>`<button class="category-btn${distractionType===c.type?' selected':''}" data-type="${c.type}">${icons[c.icon]} ${t(c.type)}</button>`).join('');
+        document.querySelectorAll('#time-options .option-btn').forEach(b=>b.onclick=()=>{timerDuration=+b.dataset.time;renderSetup()});
+        document.querySelectorAll('#duration-options .option-btn').forEach(b=>b.onclick=()=>{textDistractionDuration=+b.dataset.dur;renderSetup()});
+        document.querySelectorAll('#category-options .category-btn').forEach(b=>b.onclick=()=>{distractionType=b.dataset.type;renderSetup()});
+    }
 
-            // ─────────────────── DOM ───────────────────
-            const setupScreen = document.getElementById('setup-screen');
-            const distractionScreen = document.getElementById('distraction-screen');
-            const progressBar = document.getElementById('progress-bar');
-            const distractionContent = document.getElementById('distraction-content');
-            const timeBadge = document.getElementById('time-badge');
-            const timesUpOverlay = document.getElementById('times-up-overlay');
-            const timesUpMsg = document.getElementById('times-up-msg');
-            const skipBtn = document.getElementById('skip-btn');
-            const themeToggle = document.getElementById('theme-toggle');
-            const langToggle = document.getElementById('lang-toggle');
-            const startBtn = document.getElementById('start-btn');
+    langToggle.onclick=()=>{currentLang=currentLang==='en'?'bg':'en';langToggle.textContent=currentLang==='en'?'EN':'BG';renderSetup()};
 
-            // ─────────────────── THEME ───────────────────
-            function applyTheme() {
-                if (theme === 'light') document.body.classList.add('light-mode');
-                else document.body.classList.remove('light-mode');
-            }
-            themeToggle.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark';
-                applyTheme(); });
+    function getData(){return currentLang==='bg'?dataBg:dataEn}
+    function shuffle(a){const arr=[...a];for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+    function resolveType(){if(distractionType!=='random')return distractionType;const all=[...TEXT_TYPES,...VIDEO_TYPES,'visuals'];return all[Math.floor(Math.random()*all.length)]}
+    function getVideoPool(t){return t==='shorts'?shortVideos:t==='music'?musicVideos:t==='hiddencam'?hiddenCamVideos:t==='fitness'?fitnessVideos:[]}
+    function formatTime(s){const sec=Math.ceil(Math.max(0,s));return `${Math.floor(sec/60)}:${(sec%60).toString().padStart(2,'0')}`}
 
-            // ─────────────────── RENDER SETUP ───────────────────
-            function renderSetup() {
-                document.getElementById('q-time').textContent = t('qTime');
-                document.getElementById('h-time').textContent = t('hTime');
-                document.getElementById('q-refresh').textContent = t('qRefresh');
-                document.getElementById('h-refresh').textContent = t('hRefresh');
-                document.getElementById('q-cat').textContent = t('qCat');
-                document.getElementById('h-cat').textContent = t('hCat');
-                startBtn.textContent = t('start');
+    function playBeep(){if(beeped)return;beeped=true;try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.type='sine';osc.frequency.value=880;gain.gain.value=0.3;osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+0.15)}catch(e){}}
 
-                const timeOpts = document.getElementById('time-options');
-                timeOpts.innerHTML = [30, 60, 90, 120, 180, 300].map(v => {
-                    const label = v < 60 ? `${v}${t('sec')}` : v === 60 ? `1${t('min')}` :
-                        `${v/60}${t('min')}`;
-                    return `<button class="option-btn${timerDuration===v?' selected':''}" data-time="${v}">${label}</button>`;
-                }).join('');
+    let currentTypingElement=null,typingSpeed=40,typingComplete=true;
 
-                const durOpts = document.getElementById('duration-options');
-                durOpts.innerHTML = [15, 30, 45, 60].map(v =>
-                    `<button class="option-btn${textDistractionDuration===v?' selected':''}" data-dur="${v}">${v}${t('sec')}</button>`
-                ).join('');
+    function typeText(element,text,callback){
+        if(currentTypingElement) clearInterval(currentTypingElement.interval);
+        element.textContent='';let i=0;typingComplete=false;
+        const interval=setInterval(()=>{
+            element.textContent+=text.charAt(i);i++;
+            if(i>=text.length){clearInterval(interval);typingComplete=true;if(callback)callback()}
+        },typingSpeed);
+        currentTypingElement={element,interval};
+    }
 
-                const catOpts = document.getElementById('category-options');
-                const cats = [
-                    { type: 'questions', icon: 'speech' }, { type: 'riddles', icon: 'puzzle' },
-                    { type: 'jokes', icon: 'smile' }, { type: 'movies', icon: 'film' },
-                    { type: 'popculture', icon: 'star' }, { type: 'shorts', icon: 'play' },
-                    { type: 'music', icon: 'note' }, { type: 'hiddencam', icon: 'eye' },
-                    { type: 'fitness', icon: 'dumbbell' }, { type: 'visuals', icon: 'shapes' },
-                    { type: 'random', icon: 'shuffle' },
-                ];
-                const icons = {
-                    speech: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-                    puzzle: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>',
-                    smile: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="9" r="0.5" fill="currentColor"/><circle cx="15" cy="9" r="0.5" fill="currentColor"/></svg>',
-                    film: '<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>',
-                    star: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>',
-                    play: '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"/></svg>',
-                    note: '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-                    eye: '<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
-                    dumbbell: '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/><rect x="2" y="8" width="4" height="8" rx="1.5"/><rect x="18" y="8" width="4" height="8" rx="1.5"/></svg>',
-                    shapes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>',
-                    shuffle: '<svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>',
-                };
-                catOpts.innerHTML = cats.map(c =>
-                    `<button class="category-btn${distractionType===c.type?' selected':''}" data-type="${c.type}">${icons[c.icon]} ${t(c.type)}</button>`
-                ).join('');
+    function renderTextItem(item,type){
+        distractionContent.innerHTML='';
+        if(['questions','movies','popculture'].includes(type)){
+            distractionContent.innerHTML=`<div class="millionaire-wrap"><div class="millionaire-qbox"><div class="q-label">${t('qLabel')}</div><div class="typing-area" style="font-size:1.2rem;color:#eee;"></div></div><div class="millionaire-answers">${item.answers.map((a,i)=>`<div class="millionaire-ans" data-idx="${i}"><span class="ans-circle">${String.fromCharCode(65+i)}</span><span>${a}</span></div>`).join('')}</div></div>`;
+            const typingEl=distractionContent.querySelector('.typing-area');
+            const text=item.q;const availableTime=(textDistractionDuration-5)*1000;
+            typingSpeed=Math.min(40, availableTime/(text.length+1));
+            typeText(typingEl,text);
+        }else if(type==='riddles'){
+            distractionContent.innerHTML=`<div class="text-content-wrap"><p class="main-text typing-area"></p><div class="reveal-hint">${t('revealHint')}</div><p class="reveal-text" id="reveal-text">${item.answer}</p></div>`;
+            const typingEl=distractionContent.querySelector('.typing-area');
+            const text=item.riddle;const availableTime=(textDistractionDuration-5)*1000;
+            typingSpeed=Math.min(40, availableTime/(text.length+1));
+            typeText(typingEl,text);
+        }else if(type==='jokes'){
+            distractionContent.innerHTML=`<div class="text-content-wrap"><p class="main-text typing-area"></p><div class="reveal-hint">${t('revealHint')}</div><p class="reveal-text" id="reveal-text">${item.punchline}</p></div>`;
+            const typingEl=distractionContent.querySelector('.typing-area');
+            const text=item.setup;const availableTime=(textDistractionDuration-5)*1000;
+            typingSpeed=Math.min(40, availableTime/(text.length+1));
+            typeText(typingEl,text);
+        }
+    }
 
-                bindSetupEvents();
-            }
+    function revealCurrentText(type){
+        if(!typingComplete) return;
+        if(['questions','movies','popculture'].includes(type)){
+            const item=shuffledItems[currentShuffleIndex];
+            document.querySelectorAll('.millionaire-ans').forEach((el,i)=>{if(i===item.correct)el.classList.add('correct-glow');else el.style.opacity='0.4'});
+        }else if(type==='riddles'||type==='jokes'){
+            const rev=document.getElementById('reveal-text');
+            if(rev) rev.classList.add('visible');
+        }
+    }
 
-            function bindSetupEvents() {
-                document.querySelectorAll('#time-options .option-btn').forEach(b => {
-                    b.addEventListener('click', () => { timerDuration = parseInt(b.dataset.time);
-                        renderSetup(); });
-                });
-                document.querySelectorAll('#duration-options .option-btn').forEach(b => {
-                    b.addEventListener('click', () => { textDistractionDuration = parseInt(b.dataset
-                            .dur);
-                        renderSetup(); });
-                });
-                document.querySelectorAll('#category-options .category-btn').forEach(b => {
-                    b.addEventListener('click', () => { distractionType = b.dataset.type;
-                        renderSetup(); });
-                });
-            }
+    function nextDistraction(){
+        if(TEXT_TYPES.includes(resolvedType)){
+            currentShuffleIndex++;if(currentShuffleIndex>=shuffledItems.length){shuffledItems=shuffle(shuffledItems);currentShuffleIndex=0}
+            renderTextItem(shuffledItems[currentShuffleIndex],resolvedType);
+            typingComplete=false;
+        }else if(VIDEO_TYPES.includes(resolvedType)){
+            currentShuffleIndex++;if(currentShuffleIndex>=shuffledItems.length){shuffledItems=shuffle(shuffledItems);currentShuffleIndex=0}
+            const nextVideo=shuffledItems[currentShuffleIndex];
+            distractionContent.innerHTML=`<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${nextVideo.id}?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1&cc_load_policy=0&playsinline=1" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe></div>`;
+        }else if(resolvedType==='visuals'){/* restart breathing ring by resetting phase */ breathPhase=0;}
+    }
 
-            langToggle.addEventListener('click', () => {
-                currentLang = currentLang === 'en' ? 'bg' : 'en';
-                langToggle.textContent = currentLang === 'en' ? 'EN' : 'BG';
-                renderSetup();
-            });
+    nextBtn.onclick=nextDistraction;
 
-            startBtn.addEventListener('click', startDistraction);
-            skipBtn.addEventListener('click', () => { if (timerInterval) endDistraction(true); });
-
-            // ─────────────────── HELPERS ───────────────────
-            function getData() { return currentLang === 'bg' ? dataBg : dataEn; }
-
-            function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math
-                    .floor(Math.random() * (i + 1));
-                    [a[i], a[j]] = [a[j], a[i]]; } return a; }
-
-            function resolveType() {
-                if (distractionType !== 'random') return distractionType;
-                const all = [...TEXT_TYPES, ...VIDEO_TYPES, 'visuals'];
-                return all[Math.floor(Math.random() * all.length)];
-            }
-
-            function getVideoPool(type) {
-                if (type === 'shorts') return shortVideos;
-                if (type === 'music') return musicVideos;
-                if (type === 'hiddencam') return hiddenCamVideos;
-                if (type === 'fitness') return fitnessVideos;
-                return [];
-            }
-
-            function formatTime(sec) { const s = Math.ceil(Math.max(0, sec)); return `${Math.floor(s/60)}:${(s%60)
-                    .toString().padStart(2,'0')}`; }
-
-            // ─────────────────── RENDER CONTENT ───────────────────
-            function renderTextItem(item, type) {
-                distractionContent.innerHTML = '';
-                if (['questions', 'movies', 'popculture'].includes(type)) {
-                    distractionContent.innerHTML = `
-                <div class="millionaire-wrap">
-                  <div class="millionaire-qbox"><div class="q-label">${t('qLabel')}</div><div style="font-size:1.2rem;color:#eee;">${item.q}</div></div>
-                  <div class="millionaire-answers">${item.answers.map((a,i)=>`<div class="millionaire-ans" data-idx="${i}"><span class="ans-circle">${String.fromCharCode(65+i)}</span><span>${a}</span></div>`).join('')}</div>
-                </div>`;
-                } else if (type === 'riddles') {
-                    distractionContent.innerHTML = `
-                <div class="text-content-wrap">
-                  <p class="main-text">${item.riddle}</p>
-                  <div class="reveal-hint">${t('revealHint')}</div>
-                  <p class="reveal-text" id="reveal-text">${item.answer}</p>
-                </div>`;
-                } else if (type === 'jokes') {
-                    distractionContent.innerHTML = `
-                <div class="text-content-wrap">
-                  <p class="main-text">${item.setup}</p>
-                  <div class="reveal-hint">${t('revealHint')}</div>
-                  <p class="reveal-text" id="reveal-text">${item.punchline}</p>
-                </div>`;
+    function startDistraction(){
+        resolvedType=resolveType();totalTime=timerDuration;timeRemaining=totalTime;
+        shuffledItems=[];currentShuffleIndex=0;typingComplete=false;beeped=false;
+        if(animFrame)cancelAnimationFrame(animFrame);
+        if(currentTypingElement){clearInterval(currentTypingElement.interval);currentTypingElement=null}
+        if(TEXT_TYPES.includes(resolvedType)){
+            const raw=getData()[resolvedType]||[];shuffledItems=shuffle(raw);
+            renderTextItem(shuffledItems[0],resolvedType);
+        }else if(VIDEO_TYPES.includes(resolvedType)){
+            const pool=getVideoPool(resolvedType);shuffledItems=shuffle(pool);
+            distractionContent.innerHTML=`<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${shuffledItems[0].id}?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1&cc_load_policy=0&playsinline=1" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe></div>`;
+        }else if(resolvedType==='visuals'){
+            distractionContent.innerHTML='<canvas id="visuals-canvas"></canvas>';
+            const canvas=document.getElementById('visuals-canvas');
+            if(canvas){canvas.width=distractionContent.clientWidth;canvas.height=distractionContent.clientHeight;}
+            startBreathingRing();
+        }
+        setupScreen.style.display='none';distractionScreen.classList.add('active');
+        progressBar.style.width='100%';progressBar.classList.remove('warning');
+        timeBadge.textContent=formatTime(timeRemaining);fadeOverlay.style.opacity='0';fadeText.classList.remove('show');
+        const startTime=performance.now();
+        if(timerInterval)clearInterval(timerInterval);
+        timerInterval=setInterval(()=>{
+            const elapsed=(performance.now()-startTime)/1000;
+            timeRemaining=Math.max(0,totalTime-elapsed);
+            progressBar.style.width=(timeRemaining/totalTime*100)+'%';
+            if(timeRemaining<=5)progressBar.classList.add('warning');else progressBar.classList.remove('warning');
+            timeBadge.textContent=formatTime(timeRemaining);
+            if(timeRemaining<=3&&!beeped) playBeep();
+            if(timeRemaining<=5){
+                const fadeOpacity=Math.min(1,(5-timeRemaining)/3);
+                fadeOverlay.style.opacity=fadeOpacity;
+                if(timeRemaining<=2){fadeText.classList.add('show');fadeText.textContent=t('timesUp')}
+            }else{fadeOverlay.style.opacity='0';fadeText.classList.remove('show')}
+            if(TEXT_TYPES.includes(resolvedType)&&shuffledItems.length>0){
+                const elapsedSec=totalTime-timeRemaining;
+                const segIdx=Math.floor(elapsedSec/textDistractionDuration);
+                if(segIdx!==currentShuffleIndex){
+                    currentShuffleIndex=segIdx;
+                    if(currentShuffleIndex>=shuffledItems.length){shuffledItems=shuffle(shuffledItems);currentShuffleIndex=0}
+                    renderTextItem(shuffledItems[currentShuffleIndex],resolvedType);
                 }
+                const segStart=currentShuffleIndex*textDistractionDuration;
+                const segRemaining=(segStart+textDistractionDuration)-elapsedSec;
+                if(segRemaining<=5&&segRemaining>0) revealCurrentText(resolvedType);
             }
+            if(timeRemaining<=0) endDistraction();
+        },80);
+    }
 
-            function revealCurrentText(type) {
-                if (['questions', 'movies', 'popculture'].includes(type)) {
-                    const item = shuffledItems[currentShuffleIndex];
-                    document.querySelectorAll('.millionaire-ans').forEach((el, i) => {
-                        if (i === item.correct) el.classList.add('correct-glow');
-                        else el.style.opacity = '0.4';
-                    });
-                } else if (type === 'riddles' || type === 'jokes') {
-                    const rev = document.getElementById('reveal-text');
-                    if (rev && !rev.classList.contains('visible')) rev.classList.add('visible');
-                }
-            }
+    function endDistraction(){
+        if(timerInterval)clearInterval(timerInterval);if(animFrame)cancelAnimationFrame(animFrame);
+        timerInterval=null;animFrame=null;
+        progressBar.style.width='0%';progressBar.classList.remove('warning');
+        timeBadge.textContent='0:00';
+        setTimeout(()=>{
+            fadeOverlay.style.opacity='1';fadeText.classList.add('show');fadeText.textContent=t('timesUp');
+            setTimeout(()=>{
+                distractionScreen.classList.remove('active');setupScreen.style.display='flex';
+                fadeOverlay.style.opacity='0';fadeText.classList.remove('show');
+                progressBar.style.width='100%';distractionContent.innerHTML='';
+            },2000);
+        },500);
+    }
 
-            function buildPlaylistEmbed(pool) {
-                if (pool.length === 0) return '';
-                const firstId = pool[0].id;
-                const restIds = pool.slice(1).map(v => v.id).join(',');
-                const playlistParam = restIds ? `&playlist=${restIds}` : '';
-                return `https://www.youtube.com/embed/${firstId}?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1&cc_load_policy=0&playsinline=1${playlistParam}`;
-            }
+    function startBreathingRing(){
+        const canvas=document.getElementById('visuals-canvas');if(!canvas)return;
+        const ctx=canvas.getContext('2d');let animationId;
+        function resize(){canvas.width=distractionContent.clientWidth;canvas.height=distractionContent.clientHeight}
+        resize();window.addEventListener('resize',resize);
+        function animate(ts){
+            const cx=canvas.width/2,cy=canvas.height/2,maxRadius=Math.min(canvas.width,canvas.height)*0.4;
+            const cycleDuration=8000;
+            const t=(ts%cycleDuration)/cycleDuration;
+            const breath=Math.sin(t*Math.PI*2);
+            const radius=maxRadius*(0.3+0.5*(breath+1)/2);
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            const grad=ctx.createRadialGradient(cx,cy,radius*0.2,cx,cy,radius);
+            grad.addColorStop(0,'rgba(200,180,100,0.9)');grad.addColorStop(1,'rgba(100,80,40,0)');
+            ctx.fillStyle=grad;ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.fill();
+            ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=2;ctx.stroke();
+            animFrame=requestAnimationFrame(animate);
+        }
+        animFrame=requestAnimationFrame(animate);
+    }
 
-            // ─────────────────── START DISTRACTION ───────────────────
-            function startDistraction() {
-                resolvedType = resolveType();
-                totalTime = timerDuration;
-                timeRemaining = totalTime;
-                shuffledItems = [];
-                currentShuffleIndex = 0;
-                if (animFrame) { cancelAnimationFrame(animFrame);
-                    animFrame = null; }
-
-                if (TEXT_TYPES.includes(resolvedType)) {
-                    const data = getData();
-                    const rawItems = data[resolvedType] || [];
-                    shuffledItems = shuffle(rawItems);
-                    currentShuffleIndex = 0;
-                    renderTextItem(shuffledItems[0], resolvedType);
-                } else if (VIDEO_TYPES.includes(resolvedType)) {
-                    const pool = getVideoPool(resolvedType);
-                    shuffledItems = shuffle(pool);
-                    const embedUrl = buildPlaylistEmbed(shuffledItems);
-                    distractionContent.innerHTML =
-                        `<div class="video-wrap"><iframe src="${embedUrl}" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe></div>`;
-                } else if (resolvedType === 'visuals') {
-                    distractionContent.innerHTML = `<canvas id="visuals-canvas"></canvas>`;
-                    const canvas = document.getElementById('visuals-canvas');
-                    if (canvas) { canvas.width = distractionContent.clientWidth;
-                        canvas.height = distractionContent.clientHeight; }
-                    startVisuals();
-                }
-
-                setupScreen.style.display = 'none';
-                distractionScreen.classList.add('active');
-                progressBar.style.width = '100%';
-                progressBar.classList.remove('warning');
-                timeBadge.textContent = formatTime(timeRemaining);
-                timesUpOverlay.classList.remove('show');
-
-                const startTime = performance.now();
-                if (timerInterval) clearInterval(timerInterval);
-                timerInterval = setInterval(() => {
-                    const elapsed = (performance.now() - startTime) / 1000;
-                    timeRemaining = Math.max(0, totalTime - elapsed);
-                    progressBar.style.width = (timeRemaining / totalTime * 100) + '%';
-                    if (timeRemaining <= 5 && timeRemaining > 0) progressBar.classList.add(
-                        'warning');
-                    else progressBar.classList.remove('warning');
-                    timeBadge.textContent = formatTime(timeRemaining);
-
-                    if (TEXT_TYPES.includes(resolvedType) && shuffledItems.length > 0) {
-                        const elapsedSec = totalTime - timeRemaining;
-                        const segIdx = Math.floor(elapsedSec / textDistractionDuration);
-                        if (segIdx !== currentShuffleIndex) {
-                            currentShuffleIndex = segIdx;
-                            if (currentShuffleIndex >= shuffledItems.length) {
-                                shuffledItems = shuffle(shuffledItems);
-                                currentShuffleIndex = 0;
-                            }
-                            renderTextItem(shuffledItems[currentShuffleIndex], resolvedType);
-                        }
-                        const segStart = currentShuffleIndex * textDistractionDuration;
-                        const segRemaining = (segStart + textDistractionDuration) - elapsedSec;
-                        if (segRemaining <= 5 && segRemaining > 0) revealCurrentText(resolvedType);
-                    }
-
-                    if (timeRemaining <= 0) endDistraction(false);
-                }, 80);
-            }
-
-            function endDistraction(skipped = false) {
-                if (timerInterval) clearInterval(timerInterval);
-                if (animFrame) cancelAnimationFrame(animFrame);
-                timerInterval = null;
-                animFrame = null;
-                progressBar.style.width = '0%';
-                progressBar.classList.remove('warning');
-                timeBadge.textContent = '0:00';
-                timesUpMsg.textContent = t('timesUp');
-                timesUpOverlay.classList.add('show');
-                setTimeout(() => {
-                    timesUpOverlay.classList.remove('show');
-                    distractionScreen.classList.remove('active');
-                    distractionContent.innerHTML = '';
-                    setupScreen.style.display = 'flex';
-                    progressBar.style.width = '100%';
-                    shuffledItems = [];
-                }, 1800);
-            }
-
-            // ─────────────────── VISUALS ───────────────────
-            function startVisuals() {
-                const canvas = document.getElementById('visuals-canvas');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                const resize = () => { canvas.width = distractionContent.clientWidth;
-                    canvas.height = distractionContent.clientHeight; };
-                resize();
-                window.addEventListener('resize', resize);
-                particles = [];
-                for (let i = 0; i < 80; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() *
-                        canvas.height, vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5, r: Math
-                        .random() * 3 + 1, hue: Math.random() * 360 });
-
-                function animate() {
-                    if (!document.getElementById('visuals-canvas')) return;
-                    resize();
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.fillStyle = '#000a18';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    particles.forEach(p => { p.x += p.vx;
-                        p.y += p.vy; if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0; if (p
-                            .y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
-                        p.hue = (p.hue + 0.2) % 360; });
-                    for (let i = 0; i < particles.length; i++)
-                        for (let j = i + 1; j < particles.length; j++) {
-                            const dx = particles[i].x - particles[j].x,
-                                dy = particles[i].y - particles[j].y,
-                                dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < 90) { ctx.strokeStyle =
-                                    `hsla(${particles[i].hue},70%,60%,${0.25*(1-dist/90)})`;
-                                ctx.lineWidth = 0.6;
-                                ctx.beginPath();
-                                ctx.moveTo(particles[i].x, particles[i].y);
-                                ctx.lineTo(particles[j].x, particles[j].y);
-                                ctx.stroke(); }
-                        }
-                    particles.forEach(p => { ctx.fillStyle = `hsla(${p.hue},80%,65%,0.9)`;
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                        ctx.fill(); });
-                    animFrame = requestAnimationFrame(animate);
-                }
-                animFrame = requestAnimationFrame(animate);
-            }
-
-            // ─────────────────── INIT ───────────────────
-            applyTheme();
-            renderSetup();
-            langToggle.textContent = 'EN';
-        })();
-    </script>
+    startBtn.onclick=startDistraction;
+    skipBtn.onclick=()=>{if(timerInterval)endDistraction()};
+    applyTheme();renderSetup();langToggle.textContent='EN';
+})();
+</script>
 </body>
 </html>
