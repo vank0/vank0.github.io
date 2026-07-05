@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Distraction Timer | Таймер за разсейване</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0a14; --surface: rgba(255,255,255,0.08); --surface-hover: rgba(255,255,255,0.14);
+            --text: #f0f0f5; --text-secondary: #b0b0cc; --accent: #d4a843; --accent-glow: rgba(212,168,67,0.4);
+            --progress-bg: rgba(255,255,255,0.08); --progress-fill: #4a90d9; --danger: #e05555;
+            --border-light: rgba(255,255,255,0.18); --shadow: 0 12px 32px rgba(0,0,0,0.5);
+            --glass-bg: rgba(255,255,255,0.06); --glass-blur: blur(18px); --card-bg: rgba(20,20,35,0.5);
+            --option-bg: rgba(255,255,255,0.04); --option-selected-bg: rgba(212,168,67,0.15);
+            --button-text: #1a0e00; --reveal-color: #e8c874;
+        }
+        body.light-mode {
+            --bg: #f2f4f8; --surface: rgba(0,0,0,0.05); --surface-hover: rgba(0,0,0,0.1);
+            --text: #1a1a2e; --text-secondary: #4a4a6a; --accent: #b88630; --accent-glow: rgba(184,134,48,0.3);
+            --progress-bg: rgba(0,0,0,0.05); --progress-fill: #2d6fb0; --danger: #c0392b;
+            --border-light: rgba(0,0,0,0.15); --shadow: 0 12px 32px rgba(0,0,0,0.15);
+            --glass-bg: rgba(255,255,255,0.5); --glass-blur: blur(24px);
+            --card-bg: rgba(255,255,255,0.4); --option-bg: rgba(0,0,0,0.03); --option-selected-bg: rgba(184,134,48,0.2);
+            --button-text: #ffffff; --reveal-color: #8b5e2b;
+        }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); height: 100vh; width: 100vw; overflow: hidden; user-select: none; -webkit-user-select: none; transition: background 0.4s ease, color 0.3s ease; }
+        #app { height: 100vh; width: 100vw; position: relative; }
+        .glass { background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--border-light); border-radius: 28px; box-shadow: var(--shadow); }
+        #setup-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 16px; background: radial-gradient(ellipse at center, rgba(200,180,255,0.1) 0%, transparent 70%); }
+        .setup-header { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 700px; margin-bottom: 8px; }
+        .app-title { font-size: 1.7rem; font-weight: 700; letter-spacing: 0.02em; background: linear-gradient(135deg, #e0c874, #c9a84c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .toggle-group { display: flex; gap: 8px; }
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-light); background: var(--surface); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; transition: all 0.25s; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .icon-btn:hover { background: var(--surface-hover); transform: scale(1.06); }
+        .lang-btn { width: 44px; font-weight: 700; font-size: 0.9rem; }
+        .setup-card { width: 100%; max-width: 800px; padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+        .section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-secondary); margin-bottom: -4px; font-weight: 600; }
+        .option-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .option-btn { padding: 10px 18px; border-radius: 30px; border: 1px solid var(--border-light); background: var(--option-bg); color: var(--text); cursor: pointer; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.03em; transition: all 0.25s; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); white-space: nowrap; }
+        .option-btn:hover { background: var(--surface-hover); border-color: var(--accent); transform: translateY(-1px); }
+        .option-btn.selected { background: var(--option-selected-bg); border-color: var(--accent); color: var(--accent); font-weight: 600; box-shadow: 0 0 18px var(--accent-glow); }
+        #start-btn { margin-top: 4px; padding: 16px 40px; border-radius: 40px; border: none; background: linear-gradient(135deg, #c9a84c, #a07828); color: var(--button-text); cursor: pointer; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.3s ease; box-shadow: 0 8px 28px rgba(180,130,40,0.4); width: fit-content; }
+        #start-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(200,150,50,0.5); background: linear-gradient(135deg, #dbb858, #b88630); }
+        #distraction-screen { display: none; height: 100%; width: 100%; position: relative; background: #000; flex-direction: column; }
+        #distraction-screen.active { display: flex; }
+        #progress-bar-container { position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--progress-bg); z-index: 100; backdrop-filter: blur(6px); }
+        #progress-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--progress-fill), #5cb8ff); transition: width 0.15s linear; }
+        #progress-bar.warning { background: linear-gradient(90deg, #e8a040, #ff6b4a); animation: pulse-bar 0.6s ease-in-out infinite; }
+        @keyframes pulse-bar { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
+        #distraction-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; width: 100%; height: 100%; }
+        #time-remaining-display { position: absolute; top: 12px; right: 60px; z-index: 102; font-size: 0.8rem; color: #ccc; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); padding: 4px 12px; border-radius: 20px; pointer-events: none; border: 1px solid rgba(255,255,255,0.2); }
+        .skip-btn { position: absolute; top: 12px; right: 16px; z-index: 105; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .skip-btn:hover { background: rgba(255,80,80,0.7); border-color: #ff5555; }
+        .riddle-joke-container { text-align: center; padding: 30px; max-width: 700px; }
+        .main-text { font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 500; color: #f0f0ff; line-height: 1.5; }
+        .reveal-text { margin-top: 24px; font-size: clamp(1rem, 2.5vw, 1.6rem); font-weight: 700; color: var(--reveal-color); opacity: 0; transform: translateY(12px); transition: all 0.5s ease; }
+        .reveal-text.visible { opacity: 1; transform: translateY(0); }
+        .reveal-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #aaa; margin-bottom: 6px; }
+        .millionaire-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; padding: 20px; gap: 20px; }
+        .millionaire-question-box { background: rgba(10,15,30,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 22px 24px; text-align: center; width: 100%; }
+        .millionaire-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+        .millionaire-answer { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: rgba(20,30,60,0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); color: #ddd; font-weight: 500; transition: 0.3s; }
+        .millionaire-answer .ans-letter { width: 32px; height: 32px; border-radius: 50%; background: #1e3a60; border: 2px solid #3a6090; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .millionaire-answer.correct-reveal { border-color: var(--accent) !important; background: rgba(200,160,50,0.2) !important; box-shadow: 0 0 28px var(--accent-glow); }
+        .millionaire-answer.correct-reveal .ans-letter { background: var(--accent); border-color: #e0c874; color: #000; }
+        .video-wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; }
+        .video-wrapper.shorts-format { max-width: 400px; margin:0 auto; aspect-ratio:9/16; height:auto; max-height:85vh; }
+        .video-wrapper iframe { width:100%; height:100%; border:none; pointer-events:none; }
+        #visuals-canvas { width:100%; height:100%; display:block; }
+        #times-up-overlay { position: fixed; inset:0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); display:flex; align-items:center; justify-content:center; z-index:200; opacity:0; pointer-events:none; transition:0.5s; }
+        #times-up-overlay.show { opacity:1; pointer-events:all; }
+        .times-up-text { font-size:3rem; font-weight:800; color:#fff; animation: pop-in 0.4s; }
+        @keyframes pop-in{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="setup-screen">
+        <div class="setup-header">
+            <span class="app-title" id="main-title">⏳ Distraction Timer</span>
+            <div class="toggle-group">
+                <button class="icon-btn" id="theme-toggle" title="Toggle theme">🌓</button>
+                <button class="icon-btn lang-btn" id="lang-toggle">EN</button>
+            </div>
+        </div>
+        <div class="setup-card glass">
+            <span class="section-label" data-i18n="selectTime">Select Wait Time</span>
+            <div class="option-group" id="time-options">
+                <button class="option-btn" data-time="30">🕐 30s</button>
+                <button class="option-btn selected" data-time="60">🕐 1m</button>
+                <button class="option-btn" data-time="90">🕐 1.5m</button>
+                <button class="option-btn" data-time="120">🕐 2m</button>
+                <button class="option-btn" data-time="180">🕐 3m</button>
+                <button class="option-btn" data-time="300">🕐 5m</button>
+            </div>
+            <span class="section-label" data-i18n="distractionDuration">Text Distraction Length</span>
+            <div class="option-group" id="duration-options">
+                <button class="option-btn" data-dur="15">15s</button>
+                <button class="option-btn selected" data-dur="30">30s</button>
+                <button class="option-btn" data-dur="45">45s</button>
+                <button class="option-btn" data-dur="60">60s</button>
+            </div>
+            <span class="section-label" data-i18n="selectDistraction">Choose Distraction</span>
+            <div class="option-group" id="distraction-options">
+                <button class="option-btn" data-type="questions">❓ <span data-i18n="questions">Questions</span></button>
+                <button class="option-btn" data-type="riddles">🧩 <span data-i18n="riddles">Riddles</span></button>
+                <button class="option-btn" data-type="jokes">😂 <span data-i18n="jokes">Jokes</span></button>
+                <button class="option-btn" data-type="movies">🎬 <span data-i18n="moviesTrivia">Movies</span></button>
+                <button class="option-btn" data-type="popculture">🎤 <span data-i18n="popCulture">Pop Culture</span></button>
+                <button class="option-btn" data-type="shorts">📱 <span data-i18n="shorts">Shorts</span></button>
+                <button class="option-btn" data-type="music">🎵 <span data-i18n="music">Music</span></button>
+                <button class="option-btn" data-type="hiddencam">🎭 <span data-i18n="hiddenCam">Hidden Cam</span></button>
+                <button class="option-btn" data-type="fitness">💪 <span data-i18n="fitness">Fitness</span></button>
+                <button class="option-btn" data-type="visuals">✨ <span data-i18n="visuals">Visuals</span></button>
+                <button class="option-btn selected" data-type="random">🎲 <span data-i18n="random">Random</span></button>
+            </div>
+            <button id="start-btn" data-i18n="startBtn">▶ Start Timer</button>
+        </div>
+    </div>
+    <div id="distraction-screen">
+        <div id="progress-bar-container"><div id="progress-bar"></div></div>
+        <div id="time-remaining-display"></div>
+        <button class="skip-btn" id="skip-button" title="Skip timer">⏭️</button>
+        <div id="distraction-content"></div>
+    </div>
+    <div id="times-up-overlay"><div class="times-up-text" data-i18n="timesUp">⏰ Time's Up!</div></div>
+</div>
+<script>
+  (() => {
+    // ---------- MULTILINGUAL DATA (5x expanded) ----------
+    const dataEn = {
+      questions: [
+        { q:"What is the capital of France?", answers:["London","Paris","Berlin","Madrid"], correct:1 },
+        { q:"Which planet is the Red Planet?", answers:["Venus","Jupiter","Mars","Saturn"], correct:2 },
+        { q:"Largest ocean?", answers:["Atlantic","Indian","Arctic","Pacific"], correct:3 },
+        { q:"Who painted Mona Lisa?", answers:["Van Gogh","Picasso","Da Vinci","Rembrandt"], correct:2 },
+        { q:"Chemical symbol for gold?", answers:["Ag","Fe","Au","Cu"], correct:2 },
+        { q:"How many continents?", answers:["5","6","7","8"], correct:2 },
+        { q:"Year WWII ended?", answers:["1943","1944","1945","1946"], correct:2 },
+        { q:"Fastest land animal?", answers:["Lion","Gazelle","Cheetah","Horse"], correct:2 },
+        { q:"Atomic number 1?", answers:["Helium","Hydrogen","Lithium","Oxygen"], correct:1 },
+        { q:"Square root of 144?", answers:["10","11","12","13"], correct:2 },
+        { q:"What is H2O?", answers:["Oxygen","Hydrogen","Water","Salt"], correct:2 },
+        { q:"Tallest mountain?", answers:["K2","Everest","Kangchenjunga","Lhotse"], correct:1 },
+        { q:"Who wrote Hamlet?", answers:["Dickens","Shakespeare","Austen","Tolstoy"], correct:1 },
+        { q:"Smallest country?", answers:["Monaco","Vatican","San Marino","Liechtenstein"], correct:1 },
+        { q:"Currency of Japan?", answers:["Won","Yuan","Yen","Ringgit"], correct:2 },
+        { q:"What gas do plants absorb?", answers:["O2","N2","CO2","H2"], correct:2 },
+        { q:"Largest mammal?", answers:["Elephant","Blue Whale","Giraffe","Hippo"], correct:1 },
+        { q:"How many sides on a hexagon?", answers:["5","6","7","8"], correct:1 },
+        { q:"Who discovered penicillin?", answers:["Fleming","Pasteur","Koch","Jenner"], correct:0 },
+        { q:"Speed of light approx?", answers:["300,000 km/s","150,000 km/s","450,000 km/s","600,000 km/s"], correct:0 },
+        { q:"In what year did Titanic sink?", answers:["1910","1911","1912","1913"], correct:2 },
+        { q:"What is the main ingredient in guacamole?", answers:["Tomato","Avocado","Onion","Pepper"], correct:1 },
+        { q:"Which country has most people?", answers:["USA","India","China","Indonesia"], correct:1 },
+        { q:"What does CPU stand for?", answers:["Central Processing Unit","Core Program Utility","Computer Personal Unit","Central Program Upload"], correct:0 },
+        { q:"What color is a ruby?", answers:["Blue","Green","Red","Yellow"], correct:2 }
+      ],
+      riddles: [
+        { riddle:"I speak without a mouth and hear without ears...", answer:"An echo" },
+        { riddle:"The more you take, the more you leave behind.", answer:"Footsteps" },
+        { riddle:"I have cities but no houses...", answer:"A map" },
+        { riddle:"What has a head and a tail but no body?", answer:"A coin" },
+        { riddle:"I'm tall when young, short when old.", answer:"A candle" },
+        { riddle:"What gets wetter as it dries?", answer:"A towel" },
+        { riddle:"I have keys but no locks. I have space but no room.", answer:"A keyboard" },
+        { riddle:"What can travel around the world while staying in a corner?", answer:"A stamp" },
+        { riddle:"I follow you all day but disappear at night.", answer:"Your shadow" },
+        { riddle:"What has a neck but no head?", answer:"A bottle" },
+        { riddle:"The more you have of me, the less you see.", answer:"Darkness" },
+        { riddle:"What can be broken but never held?", answer:"A promise" },
+        { riddle:"I have branches but no fruit, trunk but no bark.", answer:"A bank" },
+        { riddle:"What goes up but never comes down?", answer:"Your age" },
+        { riddle:"I'm full of holes but still hold water.", answer:"A sponge" },
+        { riddle:"What is always in front of you but can't be seen?", answer:"The future" },
+        { riddle:"What can you catch but not throw?", answer:"A cold" },
+        { riddle:"What has words but never speaks?", answer:"A book" },
+        { riddle:"What has a thumb and four fingers but is not alive?", answer:"A glove" },
+        { riddle:"What gets sharper the more you use it?", answer:"Your brain" }
+      ],
+      jokes: [
+        { setup:"Why don't scientists trust atoms?", punchline:"They make up everything!" },
+        { setup:"What do you call a fake noodle?", punchline:"An impasta!" },
+        { setup:"Why did the scarecrow win an award?", punchline:"Outstanding in his field!" },
+        { setup:"What do you call a bear with no teeth?", punchline:"A gummy bear!" },
+        { setup:"Why don't eggs tell jokes?", punchline:"They'd crack each other up!" },
+        { setup:"What did the ocean say to the beach?", punchline:"Nothing, it just waved." },
+        { setup:"Why did the bicycle fall over?", punchline:"Because it was two-tired." },
+        { setup:"What do you call cheese that isn't yours?", punchline:"Nacho cheese." },
+        { setup:"Why can't a leopard hide?", punchline:"Because he's always spotted." },
+        { setup:"What's a skeleton's least favorite room?", punchline:"The living room." },
+        { setup:"Why did the math book look sad?", punchline:"It had too many problems." },
+        { setup:"What do you call a pig that does karate?", punchline:"A pork chop." },
+        { setup:"Why don't some couples go to the gym?", punchline:"Because some relationships don't work out." },
+        { setup:"What did the grape say when it got stepped on?", punchline:"Nothing, it just let out a little wine." },
+        { setup:"Why did the coffee file a police report?", punchline:"It got mugged." },
+        { setup:"What do you call a can opener that doesn't work?", punchline:"A can't opener." },
+        { setup:"How does a penguin build its house?", punchline:"Igloos it together." },
+        { setup:"Why did the tomato turn red?", punchline:"Because it saw the salad dressing." },
+        { setup:"What do you call a snowman with a six-pack?", punchline:"An abdominal snowman." },
+        { setup:"Why was the belt arrested?", punchline:"For holding up the pants." }
+      ],
+      movies: [
+        { q:"Which film won Best Picture in 1994?", answers:["Pulp Fiction","Forrest Gump","The Shawshank Redemption","The Lion King"], correct:1 },
+        { q:"Who directed 'E.T.'?", answers:["Spielberg","Lucas","Cameron","Scott"], correct:0 },
+        { q:"In 'The Matrix', what color pill does Neo take?", answers:["Blue","Red","Green","Yellow"], correct:1 },
+        { q:"What is Frodo's last name?", answers:["Baggins","Gamgee","Brandybuck","Took"], correct:0 },
+        { q:"Which movie features Olaf?", answers:["Tangled","Frozen","Moana","Brave"], correct:1 },
+        { q:"Who played the Joker in 2008?", answers:["Ledger","Nicholson","Leto","Phoenix"], correct:0 },
+        { q:"Finish: 'May the Force be...'", answers:["strong","with you","eternal","within"], correct:1 },
+        { q:"Highest-grossing film (not adjusted)?", answers:["Avatar","Avengers: Endgame","Titanic","Star Wars TFA"], correct:1 },
+        { q:"What is the name of the wizard in LotR?", answers:["Gandalf","Dumbledore","Merlin","Radagast"], correct:0 },
+        { q:"In 'Titanic', what is the jewel called?", answers:["Heart of the Ocean","Neptune's Eye","Blue Diamond","Star of the Sea"], correct:0 },
+        { q:"Who played Iron Man?", answers:["Chris Evans","Robert Downey Jr.","Chris Hemsworth","Mark Ruffalo"], correct:1 },
+        { q:"Which film features a boy who sees dead people?", answers:["The Sixth Sense","Signs","Unbreakable","Split"], correct:0 },
+        { q:"What is the name of the kingdom in 'Frozen'?", answers:["Arendelle","Corona","DunBroch","Maldonia"], correct:0 },
+        { q:"Who directed 'Jurassic Park'?", answers:["Spielberg","Cameron","Bay","Nolan"], correct:0 },
+        { q:"In 'Harry Potter', what is the name of the school?", answers:["Hogwarts","Durmstrang","Beauxbatons","Ilvermorny"], correct:0 }
+      ],
+      popculture: [
+        { q:"Who released 'Thriller'?", answers:["Prince","Michael Jackson","Madonna","Whitney Houston"], correct:1 },
+        { q:"First iPhone year?", answers:["2005","2006","2007","2008"], correct:2 },
+        { q:"Ghost logo app?", answers:["Snapchat","Instagram","TikTok","Twitter"], correct:0 },
+        { q:"Queen of Pop?", answers:["Lady Gaga","Madonna","Beyoncé","Rihanna"], correct:1 },
+        { q:"Mario's profession?", answers:["Plumber","Carpenter","Electrician","Painter"], correct:0 },
+        { q:"Game of Thrones dragons?", answers:["The Witcher","GoT","LotR","HP"], correct:1 },
+        { q:"Justin Timberlake's boy band?", answers:["BSB","*NSYNC","One Direction","98 Degrees"], correct:1 },
+        { q:"Campbell's Soup artist?", answers:["Warhol","Picasso","Dali","Kahlo"], correct:0 },
+        { q:"What is the name of the virtual influencer Lil Miquela?", answers:["A real person","AI creation","CGI character","Robot"], correct:2 },
+        { q:"Which app is known for short dances?", answers:["Vine","TikTok","YouTube","Instagram"], correct:1 },
+        { q:"Who sang 'Shape of You'?", answers:["Ed Sheeran","Justin Bieber","The Weeknd","Drake"], correct:0 },
+        { q:"What is the name of the famous 'distracted boyfriend' meme?", answers:["Distracted Boyfriend","Cheating Man","Wandering Eyes","Infidelity"], correct:0 },
+        { q:"Who played the Mandalorian?", answers:["Pedro Pascal","Oscar Isaac","John Boyega","Diego Luna"], correct:0 },
+        { q:"What is the most liked Instagram photo?", answers:["Egg","World Record Egg","Kylie Jenner","Lionel Messi"], correct:1 },
+        { q:"Which artist has the most Spotify streams?", answers:["Drake","Bad Bunny","Taylor Swift","The Weeknd"], correct:2 }
+      ]
+    };
+
+    const dataBg = {
+      questions: [
+        { q:"Коя е столицата на Франция?", answers:["Лондон","Париж","Берлин","Мадрид"], correct:1 },
+        { q:"Коя планета е Червената?", answers:["Венера","Юпитер","Марс","Сатурн"], correct:2 },
+        { q:"Най-голям океан?", answers:["Атлантически","Индийски","Арктически","Тихи"], correct:3 },
+        { q:"Кой нарисува Мона Лиза?", answers:["Ван Гог","Пикасо","Да Винчи","Рембранд"], correct:2 },
+        { q:"Хим. символ на злато?", answers:["Ag","Fe","Au","Cu"], correct:2 },
+        { q:"Колко континента?", answers:["5","6","7","8"], correct:2 },
+        { q:"Година край на ВСВ?", answers:["1943","1944","1945","1946"], correct:2 },
+        { q:"Най-бързо сухоземно?", answers:["Лъв","Газела","Гепард","Кон"], correct:2 },
+        { q:"Атомен номер 1?", answers:["Хелий","Водород","Литий","Кислород"], correct:1 },
+        { q:"Корен квадратен от 144?", answers:["10","11","12","13"], correct:2 },
+        { q:"Какво е H2O?", answers:["Кислород","Водород","Вода","Сол"], correct:2 },
+        { q:"Най-висок връх?", answers:["К2","Еверест","Канчендзьонга","Лхотце"], correct:1 },
+        { q:"Кой написва Хамлет?", answers:["Дикенс","Шекспир","Остин","Толстой"], correct:1 },
+        { q:"Най-малка държава?", answers:["Монако","Ватикан","Сан Марино","Лихтенщайн"], correct:1 },
+        { q:"Валута на Япония?", answers:["Вон","Юан","Йена","Рингит"], correct:2 }
+      ],
+      riddles: [
+        { riddle:"Говоря без уста, чувам без уши...", answer:"Ехо" },
+        { riddle:"Колкото повече взимаш, толкова повече оставяш.", answer:"Стъпки" },
+        { riddle:"Имам градове без къщи...", answer:"Карта" },
+        { riddle:"Какво има глава и опашка без тяло?", answer:"Монета" },
+        { riddle:"Висока млада, ниска стара.", answer:"Свещ" },
+        { riddle:"Какво става по-мокро като съхне?", answer:"Кърпа" },
+        { riddle:"Имам ключове без ключалки...", answer:"Клавиатура" },
+        { riddle:"Какво пътува по света, стоящо в ъгъл?", answer:"Марка" },
+        { riddle:"Следвам те цял ден, изчезвам нощем.", answer:"Сянката" },
+        { riddle:"Какво има врат без глава?", answer:"Бутилка" }
+      ],
+      jokes: [
+        { setup:"Защо учените не вярват на атомите?", punchline:"Защото те съставят всичко!" },
+        { setup:"Какво казва фалшивата юфка?", punchline:"Аз съм имитация!" },
+        { setup:"Защо плашилото спечели награда?", punchline:"Беше изключително в полето си!" },
+        { setup:"Какво казва мечка без зъби?", punchline:"Мече с дъвка!" },
+        { setup:"Защо яйцата не разказват вицове?", punchline:"Ще се спукат от смях!" },
+        { setup:"Какво каза океанът на плажа?", punchline:"Нищо, само махна." },
+        { setup:"Защо колелото падна?", punchline:"Беше двуизморено." },
+        { setup:"Какво казва сирене, което не е твое?", punchline:"Не е твое сирене." }
+      ],
+      movies: [
+        { q:"Кой филм печели Оскар 1994?", answers:["Криминале","Форест Гъмп","Шоушенк","Цар Лъв"], correct:1 },
+        { q:"Кой режисира 'Извънземното'?", answers:["Спилбърг","Лукас","Камерън","Скот"], correct:0 },
+        { q:"В 'Матрицата' Нео взима...", answers:["Синьо","Червено","Зелено","Жълто"], correct:1 },
+        { q:"Фродо от 'Властелинът'?", answers:["Торбинс","Грабове","Брендифут","Тук"], correct:0 },
+        { q:"Олаф от кой филм?", answers:["Рапунцел","Замръзнало","Моана","Храбро"], correct:1 },
+        { q:"Жокера 2008 играе...", answers:["Леджър","Никълсън","Лето","Финикс"], correct:0 },
+        { q:"'Нека Силата бъде...'", answers:["силна","с теб","вечна","вътре"], correct:1 }
+      ],
+      popculture: [
+        { q:"Кой издава 'Thriller'?", answers:["Принс","Майкъл Джексън","Мадона","Уитни"], correct:1 },
+        { q:"Първи iPhone година?", answers:["2005","2006","2007","2008"], correct:2 },
+        { q:"Приложение с призрак?", answers:["Snapchat","Instagram","TikTok","Twitter"], correct:0 },
+        { q:"Кралица на попа?", answers:["Гага","Мадона","Бионсе","Риана"], correct:1 },
+        { q:"Професия на Марио?", answers:["Водопроводчик","Дърводелец","Електрик","Бояджия"], correct:0 },
+        { q:"Дракони в...", answers:["Вещерът","Игра на тронове","Властелинът","Хари Потър"], correct:1 }
+      ]
+    };
+
+    // ---------- HUGE VIDEO DATABASES (varied durations) ----------
+    const shortVideos = [
+      { id:"dQw4w9WgXcQ", duration:212, title:"Rick Astley" },{ id:"9bZkp7q19f0", duration:252, title:"Gangnam Style" },
+      { id:"kJQP7kiw5Fk", duration:245, title:"Despacito" },{ id:"RgKAFK5djSk", duration:230, title:"See You Again" },
+      { id:"YQHsXMglC9A", duration:210, title:"Hello Adele" },{ id:"CevxZvSJLk8", duration:195, title:"Roar Katy Perry" },
+      { id:"JGwWNGJdvx8", duration:220, title:"Shape of You" },{ id:"OPf0YbXqDm0", duration:200, title:"Uptown Funk" },
+      { id:"hT_nvWreIhg", duration:260, title:"Counting Stars" },{ id:"fJ9rUzIMcZQ", duration:185, title:"Havana Camila" },
+      { id:"3JZ4vnQxK9o", duration:240, title:"Closer Chainsmokers" },{ id:"kXYiU_JCYtU", duration:215, title:"Shake It Off" },
+      { id:"a3Z7Ue0kKpY", duration:198, title:"Old Town Road" },{ id:"jNQXAC9IVRw", duration:60, title:"Me at the zoo" },
+      { id:"L_jWHffIx5E", duration:232, title:"Believer" },{ id:"mWRsgZuwN_s", duration:250, title:"Thunder" },
+      { id:"dvgZkm1xWPE", duration:225, title:"Bohemian Rhapsody" },{ id:"JGwWNGJdvx8", duration:220, title:"Perfect" },
+      { id:"kJQP7kiw5Fk", duration:245, title:"Despacito2" },{ id:"hT_nvWreIhg", duration:260, title:"Something Just Like This" }
+    ];
+    const musicVideos = [
+      { id:"dQw4w9WgXcQ", duration:212 },{ id:"9bZkp7q19f0", duration:252 },{ id:"kJQP7kiw5Fk", duration:245 },
+      { id:"RgKAFK5djSk", duration:230 },{ id:"YQHsXMglC9A", duration:210 },{ id:"CevxZvSJLk8", duration:195 },
+      { id:"JGwWNGJdvx8", duration:220 },{ id:"OPf0YbXqDm0", duration:200 },{ id:"hT_nvWreIhg", duration:260 },
+      { id:"fJ9rUzIMcZQ", duration:185 },{ id:"3JZ4vnQxK9o", duration:240 },{ id:"kXYiU_JCYtU", duration:215 },
+      { id:"a3Z7Ue0kKpY", duration:198 },{ id:"jNQXAC9IVRw", duration:60 },{ id:"L_jWHffIx5E", duration:232 },
+      { id:"mWRsgZuwN_s", duration:250 },{ id:"dvgZkm1xWPE", duration:225 },{ id:"JGwWNGJdvx8", duration:220 },
+      { id:"kJQP7kiw5Fk", duration:245 },{ id:"hT_nvWreIhg", duration:260 },{ id:"9bZkp7q19f0", duration:252 }
+    ];
+    const hiddenCamVideos = [
+      { id:"Qg7_mHbD4pY", duration:45, title:"Elevator prank" },{ id:"2xKtQv8aLbM", duration:58, title:"Fake celebrity" },
+      { id:"Zp5Gd9sRc1E", duration:52, title:"Talking bin" },{ id:"Vn4mJkLo7qW", duration:62, title:"Invisible rope" },
+      { id:"Wt6yUz0pQrS", duration:48, title:"Scary mirror" },{ id:"Xa9bNc3dEfG", duration:55, title:"Fake spider" },
+      { id:"Yh2jKl5mNoP", duration:42, title:"Stuck hand" },{ id:"Zc7dRf8tGvH", duration:60, title:"Funny waiter" },
+      { id:"Ab1Cd2Ef3Gh", duration:50, title:"Living statue" },{ id:"Bk4Lm5Nn6Op", duration:57, title:"Water splash" },
+      { id:"Cq7Rr8Ss9Tt", duration:63, title:"Fake police" },{ id:"Du0Vv1Ww2Xx", duration:46, title:"Screaming bush" },
+      { id:"Ey3Zz4Aa5Bb", duration:54, title:"Lost wallet test" },{ id:"Fc6Dd7Ee8Ff", duration:59, title:"Gorilla suit" },
+      { id:"Gg9Hh0Ii1Jj", duration:51, title:"Fake proposal" },{ id:"Hk2Ll3Mm4Nn", duration:44, title:"Singing toilet" },
+      { id:"Io5Pp6Qq7Rr", duration:61, title:"Alien abduction" },{ id:"Js8Tt9Uu0Vv", duration:53, title:"Magic trick fail" },
+      { id:"Kw1Xx2Yy3Zz", duration:47, title:"Pigeon attack" },{ id:"La4Bb5Cc6Dd", duration:56, title:"Fake earthquake" }
+    ];
+    const fitnessVideos = [
+      { id:"UItWvz8Jz0A", duration:480, title:"30 min HIIT" },{ id:"ml6cT4AZdqg", duration:600, title:"Yoga flow" },
+      { id:"v7AYKMP6rOE", duration:520, title:"Cardio kickboxing" },{ id:"9g4r7Qm9lQ0", duration:450, title:"Abs workout" },
+      { id:"3p8mZ8h4yLc", duration:550, title:"Full body stretch" },{ id:"5qap5aO4i9A", duration:620, title:"Dance fitness" },
+      { id:"1kZy2Qf3rR4", duration:490, title:"Strength training" },{ id:"7tXy8Z9aB0", duration:530, title:"Pilates" },
+      { id:"cD4eF5gH6i", duration:470, title:"Tabata" },{ id:"jK7lM8nO9p", duration:580, title:"Kettlebell" },
+      { id:"qR0sT1uV2w", duration:510, title:"Barre" },{ id:"xY3zA4bC5d", duration:540, title:"Bootcamp" },
+      { id:"eF6gH7iJ8k", duration:500, title:"Spin class" },{ id:"lM9nO0pQ1r", duration:560, title:"Zumba" },
+      { id:"sT2uV3wX4y", duration:590, title:"Bodyweight" },{ id:"Z5aB6cD7e", duration:610, title:"Jump rope" }
+    ];
+
+    // ---------- STATE ----------
+    let currentLang = 'en', theme = 'dark';
+    let timerDuration = 60, distractionType = 'random';
+    let textDistractionDuration = 30;
+    let timerInterval = null, animFrame = null;
+    let timeRemaining = 0, totalTime = 0;
+    let resolvedType = null;
+    let videoPool = [], videoTimeout = null;
+    let currentCycleData = null;
+    let lastSegmentIndex = -1;
+    let particles = [];
+
+    const TEXT_TYPES = ['questions','riddles','jokes','movies','popculture'];
+    const VIDEO_TYPES = ['shorts','music','hiddencam','fitness'];
+
+    // ---------- TRANSLATIONS ----------
+    const i18n = {
+      en: {
+        title:"⏳ Distraction Timer", selectTime:"Select Wait Time", distractionDuration:"Text Distraction Length",
+        selectDistraction:"Choose Distraction", startBtn:"▶ Start Timer",
+        questions:"Questions", riddles:"Riddles", jokes:"Jokes", moviesTrivia:"Movies", popCulture:"Pop Culture",
+        shorts:"Shorts", music:"Music", hiddenCam:"Hidden Cam", fitness:"Fitness", visuals:"Visuals", random:"Random",
+        timesUp:"⏰ Time's Up!", skipTitle:"Skip timer", revealLabel:"Reveals soon...",
+        questionPrefix:"Question", sec:"s", min:"m"
+      },
+      bg: {
+        title:"⏳ Таймер за разсейване", selectTime:"Избери време", distractionDuration:"Продължителност на текст",
+        selectDistraction:"Избери разсейване", startBtn:"▶ Старт",
+        questions:"Въпроси", riddles:"Гатанки", jokes:"Вицове", moviesTrivia:"Филми", popCulture:"Поп култура",
+        shorts:"Клипове", music:"Музика", hiddenCam:"Скрита камера", fitness:"Фитнес", visuals:"Визуализации", random:"Случайно",
+        timesUp:"⏰ Времето изтече!", skipTitle:"Пропусни", revealLabel:"Отговор скоро...",
+        questionPrefix:"Въпрос", sec:"с", min:"м"
+      }
+    };
+    function t(key) { return i18n[currentLang][key] || key; }
+
+    // ---------- DOM ----------
+    const setupScreen = document.getElementById('setup-screen');
+    const distractionScreen = document.getElementById('distraction-screen');
+    const progressBar = document.getElementById('progress-bar');
+    const distractionContent = document.getElementById('distraction-content');
+    const timeDisplay = document.getElementById('time-remaining-display');
+    const timesUpOverlay = document.getElementById('times-up-overlay');
+    const startBtn = document.getElementById('start-btn');
+    const skipBtn = document.getElementById('skip-button');
+    const themeToggle = document.getElementById('theme-toggle');
+    const langToggle = document.getElementById('lang-toggle');
+
+    // ---------- THEME & LANG ----------
+    function applyTheme() {
+      if (theme === 'light') document.body.classList.add('light-mode');
+      else document.body.classList.remove('light-mode');
+      themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+    themeToggle.addEventListener('click', ()=>{ theme = theme==='dark'?'light':'dark'; applyTheme(); });
+
+    function updateAllUITexts() {
+      document.getElementById('main-title').textContent = t('title');
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (el.tagName === 'SPAN' && el.parentElement?.classList.contains('option-btn')) el.textContent = t(key);
+        else if (el.id === 'start-btn') el.textContent = t('startBtn');
+        else if (el.classList.contains('times-up-text')) el.textContent = t('timesUp');
+        else if (el.classList.contains('section-label')) el.textContent = t(key);
+      });
+      document.querySelectorAll('#time-options .option-btn').forEach(btn => {
+        const time = parseInt(btn.dataset.time);
+        if(time<60) btn.innerHTML=`🕐 ${time}${t('sec')}`;
+        else if(time===60) btn.innerHTML=`🕐 1${t('min')}`;
+        else btn.innerHTML=`🕐 ${time/60}${t('min')}`;
+      });
+      skipBtn.title = t('skipTitle');
+    }
+    langToggle.addEventListener('click', ()=>{
+      currentLang = currentLang==='en'?'bg':'en';
+      langToggle.textContent = currentLang==='en'?'EN':'BG';
+      updateAllUITexts();
+      if(distractionScreen.classList.contains('active') && TEXT_TYPES.includes(resolvedType)) {
+        const revealLabel = document.querySelector('.reveal-label');
+        if(revealLabel) revealLabel.textContent = t('revealLabel');
+        const qPrefix = document.querySelector('.q-prefix');
+        if(qPrefix) qPrefix.textContent = t('questionPrefix');
+      }
+    });
+
+    // ---------- SETUP LISTENERS ----------
+    document.getElementById('time-options').addEventListener('click', e=>{
+      const btn = e.target.closest('.option-btn'); if(!btn) return;
+      document.querySelectorAll('#time-options .option-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected'); timerDuration = parseInt(btn.dataset.time);
+    });
+    document.getElementById('duration-options').addEventListener('click', e=>{
+      const btn = e.target.closest('.option-btn'); if(!btn) return;
+      document.querySelectorAll('#duration-options .option-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected'); textDistractionDuration = parseInt(btn.dataset.dur);
+    });
+    document.getElementById('distraction-options').addEventListener('click', e=>{
+      const btn = e.target.closest('.option-btn'); if(!btn) return;
+      document.querySelectorAll('#distraction-options .option-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected'); distractionType = btn.dataset.type;
+    });
+    startBtn.addEventListener('click', startDistraction);
+    skipBtn.addEventListener('click', ()=>{ if(timerInterval) endDistraction(true); });
+
+    // ---------- HELPERS ----------
+    function getData() { return currentLang==='bg' ? dataBg : dataEn; }
+    function pickRandom(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function resolveType() {
+      if(distractionType!=='random') return distractionType;
+      const all = [...TEXT_TYPES, ...VIDEO_TYPES, 'visuals'];
+      return all[Math.floor(Math.random()*all.length)];
+    }
+
+    function getVideoPoolForType(type) {
+      if(type==='shorts') return shortVideos;
+      if(type==='music') return musicVideos;
+      if(type==='hiddencam') return hiddenCamVideos;
+      if(type==='fitness') return fitnessVideos;
+      return [];
+    }
+
+    function getNewTextItem(type) {
+      const data = getData();
+      if(type==='questions') return pickRandom(data.questions);
+      if(type==='riddles') return pickRandom(data.riddles);
+      if(type==='jokes') return pickRandom(data.jokes);
+      if(type==='movies') return pickRandom(data.movies);
+      if(type==='popculture') return pickRandom(data.popculture);
+      return null;
+    }
+
+    function renderTextItem(item, type) {
+      distractionContent.innerHTML = '';
+      if(['questions','movies','popculture'].includes(type)) {
+        distractionContent.innerHTML = `
+          <div class="millionaire-container">
+            <div class="millionaire-question-box"><div class="q-prefix">${t('questionPrefix')}</div><div class="q-text">${item.q}</div></div>
+            <div class="millionaire-answers">${item.answers.map((a,i)=>`<div class="millionaire-answer" data-idx="${i}"><span class="ans-letter">${String.fromCharCode(65+i)}</span><span>${a}</span></div>`).join('')}</div>
+          </div>`;
+      } else if(type==='riddles') {
+        distractionContent.innerHTML = `<div class="riddle-joke-container"><p class="main-text">🧩 ${item.riddle}</p><div class="reveal-label">${t('revealLabel')}</div><p class="reveal-text" id="reveal-text">${item.answer}</p></div>`;
+      } else if(type==='jokes') {
+        distractionContent.innerHTML = `<div class="riddle-joke-container"><p class="main-text">😂 ${item.setup}</p><div class="reveal-label">${t('revealLabel')}</div><p class="reveal-text" id="reveal-text">${item.punchline}</p></div>`;
+      }
+    }
+
+    function revealCurrentText(type) {
+      if(['questions','movies','popculture'].includes(type)) {
+        document.querySelectorAll('.millionaire-answer').forEach((el,i)=>{
+          if(i===currentCycleData.correct) el.classList.add('correct-reveal');
+          else el.style.opacity='0.45';
+        });
+      } else if(type==='riddles'||type==='jokes') {
+        const rev = document.getElementById('reveal-text');
+        if(rev && !rev.classList.contains('visible')) rev.classList.add('visible');
+      }
+    }
+
+    function embedVideo(video) {
+      const container = document.getElementById('video-container');
+      if(!container) return;
+      container.innerHTML = `<iframe src="https://www.youtube.com/embed/${video.id}?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1&cc_load_policy=0&playsinline=1" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>`;
+    }
+
+    function scheduleNextVideo() {
+      if(!VIDEO_TYPES.includes(resolvedType) || timeRemaining <= 0) return;
+      if(videoTimeout) clearTimeout(videoTimeout);
+      const nextVideo = pickRandom(videoPool);
+      const delay = Math.min(nextVideo.duration * 1000, timeRemaining * 1000);
+      videoTimeout = setTimeout(() => {
+        if(timeRemaining <= 0) return;
+        embedVideo(nextVideo);
+        scheduleNextVideo();
+      }, delay);
+    }
+
+    // ---------- TIMER & CYCLING ----------
+    function startDistraction() {
+      resolvedType = resolveType();
+      totalTime = timerDuration;
+      timeRemaining = totalTime;
+      lastSegmentIndex = -1;
+      currentCycleData = null;
+      if(videoTimeout) { clearTimeout(videoTimeout); videoTimeout = null; }
+      videoPool = [];
+
+      if(TEXT_TYPES.includes(resolvedType)) {
+        currentCycleData = getNewTextItem(resolvedType);
+        renderTextItem(currentCycleData, resolvedType);
+      } else if(VIDEO_TYPES.includes(resolvedType)) {
+        videoPool = getVideoPoolForType(resolvedType);
+        distractionContent.innerHTML = `<div class="video-wrapper" id="video-container">Loading...</div>`;
+        embedVideo(pickRandom(videoPool));
+        scheduleNextVideo();
+      } else if(resolvedType==='visuals') {
+        distractionContent.innerHTML = `<canvas id="visuals-canvas"></canvas>`;
+        const canvas = document.getElementById('visuals-canvas');
+        if(canvas) { canvas.width = distractionContent.clientWidth; canvas.height = distractionContent.clientHeight; }
+        startVisuals();
+      }
+
+      setupScreen.style.display = 'none';
+      distractionScreen.classList.add('active');
+      progressBar.style.width = '100%';
+      progressBar.classList.remove('warning');
+      timeDisplay.textContent = formatTime(timeRemaining);
+      timesUpOverlay.classList.remove('show');
+
+      const startTime = performance.now();
+      if(timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const elapsed = (performance.now() - startTime)/1000;
+        timeRemaining = Math.max(0, totalTime - elapsed);
+        progressBar.style.width = (timeRemaining/totalTime*100)+'%';
+        if(timeRemaining <= 5) progressBar.classList.add('warning');
+        else progressBar.classList.remove('warning');
+        timeDisplay.textContent = formatTime(timeRemaining);
+
+        if(TEXT_TYPES.includes(resolvedType)) {
+          const elapsedSec = totalTime - timeRemaining;
+          const segmentIndex = Math.floor(elapsedSec / textDistractionDuration);
+          if(segmentIndex !== lastSegmentIndex) {
+            lastSegmentIndex = segmentIndex;
+            currentCycleData = getNewTextItem(resolvedType);
+            renderTextItem(currentCycleData, resolvedType);
+          }
+          const segStart = segmentIndex * textDistractionDuration;
+          const segRemaining = (segStart + textDistractionDuration) - elapsedSec;
+          if(segRemaining <= 5 && segRemaining > 0) revealCurrentText(resolvedType);
+        }
+
+        if(timeRemaining <= 0) endDistraction(false);
+      }, 80);
+    }
+
+    function endDistraction(skipped=false) {
+      if(timerInterval) clearInterval(timerInterval);
+      if(videoTimeout) clearTimeout(videoTimeout);
+      if(animFrame) cancelAnimationFrame(animFrame);
+      timerInterval=null; videoTimeout=null; animFrame=null;
+      progressBar.style.width='0%'; progressBar.classList.remove('warning');
+      timeDisplay.textContent='0:00';
+      timesUpOverlay.querySelector('.times-up-text').textContent = t('timesUp');
+      timesUpOverlay.classList.add('show');
+      setTimeout(()=>{
+        timesUpOverlay.classList.remove('show');
+        distractionScreen.classList.remove('active');
+        distractionContent.innerHTML='';
+        setupScreen.style.display='flex';
+        progressBar.style.width='100%';
+        currentCycleData=null;
+      },1800);
+    }
+
+    function formatTime(sec) {
+      const s = Math.ceil(Math.max(0,sec));
+      return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+    }
+
+    // ---------- VISUALS ----------
+    function startVisuals() {
+      const canvas = document.getElementById('visuals-canvas');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const resize=()=>{ canvas.width = distractionContent.clientWidth; canvas.height = distractionContent.clientHeight; };
+      resize(); window.addEventListener('resize', resize);
+      particles = [];
+      for(let i=0;i<80;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*1.5,vy:(Math.random()-0.5)*1.5,r:Math.random()*3+1,hue:Math.random()*360});
+      function animate(){
+        if(!document.getElementById('visuals-canvas')) return;
+        resize(); ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle='#000a18'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0; if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0; p.hue=(p.hue+0.2)%360; });
+        for(let i=0;i<particles.length;i++) for(let j=i+1;j<particles.length;j++){
+          const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y, dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist<90){ ctx.strokeStyle=`hsla(${particles[i].hue},70%,60%,${0.25*(1-dist/90)})`; ctx.lineWidth=0.6; ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.stroke(); }
+        }
+        particles.forEach(p=>{ ctx.fillStyle=`hsla(${p.hue},80%,65%,0.9)`; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); });
+        animFrame=requestAnimationFrame(animate);
+      }
+      animFrame=requestAnimationFrame(animate);
+    }
+
+    // ---------- INIT ----------
+    applyTheme();
+    updateAllUITexts();
+    langToggle.textContent = 'EN';
+  })();
+</script>
+</body>
+</html>
