@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Планк - Режим Разсейване V2</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --primary: #FF8C00;
+            --primary-gradient: linear-gradient(90deg, #FF8C00, #FF0080);
+            --success: #4CAF50;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 450px;
+            padding: 30px 20px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .menu-grid button {
+            background: #2a2a2a;
+            color: white;
+            border: 2px solid transparent;
+            padding: 20px 10px;
+            border-radius: 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-grid button:hover {
+            border-color: var(--primary);
+            background: #333;
+        }
+        
+        .menu-grid button.full-width {
+            grid-column: span 2;
+            background: var(--primary-gradient);
+            font-weight: bold;
+        }
+
+        .emoji {
+            font-size: 2rem;
+        }
+
+        /* Text Content (Riddles & Jokes) */
+        .text-content-box {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            font-style: italic;
+        }
+
+        .reveal-box {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reveal-box.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-box.success {
+            color: var(--success);
+            transform: scale(1.1);
+        }
+
+        /* Video Container */
+        .video-container {
+            width: 100%;
+            aspect-ratio: 9/16; /* Mobile format for shorts/reels */
+            max-height: 50vh;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            margin: 0 auto;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 10px;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-height: 20px;
+        }
+
+        /* Controls */
+        .back-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--text-muted);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            align-self: center;
+            margin-top: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- SCREEN 1: MENU -->
+        <div id="screen-menu" class="screen active">
+            <h2>Режим "Разсейване" 🧘‍♂️</h2>
+            <p class="subtitle">Избери какво да ангажира мозъка ти през следващите 60 секунди:</p>
+            
+            <div class="menu-grid">
+                <button onclick="startTimer('riddle')">
+                    <span class="emoji">🧩</span>
+                    Гатанка
+                </button>
+                <button onclick="startTimer('joke')">
+                    <span class="emoji">😂</span>
+                    Виц
+                </button>
+                <button onclick="startTimer('hypnotic')">
+                    <span class="emoji">🌀</span>
+                    Oddly Satisfying
+                </button>
+                <button onclick="startTimer('motivation')">
+                    <span class="emoji">🔥</span>
+                    Мотивация
+                </button>
+                <button class="full-width" onclick="startTimer('reels')">
+                    <span class="emoji">📱</span>
+                    60-сек Reels/Shorts
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: TIMER & CONTENT -->
+        <div id="screen-timer" class="screen">
+            
+            <!-- Text based content -->
+            <div id="text-container">
+                <div class="text-content-box" id="text-setup"></div>
+                <div class="reveal-box" id="text-reveal"></div>
+            </div>
+
+            <!-- Video based content -->
+            <div class="video-container" id="video-container">
+                <iframe id="yt-player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            
+            <div class="status-text" id="status">Приготви се...</div>
+            
+            <button class="back-btn" id="back-btn" onclick="resetApp()" style="display:none;">← Избери друго</button>
+        </div>
+
+    </div>
+
+    <script>
+        // ЛОКАЛНА БАЗА ДАННИ
+        const database = {
+            riddles: [
+                { setup: "Има градове, но няма къщи. Има планини, но няма дървета. Има вода, но няма риби. Що е то?", reveal: "ГЕОГРАФСКА КАРТА" },
+                { setup: "Колкото повече вземаш от нея, толкова по-голяма става. Що е то?", reveal: "ДУПКАТА" },
+                { setup: "Върви, а не стъпва. Има легло, а не спи. Има уста, а не говори. Що е то?", reveal: "РЕКАТА" }
+            ],
+            jokes: [
+                { setup: "Защо програмистите бъркат Коледа с Хелоуин?", reveal: "Защото 25 Dec = 31 Oct." },
+                { setup: "Какво казва един сървър на друг в края на работния ден?", reveal: "Аз паднах, да си лягаме!" },
+                { setup: "Отива един охлюв да си купи кола и казва: 'Искам голямо S на капака!'. Защо?", reveal: "За да казват всички: 'Виж как лети тоя охлюв!'" }
+            ],
+            hypnotic: [
+                "1mHQd9D-wTo", // Kinetic Sand
+                "7R1N-8SoqcM", // Satisfying compilation
+                "YJ3Xz5k8r-Q"  // ASMR soap cutting
+            ],
+            motivation: [
+                "wnHW6o8WMas", // David Goggins short
+                "g-jwWYX7Jlo", // Arnold motivation
+                "tbnzAVRZ9Xc"  // Mindset motivation
+            ],
+            reels: [
+                "N9oxmRT2YWw", // 1 min short example
+                "q-37x3R4oK8", // Cooking 1 min
+                "1j2xK3f9o0s"  // Fitness 1 min
+            ]
+        };
+
+        const DURATION = 60; 
+        let timerInterval;
+        let wakeLock = null;
+
+        // Елементи
+        const screenMenu = document.getElementById('screen-menu');
+        const screenTimer = document.getElementById('screen-timer');
+        const textContainer = document.getElementById('text-container');
+        const textSetup = document.getElementById('text-setup');
+        const textReveal = document.getElementById('text-reveal');
+        const videoContainer = document.getElementById('video-container');
+        const ytPlayer = document.getElementById('yt-player');
+        const progressBar = document.getElementById('progress');
+        const statusText = document.getElementById('status');
+        const backBtn = document.getElementById('back-btn');
+
+        // Wake Lock
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('Wake Lock error:', err);
+            }
+        }
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release().then(() => wakeLock = null);
+            }
+        }
+
+        // --- БОНУС: Автоматично дърпане от YouTube (Симулация/API Функция) ---
+        // Тъй като реалното търсене изисква YouTube Data API ключ, който не можем да сложим 
+        // хардкоднат в клиентски код от съображения за сигурност, тук дефинираме функцията.
+        // Ако няма ключ, тя използва нашата богата локална база чрез Fallback.
+        async function fetchYouTubeVideoId(category) {
+            const API_KEY = "YOUR_YOUTUBE_API_KEY"; // Замени с реален ключ при имплементация в бекенд
+            const queries = {
+                hypnotic: "oddly satisfying short",
+                motivation: "1 minute motivation short",
+                reels: "funny 1 minute reel"
+            };
+
+            // Симулиран отговор, ако няма API ключ (ползва локалната база)
+            if (API_KEY === "YOUR_YOUTUBE_API_KEY") {
+                console.log("No API Key: Falling back to local database for category:", category);
+                const categoryArray = database[category];
+                const randomIndex = Math.floor(Math.random() * categoryArray.length);
+                return categoryArray[randomIndex];
+            }
+
+            // РЕАЛНА ЗАЯВКА (ако има ключ):
+            try {
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(queries[category])}&type=video&videoDuration=short&key=${API_KEY}`);
+                const data = await response.json();
+                const items = data.items;
+                const randomItem = items[Math.floor(Math.random() * items.length)];
+                return randomItem.id.videoId;
+            } catch (error) {
+                console.error("YT API Error, falling back...", error);
+                return database[category][0];
+            }
+        }
+
+        async function startTimer(type) {
+            // Смяна на екраните
+            screenMenu.classList.remove('active');
+            screenTimer.classList.add('active');
+            backBtn.style.display = "none";
+            
+            // Ресет на UI
+            progressBar.style.width = '0%';
+            progressBar.style.transition = 'none';
+            textReveal.classList.remove('visible', 'success');
+            textReveal.innerText = "";
+            statusText.innerText = "Фокусирай се...";
+            statusText.style.color = "var(--text-muted)";
+            
+            await requestWakeLock();
+
+            // Зареждане на съдържание според типа
+            if (type === 'riddle' || type === 'joke') {
+                videoContainer.style.display = 'none';
+                textContainer.style.display = 'block';
+                
+                const categoryArray = database[type + 's'];
+                const randomItem = categoryArray[Math.floor(Math.random() * categoryArray.length)];
+                
+                textSetup.innerHTML = randomItem.setup;
+                textReveal.innerText = randomItem.reveal;
+            } else {
+                textContainer.style.display = 'none';
+                videoContainer.style.display = 'block';
+                statusText.innerText = "Гледай и задръж!";
+                
+                // Използваме функцията, която може да дърпа от API (с fallback към локалната DB)
+                const videoId = await fetchYouTubeVideoId(type);
+                // Зареждаме iframe-а (добавяме autoplay, mute=0, и controls=0 за максимално изчистен вид)
+                ytPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&playsinline=1`;
+            }
+
+            // Форсираме reflow за progress bar
+            void progressBar.offsetWidth; 
+            progressBar.style.transition = `width ${DURATION}s linear`;
+            progressBar.style.width = '100%';
+
+            let timeLeft = DURATION;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+
+                // Ако е текст - показваме отговора 5 секунди преди края
+                if (timeLeft === 5 && (type === 'riddle' || type === 'joke')) {
+                    textReveal.classList.add('visible');
+                    statusText.innerText = "Още малко! Дръж!";
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    releaseWakeLock();
+                    
+                    statusText.innerText = "БРАВО! МИНУТАТА ИЗТЕЧЕ!";
+                    statusText.style.color = "var(--success)";
+                    statusText.style.fontWeight = "bold";
+                    
+                    if (type === 'riddle' || type === 'joke') {
+                        textReveal.classList.add('success');
+                    }
+
+                    // Показване на бутона за връщане
+                    setTimeout(() => {
+                        backBtn.style.display = "block";
+                    }, 1500);
+                }
+            }, 1000);
+        }
+
+        function resetApp() {
+            // Спираме видеото
+            ytPlayer.src = "";
+            screenTimer.classList.remove('active');
+            screenMenu.classList.add('active');
+        }
+    </script>
+</body>
+</html>
