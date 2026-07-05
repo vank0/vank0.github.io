@@ -6,17 +6,16 @@
     <title>Distraction Timer</title>
     <style>
         :root {
-            --bg: #0d0d1a;
-            --surface: rgba(255, 255, 255, 0.06);
+            --bg: #0a0a14;
+            --surface: rgba(255, 255, 255, 0.05);
             --surface2: rgba(255, 255, 255, 0.09);
             --text: #f0f0f5;
             --text2: #a0a0b8;
             --accent: #c9a84c;
             --accent2: #e0c874;
-            --danger: #e05555;
-            --border: rgba(255, 255, 255, 0.10);
-            --border2: rgba(255, 255, 255, 0.16);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --border: rgba(255, 255, 255, 0.09);
+            --border2: rgba(255, 255, 255, 0.15);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
             --glass: rgba(255, 255, 255, 0.04);
             --glass2: rgba(255, 255, 255, 0.07);
             --progress-bg: rgba(255, 255, 255, 0.06);
@@ -34,10 +33,9 @@
             --text2: #5a5a7a;
             --accent: #b88630;
             --accent2: #8b5e2b;
-            --danger: #c0392b;
             --border: rgba(0, 0, 0, 0.08);
-            --border2: rgba(0, 0, 0, 0.14);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --border2: rgba(0, 0, 0, 0.13);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
             --glass: rgba(255, 255, 255, 0.5);
             --glass2: rgba(255, 255, 255, 0.7);
             --progress-bg: rgba(0, 0, 0, 0.05);
@@ -65,7 +63,7 @@
         #app {
             width: 100%;
             height: 100%;
-            max-width: 600px;
+            max-width: 620px;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -88,14 +86,14 @@
             box-shadow: var(--shadow);
         }
 
-        /* Setup Screen */
         #setup-screen {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            gap: 12px;
+            padding: 16px 16px 20px;
+            gap: 8px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .setup-top-bar {
             display: flex;
@@ -104,13 +102,13 @@
             padding: 4px 8px;
             flex-shrink: 0;
         }
-        .setup-top-bar .brand {
-            font-size: 1.25rem;
+        .brand {
+            font-size: 1.2rem;
             font-weight: 700;
             letter-spacing: -0.01em;
             color: var(--text);
         }
-        .setup-top-bar .brand span {
+        .brand span {
             color: var(--accent);
         }
         .icon-btn {
@@ -148,75 +146,44 @@
             width: 42px;
         }
 
-        /* Step Indicator */
-        .step-dots {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-shrink: 0;
-            padding: 4px 0;
-        }
-        .step-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--border2);
-            transition: all var(--transition);
-        }
-        .step-dot.active {
-            background: var(--accent);
-            width: 20px;
-            border-radius: 10px;
-        }
-        .step-dot.done {
-            background: var(--accent);
-            opacity: 0.5;
-        }
-
-        /* Wizard Card */
-        #wizard-card {
-            flex: 1;
+        .setup-card {
+            padding: 22px 20px;
             display: flex;
             flex-direction: column;
-            padding: 28px 24px 24px;
             gap: 20px;
-            min-height: 340px;
-            justify-content: center;
-            transition: opacity 0.25s, transform 0.25s;
+            flex-shrink: 0;
         }
-        #wizard-card.fade-out {
-            opacity: 0;
-            transform: translateY(12px);
+        .setup-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .wizard-title {
-            font-size: 1.4rem;
+        .setup-section .section-question {
+            font-size: 1.05rem;
             font-weight: 600;
-            letter-spacing: -0.02em;
-            text-align: center;
+            letter-spacing: -0.01em;
             color: var(--text);
             line-height: 1.3;
         }
-        .wizard-subtitle {
-            font-size: 0.78rem;
+        .setup-section .section-hint {
+            font-size: 0.72rem;
             color: var(--text2);
-            text-align: center;
             letter-spacing: 0.03em;
-            margin-top: -8px;
+            margin-top: -6px;
         }
         .option-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+            gap: 8px;
         }
         .option-btn {
-            padding: 12px 18px;
+            padding: 10px 16px;
             border-radius: var(--btn-radius);
             border: 1px solid var(--border);
             background: var(--surface);
             color: var(--text);
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             letter-spacing: 0.02em;
             transition: all var(--transition);
@@ -224,7 +191,7 @@
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         .option-btn:hover {
             background: var(--surface2);
@@ -236,11 +203,11 @@
             border-color: var(--accent);
             color: var(--accent);
             font-weight: 600;
-            box-shadow: 0 0 20px rgba(200, 150, 50, 0.15);
+            box-shadow: 0 0 20px rgba(200, 150, 50, 0.12);
         }
         .option-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             fill: none;
             stroke: currentColor;
             stroke-width: 2;
@@ -250,25 +217,24 @@
         }
         .category-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
-            width: 100%;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
         }
         .category-btn {
-            padding: 14px 12px;
-            border-radius: 16px;
+            padding: 12px 8px;
+            border-radius: 14px;
             border: 1px solid var(--border);
             background: var(--surface);
             color: var(--text);
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             letter-spacing: 0.02em;
             transition: all var(--transition);
             font-family: var(--font);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             justify-content: center;
             text-align: center;
         }
@@ -282,11 +248,11 @@
             border-color: var(--accent);
             color: var(--accent);
             font-weight: 600;
-            box-shadow: 0 0 24px rgba(200, 150, 50, 0.15);
+            box-shadow: 0 0 24px rgba(200, 150, 50, 0.12);
         }
         .category-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             fill: none;
             stroke: currentColor;
             stroke-width: 2;
@@ -294,14 +260,8 @@
             stroke-linejoin: round;
             flex-shrink: 0;
         }
-        .nav-btns {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .btn-primary {
-            padding: 14px 32px;
+        #start-btn {
+            padding: 15px 32px;
             border-radius: 30px;
             border: none;
             background: linear-gradient(135deg, #c9a84c, #a07828);
@@ -313,31 +273,15 @@
             font-family: var(--font);
             transition: all var(--transition);
             box-shadow: 0 6px 24px rgba(180, 130, 40, 0.3);
+            width: 100%;
+            margin-top: 4px;
         }
-        .btn-primary:hover {
+        #start-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(200, 150, 50, 0.4);
             background: linear-gradient(135deg, #dbb858, #b88630);
         }
-        .btn-secondary {
-            padding: 12px 24px;
-            border-radius: 30px;
-            border: 1px solid var(--border2);
-            background: var(--surface);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            letter-spacing: 0.03em;
-            font-family: var(--font);
-            transition: all var(--transition);
-        }
-        .btn-secondary:hover {
-            background: var(--surface2);
-            border-color: var(--border);
-        }
 
-        /* Distraction Screen */
         #distraction-screen {
             display: none;
             position: fixed;
@@ -435,7 +379,6 @@
             stroke-linejoin: round;
         }
 
-        /* Content styles */
         .text-content-wrap {
             text-align: center;
             padding: 30px 24px;
@@ -443,7 +386,7 @@
             width: 100%;
         }
         .text-content-wrap .main-text {
-            font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+            font-size: clamp(1.1rem, 2.8vw, 1.55rem);
             font-weight: 500;
             color: #eee;
             line-height: 1.5;
@@ -451,7 +394,7 @@
         }
         .text-content-wrap .reveal-text {
             margin-top: 20px;
-            font-size: clamp(0.95rem, 2.2vw, 1.35rem);
+            font-size: clamp(0.95rem, 2.2vw, 1.3rem);
             font-weight: 700;
             color: #e0c874;
             opacity: 0;
@@ -463,7 +406,7 @@
             transform: translateY(0);
         }
         .text-content-wrap .reveal-hint {
-            font-size: 0.68rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: #888;
@@ -488,7 +431,7 @@
             width: 100%;
         }
         .millionaire-qbox .q-label {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             color: #889;
@@ -598,31 +541,34 @@
         @media (max-width: 480px) {
             .category-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
+                gap: 6px;
             }
             .category-btn {
-                padding: 10px 6px;
-                font-size: 0.75rem;
-                gap: 4px;
-                border-radius: 12px;
+                padding: 10px 4px;
+                font-size: 0.72rem;
+                gap: 3px;
+                border-radius: 10px;
             }
             .category-btn svg {
-                width: 16px;
-                height: 16px;
+                width: 15px;
+                height: 15px;
             }
-            .wizard-title {
-                font-size: 1.2rem;
+            .setup-card {
+                padding: 16px 14px;
+                gap: 14px;
+            }
+            .section-question {
+                font-size: 0.95rem !important;
             }
             .option-btn {
-                padding: 10px 14px;
-                font-size: 0.8rem;
+                padding: 8px 12px;
+                font-size: 0.78rem;
             }
         }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- SETUP SCREEN -->
         <div id="setup-screen">
             <div class="setup-top-bar">
                 <div class="brand">Distraction<span>Timer</span></div>
@@ -633,15 +579,25 @@
                     <button class="icon-btn lang-btn" id="lang-toggle">EN</button>
                 </div>
             </div>
-            <div class="step-dots" id="step-dots">
-                <div class="step-dot active"></div>
-                <div class="step-dot"></div>
-                <div class="step-dot"></div>
+            <div class="glass-card2 setup-card" id="setup-card">
+                <div class="setup-section">
+                    <div class="section-question" id="q-time">How long should the timer run?</div>
+                    <div class="section-hint" id="h-time">Pick your total wait duration</div>
+                    <div class="option-row" id="time-options"></div>
+                </div>
+                <div class="setup-section">
+                    <div class="section-question" id="q-refresh">How often should content refresh?</div>
+                    <div class="section-hint" id="h-refresh">For text‑based distractions only</div>
+                    <div class="option-row" id="duration-options"></div>
+                </div>
+                <div class="setup-section">
+                    <div class="section-question" id="q-cat">What would you like to do?</div>
+                    <div class="section-hint" id="h-cat">Choose your distraction category</div>
+                    <div class="category-grid" id="category-options"></div>
+                </div>
+                <button id="start-btn">Start Timer</button>
             </div>
-            <div class="glass-card2" id="wizard-card"></div>
-            <div class="nav-btns" id="nav-btns"></div>
         </div>
-        <!-- DISTRACTION SCREEN -->
         <div id="distraction-screen">
             <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
             <div id="time-badge"></div>
@@ -653,11 +609,209 @@
 
     <script>
         (() => {
-            // ─────────────────── DATA ───────────────────
+            // ─────────────────── VIDEO DATABASE ───────────────────
+            const shortVideos = [
+                { id: "uNDxxAm86W4", duration: 15, title: "Funny Monday Motivation" }, { id: "6ELDZo099VE",
+                    duration: 22, title: "1900s is Crazy" }, { id: "_hU58WCIRMI", duration: 18,
+                    title: "Zverev is Everywhere" }, { id: "SW3dCqRvFqQ", duration: 45, title: "A True Artist" },
+                { id: "xrHUyeYdz9E", duration: 30, title: "Spot On Football" }, { id: "lDWH1Ac1bvU", duration: 58,
+                    title: "Insane Magic Trick" }, { id: "N9U5sR2VBjU", duration: 55, title: "URL Basics Short" },
+                { id: "hFooouyUhO8", duration: 38, title: "Why Wear an Apron" }, { id: "jNQXAC9IVRw", duration: 19,
+                    title: "Me at the zoo" }, { id: "_OBlgSz8sSM", duration: 56, title: "Charlie bit my finger" },
+                { id: "txqiwrbYGrs", duration: 118, title: "David After Dentist" }, { id: "OQSNhk5ICTI",
+                    duration: 210, title: "Double Rainbow" }, { id: "k85mRPqvMbE", duration: 172,
+                    title: "Crazy Frog" }, { id: "KmtzQCSh6xk", duration: 54, title: "Keyboard Cat" },
+                { id: "FzRH3iTQPrk", duration: 17, title: "Sneezing Panda" }, { id: "a1Y73sPHKxw", duration: 5,
+                    title: "Dramatic Chipmunk" }, { id: "wZZ7oFKsKzY", duration: 216, title: "Nyan Cat" },
+                { id: "QH2-TGUlwu4", duration: 216, title: "Nyan Cat Original" }, { id: "9C_HReR_McQ", duration: 45,
+                    title: "Hide and Seek Funny" }, { id: "Z19zFlPah-o", duration: 35, title: "Funny Cat Video" },
+                { id: "5dsGWM5XGdg", duration: 22, title: "Cat Jump Fail" }, { id: "tntOCGkgt98", duration: 48,
+                    title: "Keyboard Cat Reborn" }, { id: "nGeKSiCQkPw", duration: 129,
+                title: "Talking Twin Babies" }, { id: "AWtCittJyr0", duration: 44,
+                    title: "Ain't Nobody Got Time" }, { id: "bFEoMO0pc7k", duration: 12,
+                title: "Moth on screen" }, { id: "L_jWHffIx5E", duration: 200, title: "All Star Meme" },
+                { id: "J---aiyznGQ", duration: 31, title: "Keyboard Cat 2" }, { id: "dQw4w9WgXcQ", duration: 212,
+                    title: "Rickroll Prank Short" }, { id: "0Bmhjf0rKe8", duration: 17, title: "Surprised Kitty" },
+                { id: "qnydFmqHuVo", duration: 23, title: "Puppy yawns" }, { id: "YQHsXMglC9A", duration: 59,
+                    title: "Hello Meme Clip" }, { id: "JGwWNGJdvx8", duration: 60, title: "Shape of You snippet" },
+                { id: "fRh_vgS2dFE", duration: 45, title: "Sorry Dance clip" }, { id: "09R8_2nJtjg", duration: 55,
+                    title: "Sugar Wedding Crash" }, { id: "hT_nvWreIhg", duration: 40,
+                    title: "Counting Stars Hook" }, { id: "nfWlot6h_JM", duration: 35,
+                    title: "Shake It Off loop" }, { id: "e-ORhEE9VVg", duration: 50, title: "Blank Space edit" },
+                { id: "pRpeEdMmmQ0", duration: 55, title: "Waka Waka Dance" }, { id: "2vjPBrBU-TM", duration: 60,
+                    title: "Chandelier routine" }, { id: "kffacxfA7G4", duration: 45,
+                title: "Baby hook snippet" }, { id: "rYEDA3JcQqw", duration: 50,
+                    title: "Rolling in the Deep chorus" }, { id: "t4H_Zoh7G5A", duration: 40,
+                    title: "On The Floor dance" }, { id: "lY2yjAdbvdQ", duration: 35,
+                    title: "Treat You Better snip" }, { id: "7PCkvCPvDXk", duration: 40,
+                    title: "All About That Bass drop" }, { id: "450p7goxZqg", duration: 45,
+                title: "All of Me hook" }, { id: "IcrbM1l_BoI", duration: 50, title: "Wake Me Up drop" },
+                { id: "DK_0jXPuIr0", duration: 35, title: "What Do You Mean loop" }, { id: "rtOvBOTyX00",
+                    duration: 55, title: "A Thousand Years clip" }, { id: "34Na4j8HLjc", duration: 40,
+                    title: "Starboy chorus" }, { id: "YBHQbu5rbdQ", duration: 30, title: "Worth It sax hook" },
+            ];
+            const musicVideos = [
+                { id: "kJQP7kiw5Fk", duration: 281, title: "Luis Fonsi - Despacito" }, { id: "JGwWNGJdvx8",
+                    duration: 263, title: "Ed Sheeran - Shape of You" }, { id: "RgKAFK5djSk", duration: 237,
+                    title: "Wiz Khalifa - See You Again" }, { id: "OPf0YbXqDm0", duration: 270,
+                    title: "Mark Ronson - Uptown Funk" }, { id: "9bZkp7q19f0", duration: 252,
+                    title: "PSY - GANGNAM STYLE" }, { id: "09R8_2nJtjg", duration: 301,
+                title: "Maroon 5 - Sugar" }, { id: "CevxZvSJLk8", duration: 269,
+                title: "Katy Perry - Roar" }, { id: "hT_nvWreIhg", duration: 283,
+                    title: "OneRepublic - Counting Stars" }, { id: "fRh_vgS2dFE", duration: 205,
+                    title: "Justin Bieber - Sorry" }, { id: "lp-EO5I60KA", duration: 296,
+                    title: "Ed Sheeran - Thinking Out Loud" }, { id: "0KSOMA3QBU0", duration: 224,
+                    title: "Katy Perry - Dark Horse" }, { id: "60ItHLz5WEA", duration: 212,
+                    title: "Alan Walker - Faded" }, { id: "YqeW9_5kURI", duration: 176,
+                    title: "Major Lazer - Lean On" }, { id: "nfWlot6h_JM", duration: 241,
+                    title: "Taylor Swift - Shake It Off" }, { id: "e-ORhEE9VVg", duration: 272,
+                    title: "Taylor Swift - Blank Space" }, { id: "pRpeEdMmmQ0", duration: 210,
+                    title: "Shakira - Waka Waka" }, { id: "wnJ6LuUFpMo", duration: 185,
+                    title: "J Balvin - Mi Gente" }, { id: "YQHsXMglC9A", duration: 366,
+                title: "Adele - Hello" }, { id: "2vjPBrBU-TM", duration: 231,
+                title: "Sia - Chandelier" }, { id: "kffacxfA7G4", duration: 225,
+                title: "Justin Bieber - Baby" }, { id: "5GL9JoH4Sws", duration: 219,
+                    title: "Fifth Harmony - Work from Home" }, { id: "uelHwf8o7_U", duration: 266,
+                    title: "Eminem - Love The Way You Lie" }, { id: "kOkQ4T5OEQs", duration: 240,
+                    title: "Calvin Harris - This Is What You Came For" }, { id: "7wtfhZwyrcc", duration: 216,
+                    title: "Imagine Dragons - Believer" }, { id: "rYEDA3JcQqw", duration: 233,
+                    title: "Adele - Rolling in the Deep" }, { id: "t4H_Zoh7G5A", duration: 266,
+                    title: "Jennifer Lopez - On The Floor" }, { id: "lY2yjAdbvdQ", duration: 256,
+                    title: "Shawn Mendes - Treat You Better" }, { id: "7PCkvCPvDXk", duration: 194,
+                    title: "Meghan Trainor - All About That Bass" }, { id: "450p7goxZqg", duration: 307,
+                    title: "John Legend - All of Me" }, { id: "IcrbM1l_BoI", duration: 272,
+                    title: "Avicii - Wake Me Up" }, { id: "DK_0jXPuIr0", duration: 207,
+                    title: "Justin Bieber - What Do You Mean?" }, { id: "rtOvBOTyX00", duration: 287,
+                    title: "Christina Perri - A Thousand Years" }, { id: "34Na4j8HLjc", duration: 273,
+                    title: "The Weeknd - Starboy" }, { id: "YBHQbu5rbdQ", duration: 255,
+                    title: "Fifth Harmony - Worth It" }, { id: "PMivT7MJ41M", duration: 210,
+                    title: "Bruno Mars - That's What I Like" }, { id: "lWA2pjMjpBs", duration: 283,
+                    title: "Rihanna - Diamonds" }, { id: "l0U7CbUUct8", duration: 335,
+                    title: "Future - Life Is Good" }, { id: "SXiSVQZLje8", duration: 238,
+                    title: "Ariana Grande - Side To Side" }, { id: "8UVNT4wvIGY", duration: 243,
+                    title: "Gotye - Somebody That I Used To Know" }, { id: "8SbUC-UaAxE", duration: 556,
+                    title: "Guns N' Roses - November Rain" }, { id: "djV11Xbc914", duration: 243,
+                    title: "a-ha - Take On Me" }, { id: "hTWKbfoikeg", duration: 278,
+                    title: "Nirvana - Smells Like Teen Spirit" }, { id: "1w7OgIMMRc4", duration: 302,
+                    title: "Guns N' Roses - Sweet Child O' Mine" }, { id: "Zi_XLOBDo_Y", duration: 295,
+                    title: "Michael Jackson - Billie Jean" }, { id: "sOnqjkJTMaA", duration: 822,
+                    title: "Michael Jackson - Thriller" }, { id: "fJ9rUzIMcZQ", duration: 359,
+                    title: "Queen - Bohemian Rhapsody" }, { id: "kXYiU_JCYtU", duration: 186,
+                    title: "Linkin Park - Numb" }, { id: "eVTXPUF4Oz4", duration: 216,
+                    title: "Linkin Park - In The End" }, { id: "CSvFpBOe8eY", duration: 206,
+                    title: "System Of A Down - Chop Suey!" }, { id: "ktvTqknDobU", duration: 261,
+                    title: "Imagine Dragons - Radioactive" },
+            ];
+            const hiddenCamVideos = [
+                { id: "Cm3T1lAxy4s", duration: 605, title: "Our Stupidest Pranks | JFL Gags" },
+                { id: "h9tea8FLde0", duration: 580, title: "Pranks That Went Too Far" }, { id: "Wx7Y27Gp-_A",
+                    duration: 321, title: "Biggest Scare Prank Ever" }, { id: "TUC6xK7QySg", duration: 480,
+                    title: "Pranks that Backfired" }, { id: "n5vGKJCJEcA", duration: 940,
+                    title: "1,000 Pranks in 24 Hours" }, { id: "3Q5dFeucPVc", duration: 602,
+                    title: "12 Funny Pranks Compilation" }, { id: "zazlbczbBj4", duration: 550,
+                    title: "Best Pranks of the Week" }, { id: "FbN7aKYrtgk", duration: 620,
+                    title: "The Best Pranks of 2021" }, { id: "xeMUls8r64o", duration: 435,
+                    title: "April Fools Scares" }, { id: "cZNGtgAEwas", duration: 510,
+                    title: "New 2026 Funniest Prank Compilation" }, { id: "_-d9aucC914", duration: 700,
+                    title: "Best Crazy Pranks Ever" }, { id: "6ZfuNTqbHE8", duration: 145,
+                    title: "Public Scare Hidden Cam" }, { id: "TcMBFSGVi1c", duration: 142,
+                    title: "Crazy Reaction Hidden Prank" }, { id: "sGbxmsDFVnE", duration: 120,
+                    title: "Jumping out of trash can prank" }, { id: "rt-2crZzQZA", duration: 178,
+                    title: "Spider Prank Gone Wrong" }, { id: "mqqft2x_Aa4", duration: 160,
+                    title: "Scary Costume Hidden Cam" }, { id: "YoHD9XEInc0", duration: 140,
+                    title: "Mind Bending Street Magic Prank" }, { id: "zSWdZVtXT7E", duration: 155,
+                    title: "Space Alien Encounter Prank" }, { id: "zAGVQLHvwOY", duration: 144,
+                    title: "Creepy Clown Street Prank" }, { id: "9ix7TUGVYIo", duration: 170,
+                    title: "Matrix Glitch Public Prank" }, { id: "n9xhKv0xLw0", duration: 180,
+                    title: "Sandworm Beach Prank" }, { id: "XqZsoesa55w", duration: 136,
+                    title: "Shark Attack Beach Prank" }, { id: "e_04ZrNroTo", duration: 150,
+                    title: "Bus Driver Pranks Passengers" }, { id: "F4tHL8reNCs", duration: 110,
+                    title: "Dad Catching Son Sneaking Snacks" }, { id: "WRVsOCh907o", duration: 130,
+                    title: "Bathtub Overflow Prank" }, { id: "v7AYKMP6rOE", duration: 1200,
+                    title: "Yoga Instructor Fails Prank" }, { id: "j7rKKpwdXjc", duration: 600,
+                    title: "Classroom Ghost Prank" }, { id: "hJbRpHZr_d0", duration: 900,
+                    title: "Stressful Interview Prank" }, { id: "4pKly2JojMw", duration: 750,
+                    title: "Waking Up Roommate Airhorn" }, { id: "EwQkfoKxRvo", duration: 800,
+                    title: "Gym Stereotypes Prank" }, { id: "8EnylqXLAI8", duration: 400,
+                    title: "Fake Treadmill Speed Prank" }, { id: "2pLT-olgUJs", duration: 650,
+                    title: "Instant Muscle Suit Prank" }, { id: "2MoGxae-zyo", duration: 700,
+                    title: "Water Bottle Squeeze Prank" }, { id: "1919eTCoESo", duration: 600,
+                    title: "Fake Sweat Prank" }, { id: "cZnsLVArIt8", duration: 450,
+                    title: "Hot Pepper in Food Prank" }, { id: "4nPKyvKmFi0", duration: 1800,
+                    title: "Gym Equipment Malfunction Prank" }, { id: "ml6cT4AZdqI", duration: 1800,
+                    title: "Trainer Yells at Client Prank" }, { id: "wa0Jtlh3J2s", duration: 900,
+                    title: "Fake Health Inspector Prank" }, { id: "u-G7oOVTyx8", duration: 2400,
+                    title: "Statue Comes to Life Prank" }, { id: "2eC7TlC2NLs", duration: 1800,
+                    title: "Fake Dog Poop Prank" }, { id: "223czWgGnQg", duration: 600,
+                    title: "Doctor Gives Bad News Prank" }, { id: "vc1E5CfRfos", duration: 900,
+                    title: "Home Intruder Scare Prank" }, { id: "_rSW3GikiKs", duration: 420,
+                    title: "Fake Bug on Screen Prank" }, { id: "wZZ7oFKsKzY", duration: 216,
+                    title: "Flying Cat Prank" }, { id: "QH2-TGUlwu4", duration: 216,
+                title: "Rainbow Paint Prank" }, { id: "9C_HReR_McQ", duration: 45,
+                    title: "Scary Maze Game Reaction" }, { id: "Z19zFlPah-o", duration: 35,
+                    title: "Fake Spider Drop Prank" }, { id: "5dsGWM5XGdg", duration: 22,
+                    title: "Pie in the Face Prank" }, { id: "tntOCGkgt98", duration: 48,
+                    title: "Piano Surprise Prank" }, { id: "nGeKSiCQkPw", duration: 129,
+                    title: "Talking Mirrors Prank" },
+            ];
+            const fitnessVideos = [
+                { id: "4nPKyvKmFi0", duration: 1800, title: "30 Min Intense HIIT Workout" }, { id: "ml6cT4AZdqI",
+                    duration: 1800, title: "30-Minute HIIT Cardio Workout" }, { id: "wa0Jtlh3J2s", duration: 900,
+                    title: "Introduction to HIIT" }, { id: "u-G7oOVTyx8", duration: 2400,
+                    title: "40 Min Full Body Yoga Routine" }, { id: "2eC7TlC2NLs", duration: 1800,
+                    title: "30 Min Daily Yoga Flow" }, { id: "223czWgGnQg", duration: 600,
+                    title: "The BEST exercise for your heart" }, { id: "vc1E5CfRfos", duration: 900,
+                    title: "The PERFECT Home Workout" }, { id: "_rSW3GikiKs", duration: 420,
+                    title: "Full Body workout at Home - 7 minutes" }, { id: "v7AYKMP6rOE", duration: 1200,
+                    title: "Yoga For Complete Beginners" }, { id: "j7rKKpwdXjc", duration: 600,
+                    title: "10 Minute Yoga For Beginners" }, { id: "hJbRpHZr_d0", duration: 1500,
+                    title: "Yoga for Anxiety and Stress" }, { id: "4pKly2JojMw", duration: 900,
+                    title: "Morning Yoga Workout" }, { id: "EwQkfoKxRvo", duration: 600,
+                    title: "Victoria Secret Model Ab Workout" }, { id: "8EnylqXLAI8", duration: 300,
+                    title: "Fat Burning Cardio Warmup" }, { id: "2pLT-olgUJs", duration: 660,
+                    title: "Get Abs in 2 WEEKS" }, { id: "2MoGxae-zyo", duration: 800,
+                    title: "Do This Everyday To Lose Weight" }, { id: "1919eTCoESo", duration: 600,
+                    title: "10 Minute Abs Workout" }, { id: "cZnsLVArIt8", duration: 900,
+                    title: "Fat Burning HIIT Cardio" }, { id: "6ZfuNTqbHE8", duration: 145,
+                    title: "Avengers Superhero Workout" }, { id: "TcMBFSGVi1c", duration: 142,
+                    title: "Endgame Fitness Challenge" }, { id: "sGbxmsDFVnE", duration: 120,
+                    title: "Jedi Lightsaber Cardio" }, { id: "rt-2crZzQZA", duration: 178,
+                    title: "Spider-Man Agility Training" }, { id: "mqqft2x_Aa4", duration: 160,
+                    title: "Batman Strength Conditioning" }, { id: "YoHD9XEInc0", duration: 140,
+                    title: "Inception Core Routine" }, { id: "zSWdZVtXT7E", duration: 155,
+                    title: "Zero Gravity Yoga" }, { id: "zAGVQLHvwOY", duration: 144,
+                    title: "Stair Dance Cardio" }, { id: "9ix7TUGVYIo", duration: 170,
+                    title: "Martial Arts Warmup" }, { id: "n9xhKv0xLw0", duration: 180,
+                    title: "Desert Dune Sprints" }, { id: "XqZsoesa55w", duration: 136,
+                    title: "Kids Dance Fitness" }, { id: "e_04ZrNroTo", duration: 150,
+                    title: "Nursery Rhyme Zumba" }, { id: "F4tHL8reNCs", duration: 110,
+                    title: "Toddler Aerobics" }, { id: "WRVsOCh907o", duration: 130,
+                    title: "Water Resistance Exercises" }, { id: "kJQP7kiw5Fk", duration: 281,
+                    title: "Despacito Latin Dance Workout" }, { id: "JGwWNGJdvx8", duration: 263,
+                    title: "Shape of You Boxing Routine" }, { id: "RgKAFK5djSk", duration: 237,
+                    title: "See You Again Cool Down Stretch" }, { id: "OPf0YbXqDm0", duration: 270,
+                    title: "Uptown Funk Hip Hop Aerobics" }, { id: "9bZkp7q19f0", duration: 252,
+                    title: "Gangnam Style Horse Dance Cardio" }, { id: "09R8_2nJtjg", duration: 301,
+                    title: "Sugar Wedding Dance Prep" }, { id: "CevxZvSJLk8", duration: 269,
+                    title: "Roar Jungle Bootcamp" }, { id: "hT_nvWreIhg", duration: 283,
+                    title: "Counting Stars High Tempo Run" }, { id: "fRh_vgS2dFE", duration: 205,
+                    title: "Sorry Reggaeton Dance Workout" }, { id: "lp-EO5I60KA", duration: 296,
+                    title: "Thinking Out Loud Partner Yoga" }, { id: "0KSOMA3QBU0", duration: 224,
+                    title: "Dark Horse Core Power" }, { id: "60ItHLz5WEA", duration: 212,
+                    title: "Faded Meditation & Flexibility" }, { id: "YqeW9_5kURI", duration: 176,
+                    title: "Lean On Bollywood Fitness" }, { id: "nfWlot6h_JM", duration: 241,
+                    title: "Shake It Off Cheer Cardio" }, { id: "e-ORhEE9VVg", duration: 272,
+                    title: "Blank Space Mansion Walk" }, { id: "pRpeEdMmmQ0", duration: 210,
+                    title: "Waka Waka African Dance Fitness" }, { id: "wnJ6LuUFpMo", duration: 185,
+                    title: "Mi Gente Zumba Class" }, { id: "YQHsXMglC9A", duration: 366,
+                    title: "Hello Deep Breathing Exercises" },
+            ];
+
+            // ─────────────────── TEXT DATA (language‑independent riddles/jokes) ───────────────────
             const dataEn = {
                 questions: [
                     { q: "What is the capital of France?", answers: ["London", "Paris", "Berlin", "Madrid"],
-                    correct: 1 },
+                        correct: 1 },
                     { q: "Which planet is known as the Red Planet?", answers: ["Venus", "Jupiter", "Mars",
                             "Saturn"
                         ], correct: 2 },
@@ -687,15 +841,6 @@
                         ], correct: 1 },
                     { q: "What currency is used in Japan?", answers: ["Won", "Yuan", "Yen", "Ringgit"],
                         correct: 2 },
-                    { q: "What gas do plants absorb?", answers: ["O2", "N2", "CO2", "H2"], correct: 2 },
-                    { q: "What is the largest mammal?", answers: ["Elephant", "Blue Whale", "Giraffe",
-                        "Hippo"], correct: 1 },
-                    { q: "How many sides does a hexagon have?", answers: ["5", "6", "7", "8"], correct: 1 },
-                    { q: "Who discovered penicillin?", answers: ["Fleming", "Pasteur", "Koch", "Jenner"],
-                        correct: 0 },
-                    { q: "What is the speed of light approximately?", answers: ["300,000 km/s",
-                            "150,000 km/s", "450,000 km/s", "600,000 km/s"
-                        ], correct: 0 },
                 ],
                 riddles: [
                     { riddle: "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
@@ -706,18 +851,17 @@
                     { riddle: "What has a head and a tail but no body?", answer: "A coin" },
                     { riddle: "I'm tall when I'm young and short when I'm old. What am I?", answer: "A candle" },
                     { riddle: "What gets wetter the more it dries?", answer: "A towel" },
-                    { riddle: "I have keys but no locks. I have space but no room. You can enter but can't go inside. What am I?",
-                        answer: "A keyboard" },
+                    { riddle: "I have keys but no locks. I have space but no room. What am I?",
+                    answer: "A keyboard" },
                     { riddle: "What can travel around the world while staying in a corner?", answer: "A stamp" },
                     { riddle: "I follow you all day long but disappear at night. What am I?",
                     answer: "Your shadow" },
                     { riddle: "What has a neck but no head?", answer: "A bottle" },
                     { riddle: "The more you have of me, the less you see. What am I?", answer: "Darkness" },
                     { riddle: "What can be broken but never held?", answer: "A promise" },
-                    { riddle: "I have branches but no fruit, trunk but no bark, leaves but no green. What am I?",
-                        answer: "A bank" },
                     { riddle: "What goes up but never comes down?", answer: "Your age" },
                     { riddle: "I'm full of holes but still hold water. What am I?", answer: "A sponge" },
+                    { riddle: "What is always in front of you but can't be seen?", answer: "The future" },
                 ],
                 jokes: [
                     { setup: "Why don't scientists trust atoms?", punchline: "Because they make up everything!" },
@@ -734,9 +878,8 @@
                     { setup: "Why did the math book look sad?", punchline: "It had too many problems." },
                     { setup: "What do you call a pig that does karate?", punchline: "A pork chop." },
                     { setup: "Why did the coffee file a police report?", punchline: "It got mugged." },
-                    { setup: "What do you call a can opener that doesn't work?",
-                    punchline: "A can't opener." },
                     { setup: "How does a penguin build its house?", punchline: "Igloos it together." },
+                    { setup: "Why did the tomato turn red?", punchline: "Because it saw the salad dressing." },
                 ],
                 movies: [
                     { q: "Which film won Best Picture in 1994?", answers: ["Pulp Fiction", "Forrest Gump",
@@ -764,12 +907,6 @@
                         ], correct: 0 },
                     { q: "In Titanic, what is the jewel called?", answers: ["Heart of the Ocean",
                             "Neptune's Eye", "Blue Diamond", "Star of the Sea"
-                        ], correct: 0 },
-                    { q: "Who played Iron Man?", answers: ["Chris Evans", "Robert Downey Jr.",
-                            "Chris Hemsworth", "Mark Ruffalo"
-                        ], correct: 1 },
-                    { q: "Which film features a boy who sees dead people?", answers: ["The Sixth Sense",
-                            "Signs", "Unbreakable", "Split"
                         ], correct: 0 },
                 ],
                 popculture: [
@@ -829,6 +966,18 @@
                         answer: "Карта" },
                     { riddle: "Какво има глава и опашка, но няма тяло?", answer: "Монета" },
                     { riddle: "Висока съм когато съм млада, ниска когато остарея. Какво съм?", answer: "Свещ" },
+                    { riddle: "Какво става по-мокро като съхне?", answer: "Кърпа" },
+                    { riddle: "Имам клавиши без ключалки, пространство без стая. Какво съм?",
+                    answer: "Клавиатура" },
+                    { riddle: "Какво пътува по света, стоящо в ъгъл?", answer: "Марка" },
+                    { riddle: "Следвам те цял ден, изчезвам нощем. Какво съм?", answer: "Сянката" },
+                    { riddle: "Какво има врат без глава?", answer: "Бутилка" },
+                    { riddle: "Колкото повече имаш от мен, толкова по-малко виждаш. Какво съм?",
+                        answer: "Тъмнина" },
+                    { riddle: "Какво може да бъде счупено, но никога държано?", answer: "Обещание" },
+                    { riddle: "Какво се качва нагоре, но никога не слиза?", answer: "Възрастта" },
+                    { riddle: "Пълна съм с дупки, но задържам вода. Какво съм?", answer: "Гъба" },
+                    { riddle: "Какво винаги е пред теб, но не можеш да го видиш?", answer: "Бъдещето" },
                 ],
                 jokes: [
                     { setup: "Защо учените не вярват на атомите?", punchline: "Защото те съставят всичко!" },
@@ -837,6 +986,16 @@
                     punchline: "Беше изключително в полето си!" },
                     { setup: "Какво казва мечката без зъби?", punchline: "Мече с дъвка!" },
                     { setup: "Защо яйцата не разказват вицове?", punchline: "Ще се спукат от смях!" },
+                    { setup: "Какво каза океанът на плажа?", punchline: "Нищо, само махна." },
+                    { setup: "Защо колелото падна?", punchline: "Беше двуизморено." },
+                    { setup: "Какво казва сиренето, което не е твое?", punchline: "Не е твое сирене." },
+                    { setup: "Защо леопардът не може да се скрие?", punchline: "Защото винаги е на петна." },
+                    { setup: "Коя е най-нелюбимата стая на скелета?", punchline: "Дневната." },
+                    { setup: "Защо учебникът по математика беше тъжен?", punchline: "Имаше твърде много задачи." },
+                    { setup: "Какво казва прасето, което тренира карате?", punchline: "Свински котлет." },
+                    { setup: "Защо кафето подаде сигнал в полицията?", punchline: "Беше ограбено." },
+                    { setup: "Как пингвинът строи къщата си?", punchline: "С иглу." },
+                    { setup: "Защо доматът се изчерви?", punchline: "Защото видя дресинга за салата." },
                 ],
                 movies: [
                     { q: "Кой филм печели Оскар 1994?", answers: ["Криминале", "Форест Гъмп",
@@ -846,6 +1005,12 @@
                         correct: 0 },
                     { q: "В Матрицата Нео взима...", answers: ["Синьо", "Червено", "Зелено", "Жълто"],
                     correct: 1 },
+                    { q: "Фродо от Властелинът?", answers: ["Торбинс", "Грабове", "Брендифут", "Тук"],
+                    correct: 0 },
+                    { q: "Олаф от кой филм?", answers: ["Рапунцел", "Замръзнало", "Моана", "Храбро"],
+                    correct: 1 },
+                    { q: "Жокера 2008 играе...", answers: ["Леджър", "Никълсън", "Лето", "Финикс"], correct: 0 },
+                    { q: "Нека Силата бъде...", answers: ["силна", "с теб", "вечна", "вътре"], correct: 1 },
                 ],
                 popculture: [
                     { q: "Кой издава Thriller?", answers: ["Принс", "Майкъл Джексън", "Мадона", "Уитни"],
@@ -853,132 +1018,40 @@
                     { q: "Първи iPhone година?", answers: ["2005", "2006", "2007", "2008"], correct: 2 },
                     { q: "Приложение с призрак?", answers: ["Snapchat", "Instagram", "TikTok", "Twitter"],
                         correct: 0 },
+                    { q: "Кралица на попа?", answers: ["Гага", "Мадона", "Бионсе", "Риана"], correct: 1 },
+                    { q: "Професия на Марио?", answers: ["Водопроводчик", "Дърводелец", "Електрик",
+                        "Бояджия"], correct: 0 },
+                    { q: "Дракони в...", answers: ["Вещерът", "Игра на тронове", "Властелинът",
+                        "Хари Потър"], correct: 1 },
                 ],
             };
-
-            const shortVideos = [
-                { id: "m9a12c45g7A", duration: 45, title: "Funny Cat Fails" },
-                { id: "bB3c4d5e6fG", duration: 30, title: "Insane Parkour Trick" },
-                { id: "xY8z9A1b2cD", duration: 55, title: "Quick Magic Trick" },
-                { id: "eF3g4H5i6jK", duration: 60, title: "Satisfying Paint Mixing" },
-                { id: "lM7n8O9p0qR", duration: 58, title: "1 Minute Recipe" },
-                { id: "sT1u2V3w4xY", duration: 15, title: "Dog vs Lemon" }, { id: "zA5b6C7d8eF", duration: 40,
-                    title: "DIY Room Decor Short" },
-                { id: "gH9i0J1k2lM", duration: 30, title: "Guitar Riff in 30 Seconds" },
-                { id: "nO3p4Q5r6sT", duration: 59, title: "Comedy Sketch - Work Life" },
-                { id: "uV7w8X9y0zA", duration: 45, title: "Street Art Time Lapse" },
-                { id: "B1c2D3e4F5g", duration: 20, title: "Skateboard Kickflip Slowmo" },
-                { id: "H6i7J8k9L0m", duration: 25, title: "Amazing Basketball Trick Shot" },
-                { id: "N1o2P3q4R5s", duration: 50, title: "Morning Routine Short" },
-                { id: "T6u7V8w9X0y", duration: 60, title: "Origami Paper Crane" },
-                { id: "Z1a2B3c4D5e", duration: 10, title: "Cute Puppy Yawning" },
-                { id: "F6g7H8i9J0k", duration: 45, title: "Beatboxing Skill" },
-                { id: "L1m2N3o4P5q", duration: 55, title: "Quick Hair Tutorial" },
-                { id: "R6s7T8u9V0w", duration: 15, title: "Outfit Transition" },
-                { id: "X1y2Z3a4B5c", duration: 35, title: "Oddly Satisfying Kinetic Sand" },
-                { id: "D6e7F8g9H0i", duration: 20, title: "Funny Dad Joke" },
-            ];
-            const musicVideos = [
-                { id: "dQw4w9WgXcQ", duration: 212, title: "Rick Astley - Never Gonna Give You Up" },
-                { id: "9bZkp7q19f0", duration: 252, title: "PSY - GANGNAM STYLE" },
-                { id: "kJQP7kiw5Fk", duration: 281, title: "Luis Fonsi - Despacito" },
-                { id: "JGwWNGJdvx8", duration: 263, title: "Ed Sheeran - Shape of You" },
-                { id: "rgXXGvQf3nI", duration: 237, title: "Wiz Khalifa - See You Again" },
-                { id: "fRh_vgS2dFE", duration: 205, title: "Justin Bieber - Sorry" },
-                { id: "YQHsXMglC9A", duration: 366, title: "Adele - Hello" },
-                { id: "09R8_2nJtjg", duration: 301, title: "Maroon 5 - Sugar" },
-                { id: "CevxZvSJLk8", duration: 269, title: "Katy Perry - Roar" },
-                { id: "pB-5XG-DbAA", duration: 296, title: "Ed Sheeran - Thinking Out Loud" },
-                { id: "e-ORhEE9VVg", duration: 272, title: "Taylor Swift - Blank Space" },
-                { id: "Amq-qlqSNyw", duration: 260, title: "The Weeknd - Blinding Lights" },
-                { id: "VPRjCeoBqrI", duration: 253, title: "Coldplay - A Sky Full Of Stars" },
-                { id: "kffacxfA7G4", duration: 225, title: "Justin Bieber - Baby" },
-                { id: "lp-EO5I60KA", duration: 279, title: "Ed Sheeran - Perfect" },
-                { id: "OPf0YbXqDm0", duration: 270, title: "Mark Ronson - Uptown Funk" },
-                { id: "hT_nvWreIhg", duration: 284, title: "OneRepublic - Counting Stars" },
-                { id: "SlPhMPnQ58k", duration: 270, title: "Maroon 5 - Girls Like You" },
-                { id: "nfWlot6h_JM", duration: 241, title: "Taylor Swift - Shake It Off" },
-                { id: "7wtfhZwyrcc", duration: 216, title: "Imagine Dragons - Believer" },
-            ];
-            const hiddenCamVideos = [
-                { id: "K3w8x9Y0z1A", duration: 340, title: "Just For Laughs - Funny Statue Prank" },
-                { id: "bB3c4d5e6fH", duration: 412, title: "Scary Snowman Prank" },
-                { id: "xY8z9A1b2cE", duration: 250, title: "Fake Snake in Park Prank" },
-                { id: "eF3g4H5i6jL", duration: 190, title: "Spilling Coffee Hidden Camera" },
-                { id: "lM7n8O9p0qS", duration: 320, title: "Just For Laughs - Flying Baby Prank" },
-                { id: "sT1u2V3w4xZ", duration: 210, title: "Invisible Rope Prank" },
-                { id: "zA5b6C7d8eG", duration: 540, title: "Dropped Wallet Social Experiment" },
-                { id: "gH9i0J1k2lN", duration: 280, title: "Talking Trash Can Prank" },
-                { id: "nO3p4Q5r6sU", duration: 146, title: "Telekinetic Coffee Shop Surprise" },
-                { id: "uV7w8X9y0zB", duration: 180, title: "Dinosaur in the Office Prank" },
-                { id: "B1c2D3e4F5h", duration: 310, title: "Just For Laughs - Policeman Prank" },
-                { id: "H6i7J8k9L0n", duration: 420, title: "Alien Abduction Prank" },
-                { id: "N1o2P3q4R5t", duration: 360, title: "Fake Lottery Ticket Prank" },
-                { id: "T6u7V8w9X0z", duration: 270, title: "Ghost in the Elevator Prank" },
-                { id: "Z1a2B3c4D5f", duration: 190, title: "Exploding Cake Hidden Cam" },
-                { id: "F6g7H8i9J0l", duration: 220, title: "Mirror Reflection Prank" },
-                { id: "L1m2N3o4P5r", duration: 330, title: "Mannequin Comes to Life Prank" },
-                { id: "R6s7T8u9V0x", duration: 410, title: "Fake Bear in the Woods" },
-                { id: "X1y2Z3a4B5d", duration: 380, title: "Just For Laughs - Blind Man Prank" },
-                { id: "D6e7F8g9H0k", duration: 250, title: "Fake Speed Camera Prank" },
-            ];
-            const fitnessVideos = [
-                { id: "v7AYKMP6rOE", duration: 900, title: "15 MIN Full Body HIIT Workout" },
-                { id: "UBMk30rjy0o", duration: 1200, title: "20 MIN Fat Burning Workout" },
-                { id: "ml6cT4AZdqI", duration: 1800, title: "30 MIN Full Body Crush HIIT" },
-                { id: "cbKkAQUznOQ", duration: 600, title: "10 MIN Ab Workout" },
-                { id: "2pLT-olgUJs", duration: 900, title: "15 MIN Booty Workout" },
-                { id: "0Gxw0uV9mDk", duration: 1200, title: "20 MIN Low Impact Cardio" },
-                { id: "qWy_aPANWuI", duration: 1200, title: "Yoga for Beginners - 20 Min" },
-                { id: "v7SN-d4qXx0", duration: 1200, title: "Yoga For Complete Beginners" },
-                { id: "sTANio_2E0Q", duration: 600, title: "10 MIN Morning Yoga Stretch" },
-                { id: "hJbRpHZr_d0", duration: 1800, title: "30 MIN Morning Yoga Flow" },
-                { id: "8dzjc3WbUUM", duration: 240, title: "Zumba Dance Fitness" },
-                { id: "1vRto-2MMZo", duration: 900, title: "15 MIN Dance Workout" },
-                { id: "Qn6T2K_s7hM", duration: 1800, title: "Cardio Dance Workout" },
-                { id: "8u33hX-L21U", duration: 600, title: "10 MIN Quick Cardio HIIT" },
-                { id: "L_xrDAtykMI", duration: 1500, title: "Pilates Full Body Workout" },
-                { id: "yL_dGzB-C80", duration: 1800, title: "30 MIN Pilates Core and Glutes" },
-                { id: "H14bBuluwB8", duration: 900, title: "15 MIN Dumbbell Arm Workout" },
-                { id: "95846CBGU_M", duration: 1200, title: "20 MIN Upper Body Workout" },
-                { id: "u4WnIuAIf9c", duration: 2400, title: "Full Body Dumbbell Workout" },
-                { id: "Zmo_WTXI7jA", duration: 900, title: "15 MIN Leg Workout at Home" },
-            ];
 
             // ─────────────────── STATE ───────────────────
             let currentLang = 'en';
             let theme = 'dark';
-            let wizardStep = 0;
             let timerDuration = 60;
             let textDistractionDuration = 30;
             let distractionType = 'random';
             let timerInterval = null;
-            let videoTimeout = null;
             let animFrame = null;
             let timeRemaining = 0;
             let totalTime = 0;
             let resolvedType = null;
             let shuffledItems = [];
             let currentShuffleIndex = 0;
-            let segmentStartTime = 0;
             let particles = [];
-
             const TEXT_TYPES = ['questions', 'riddles', 'jokes', 'movies', 'popculture'];
             const VIDEO_TYPES = ['shorts', 'music', 'hiddencam', 'fitness'];
-            const TOTAL_STEPS = 3;
 
             // ─────────────────── I18N ───────────────────
             const i18n = {
                 en: {
-                    title: "DistractionTimer",
-                    step0Title: "How long do you want to wait?",
-                    step0Sub: "Select the total timer duration",
-                    step1Title: "How often should content refresh?",
-                    step1Sub: "For text-based distractions only",
-                    step2Title: "What would you like to do?",
-                    step2Sub: "Choose your distraction category",
-                    back: "Back",
-                    next: "Next",
+                    qTime: "How long should the timer run?",
+                    hTime: "Pick your total wait duration",
+                    qRefresh: "How often should content refresh?",
+                    hRefresh: "For text‑based distractions only",
+                    qCat: "What would you like to do?",
+                    hCat: "Choose your distraction category",
                     start: "Start Timer",
                     timesUp: "Time's Up",
                     sec: "s",
@@ -999,15 +1072,12 @@
                     qLabel: "Question",
                 },
                 bg: {
-                    title: "DistractionTimer",
-                    step0Title: "Колко време искате да чакате?",
-                    step0Sub: "Изберете обща продължителност",
-                    step1Title: "На колко често да се сменя съдържанието?",
-                    step1Sub: "Само за текстови категории",
-                    step2Title: "Какво искате да правите?",
-                    step2Sub: "Изберете категория",
-                    back: "Назад",
-                    next: "Напред",
+                    qTime: "Колко време да тече таймерът?",
+                    hTime: "Избери обща продължителност",
+                    qRefresh: "На колко често да се сменя съдържанието?",
+                    hRefresh: "Само за текстови категории",
+                    qCat: "Какво искаш да правиш?",
+                    hCat: "Избери категория",
                     start: "Старт",
                     timesUp: "Времето изтече",
                     sec: "с",
@@ -1017,7 +1087,7 @@
                     jokes: "Вицове",
                     moviesTrivia: "Филми",
                     popCulture: "Поп култура",
-                    shorts: "Клипове",
+                    shorts: "Shorts",
                     music: "Музика",
                     hiddenCam: "Скрита камера",
                     fitness: "Фитнес",
@@ -1040,11 +1110,9 @@
             const timesUpOverlay = document.getElementById('times-up-overlay');
             const timesUpMsg = document.getElementById('times-up-msg');
             const skipBtn = document.getElementById('skip-btn');
-            const wizardCard = document.getElementById('wizard-card');
-            const navBtns = document.getElementById('nav-btns');
-            const stepDots = document.getElementById('step-dots');
             const themeToggle = document.getElementById('theme-toggle');
             const langToggle = document.getElementById('lang-toggle');
+            const startBtn = document.getElementById('start-btn');
 
             // ─────────────────── THEME ───────────────────
             function applyTheme() {
@@ -1053,125 +1121,82 @@
             }
             themeToggle.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark';
                 applyTheme(); });
+
+            // ─────────────────── RENDER SETUP ───────────────────
+            function renderSetup() {
+                document.getElementById('q-time').textContent = t('qTime');
+                document.getElementById('h-time').textContent = t('hTime');
+                document.getElementById('q-refresh').textContent = t('qRefresh');
+                document.getElementById('h-refresh').textContent = t('hRefresh');
+                document.getElementById('q-cat').textContent = t('qCat');
+                document.getElementById('h-cat').textContent = t('hCat');
+                startBtn.textContent = t('start');
+
+                const timeOpts = document.getElementById('time-options');
+                timeOpts.innerHTML = [30, 60, 90, 120, 180, 300].map(v => {
+                    const label = v < 60 ? `${v}${t('sec')}` : v === 60 ? `1${t('min')}` :
+                        `${v/60}${t('min')}`;
+                    return `<button class="option-btn${timerDuration===v?' selected':''}" data-time="${v}">${label}</button>`;
+                }).join('');
+
+                const durOpts = document.getElementById('duration-options');
+                durOpts.innerHTML = [15, 30, 45, 60].map(v =>
+                    `<button class="option-btn${textDistractionDuration===v?' selected':''}" data-dur="${v}">${v}${t('sec')}</button>`
+                ).join('');
+
+                const catOpts = document.getElementById('category-options');
+                const cats = [
+                    { type: 'questions', icon: 'speech' }, { type: 'riddles', icon: 'puzzle' },
+                    { type: 'jokes', icon: 'smile' }, { type: 'movies', icon: 'film' },
+                    { type: 'popculture', icon: 'star' }, { type: 'shorts', icon: 'play' },
+                    { type: 'music', icon: 'note' }, { type: 'hiddencam', icon: 'eye' },
+                    { type: 'fitness', icon: 'dumbbell' }, { type: 'visuals', icon: 'shapes' },
+                    { type: 'random', icon: 'shuffle' },
+                ];
+                const icons = {
+                    speech: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+                    puzzle: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>',
+                    smile: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="9" r="0.5" fill="currentColor"/><circle cx="15" cy="9" r="0.5" fill="currentColor"/></svg>',
+                    film: '<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>',
+                    star: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>',
+                    play: '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"/></svg>',
+                    note: '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+                    eye: '<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+                    dumbbell: '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/><rect x="2" y="8" width="4" height="8" rx="1.5"/><rect x="18" y="8" width="4" height="8" rx="1.5"/></svg>',
+                    shapes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>',
+                    shuffle: '<svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>',
+                };
+                catOpts.innerHTML = cats.map(c =>
+                    `<button class="category-btn${distractionType===c.type?' selected':''}" data-type="${c.type}">${icons[c.icon]} ${t(c.type)}</button>`
+                ).join('');
+
+                bindSetupEvents();
+            }
+
+            function bindSetupEvents() {
+                document.querySelectorAll('#time-options .option-btn').forEach(b => {
+                    b.addEventListener('click', () => { timerDuration = parseInt(b.dataset.time);
+                        renderSetup(); });
+                });
+                document.querySelectorAll('#duration-options .option-btn').forEach(b => {
+                    b.addEventListener('click', () => { textDistractionDuration = parseInt(b.dataset
+                            .dur);
+                        renderSetup(); });
+                });
+                document.querySelectorAll('#category-options .category-btn').forEach(b => {
+                    b.addEventListener('click', () => { distractionType = b.dataset.type;
+                        renderSetup(); });
+                });
+            }
+
             langToggle.addEventListener('click', () => {
                 currentLang = currentLang === 'en' ? 'bg' : 'en';
                 langToggle.textContent = currentLang === 'en' ? 'EN' : 'BG';
-                renderWizard();
+                renderSetup();
             });
 
-            // ─────────────────── WIZARD ───────────────────
-            function renderWizard() {
-                updateStepDots();
-                let html = '';
-                if (wizardStep === 0) {
-                    html = `
-                <div class="wizard-title">${t('step0Title')}</div>
-                <div class="wizard-subtitle">${t('step0Sub')}</div>
-                <div class="option-row">${[30,60,90,120,180,300].map(v=>{
-                  const label=v<60?`${v}${t('sec')}`:v===60?`1${t('min')}`:`${v/60}${t('min')}`;
-                  return `<button class="option-btn${timerDuration===v?' selected':''}" data-time="${v}">${label}</button>`;
-                }).join('')}</div>`;
-                } else if (wizardStep === 1) {
-                    html = `
-                <div class="wizard-title">${t('step1Title')}</div>
-                <div class="wizard-subtitle">${t('step1Sub')}</div>
-                <div class="option-row">${[15,30,45,60].map(v=>{
-                  return `<button class="option-btn${textDistractionDuration===v?' selected':''}" data-dur="${v}">${v}${t('sec')}</button>`;
-                }).join('')}</div>`;
-                } else if (wizardStep === 2) {
-                    const cats = [
-                        { type: 'questions', icon: 'speech' }, { type: 'riddles', icon: 'puzzle' },
-                        { type: 'jokes', icon: 'smile' }, { type: 'movies', icon: 'film' },
-                        { type: 'popculture', icon: 'star' }, { type: 'shorts', icon: 'play' },
-                        { type: 'music', icon: 'note' }, { type: 'hiddencam', icon: 'eye' },
-                        { type: 'fitness', icon: 'dumbbell' }, { type: 'visuals', icon: 'shapes' },
-                        { type: 'random', icon: 'shuffle' },
-                    ];
-                    const iconSvgs = {
-                        speech: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-                        puzzle: '<svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/><path d="M12 8v8m-4-4h8"/></svg>',
-                        smile: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
-                        film: '<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>',
-                        star: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
-                        play: '<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>',
-                        note: '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-                        eye: '<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
-                        dumbbell: '<svg viewBox="0 0 24 24"><path d="M6.5 6.5h11v11H6.5z"/><rect x="2" y="8" width="4" height="8" rx="2"/><rect x="18" y="8" width="4" height="8" rx="2"/></svg>',
-                        shapes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>',
-                        shuffle: '<svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>',
-                    };
-                    html = `
-                <div class="wizard-title">${t('step2Title')}</div>
-                <div class="wizard-subtitle">${t('step2Sub')}</div>
-                <div class="category-grid">${cats.map(c=>{
-                  return `<button class="category-btn${distractionType===c.type?' selected':''}" data-type="${c.type}">${iconSvgs[c.icon]} ${t(c.type)}</button>`;
-                }).join('')}</div>`;
-                }
-                wizardCard.innerHTML = html;
-                wizardCard.classList.remove('fade-out');
-                renderNavButtons();
-                bindWizardEvents();
-            }
-
-            function updateStepDots() {
-                let dots = '';
-                for (let i = 0; i < TOTAL_STEPS; i++) {
-                    let cls = '';
-                    if (i === wizardStep) cls = 'active';
-                    else if (i < wizardStep) cls = 'done';
-                    dots += `<div class="step-dot ${cls}"></div>`;
-                }
-                stepDots.innerHTML = dots;
-            }
-
-            function renderNavButtons() {
-                let html = '';
-                if (wizardStep > 0) html +=
-                    `<button class="btn-secondary" id="btn-back">${t('back')}</button>`;
-                if (wizardStep < TOTAL_STEPS - 1) html +=
-                    `<button class="btn-primary" id="btn-next">${t('next')}</button>`;
-                else html += `<button class="btn-primary" id="btn-start">${t('start')}</button>`;
-                navBtns.innerHTML = html;
-                const btnBack = document.getElementById('btn-back');
-                const btnNext = document.getElementById('btn-next');
-                const btnStart = document.getElementById('btn-start');
-                if (btnBack) btnBack.addEventListener('click', () => {
-                    if (wizardStep > 0) { wizardStep--;
-                        transitionWizard(); }
-                });
-                if (btnNext) btnNext.addEventListener('click', () => {
-                    if (wizardStep < TOTAL_STEPS - 1) { wizardStep++;
-                        transitionWizard(); }
-                });
-                if (btnStart) btnStart.addEventListener('click', startDistraction);
-            }
-
-            function transitionWizard() {
-                wizardCard.classList.add('fade-out');
-                setTimeout(() => { renderWizard();
-                    wizardCard.classList.remove('fade-out'); }, 200);
-            }
-
-            function bindWizardEvents() {
-                wizardCard.querySelectorAll('.option-btn[data-time]').forEach(b => {
-                    b.addEventListener('click', () => {
-                        timerDuration = parseInt(b.dataset.time);
-                        renderWizard();
-                    });
-                });
-                wizardCard.querySelectorAll('.option-btn[data-dur]').forEach(b => {
-                    b.addEventListener('click', () => {
-                        textDistractionDuration = parseInt(b.dataset.dur);
-                        renderWizard();
-                    });
-                });
-                wizardCard.querySelectorAll('.category-btn[data-type]').forEach(b => {
-                    b.addEventListener('click', () => {
-                        distractionType = b.dataset.type;
-                        renderWizard();
-                    });
-                });
-            }
+            startBtn.addEventListener('click', startDistraction);
+            skipBtn.addEventListener('click', () => { if (timerInterval) endDistraction(true); });
 
             // ─────────────────── HELPERS ───────────────────
             function getData() { return currentLang === 'bg' ? dataBg : dataEn; }
@@ -1194,10 +1219,8 @@
                 return [];
             }
 
-            function formatTime(sec) {
-                const s = Math.ceil(Math.max(0, sec));
-                return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-            }
+            function formatTime(sec) { const s = Math.ceil(Math.max(0, sec)); return `${Math.floor(s/60)}:${(s%60)
+                    .toString().padStart(2,'0')}`; }
 
             // ─────────────────── RENDER CONTENT ───────────────────
             function renderTextItem(item, type) {
@@ -1205,7 +1228,7 @@
                 if (['questions', 'movies', 'popculture'].includes(type)) {
                     distractionContent.innerHTML = `
                 <div class="millionaire-wrap">
-                  <div class="millionaire-qbox"><div class="q-label">${t('qLabel')}</div><div class="main-text">${item.q}</div></div>
+                  <div class="millionaire-qbox"><div class="q-label">${t('qLabel')}</div><div style="font-size:1.2rem;color:#eee;">${item.q}</div></div>
                   <div class="millionaire-answers">${item.answers.map((a,i)=>`<div class="millionaire-ans" data-idx="${i}"><span class="ans-circle">${String.fromCharCode(65+i)}</span><span>${a}</span></div>`).join('')}</div>
                 </div>`;
                 } else if (type === 'riddles') {
@@ -1238,29 +1261,12 @@
                 }
             }
 
-            function embedVideo(video) {
-                const container = document.getElementById('video-container');
-                if (!container) return;
-                container.innerHTML =
-                    `<iframe src="https://www.youtube.com/embed/${video.id}?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1&cc_load_policy=0&playsinline=1" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>`;
-            }
-
-            function scheduleNextVideo() {
-                if (!VIDEO_TYPES.includes(resolvedType) || timeRemaining <= 0) return;
-                if (videoTimeout) clearTimeout(videoTimeout);
-                currentShuffleIndex++;
-                if (currentShuffleIndex >= shuffledItems.length) {
-                    shuffledItems = shuffle(shuffledItems);
-                    currentShuffleIndex = 0;
-                }
-                const nextVideo = shuffledItems[currentShuffleIndex];
-                const delay = Math.min(nextVideo.duration * 1000, timeRemaining * 1000);
-                if (delay < 2000) return;
-                videoTimeout = setTimeout(() => {
-                    if (timeRemaining <= 0) return;
-                    embedVideo(nextVideo);
-                    scheduleNextVideo();
-                }, delay);
+            function buildPlaylistEmbed(pool) {
+                if (pool.length === 0) return '';
+                const firstId = pool[0].id;
+                const restIds = pool.slice(1).map(v => v.id).join(',');
+                const playlistParam = restIds ? `&playlist=${restIds}` : '';
+                return `https://www.youtube.com/embed/${firstId}?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1&cc_load_policy=0&playsinline=1${playlistParam}`;
             }
 
             // ─────────────────── START DISTRACTION ───────────────────
@@ -1270,9 +1276,6 @@
                 timeRemaining = totalTime;
                 shuffledItems = [];
                 currentShuffleIndex = 0;
-                segmentStartTime = 0;
-                if (videoTimeout) { clearTimeout(videoTimeout);
-                    videoTimeout = null; }
                 if (animFrame) { cancelAnimationFrame(animFrame);
                     animFrame = null; }
 
@@ -1285,11 +1288,9 @@
                 } else if (VIDEO_TYPES.includes(resolvedType)) {
                     const pool = getVideoPool(resolvedType);
                     shuffledItems = shuffle(pool);
-                    currentShuffleIndex = 0;
+                    const embedUrl = buildPlaylistEmbed(shuffledItems);
                     distractionContent.innerHTML =
-                        `<div class="video-wrap" id="video-container">Loading...</div>`;
-                    embedVideo(shuffledItems[0]);
-                    scheduleNextVideo();
+                        `<div class="video-wrap"><iframe src="${embedUrl}" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe></div>`;
                 } else if (resolvedType === 'visuals') {
                     distractionContent.innerHTML = `<canvas id="visuals-canvas"></canvas>`;
                     const canvas = document.getElementById('visuals-canvas');
@@ -1326,13 +1327,10 @@
                                 currentShuffleIndex = 0;
                             }
                             renderTextItem(shuffledItems[currentShuffleIndex], resolvedType);
-                            segmentStartTime = segIdx * textDistractionDuration;
                         }
                         const segStart = currentShuffleIndex * textDistractionDuration;
                         const segRemaining = (segStart + textDistractionDuration) - elapsedSec;
-                        if (segRemaining <= 5 && segRemaining > 0) {
-                            revealCurrentText(resolvedType);
-                        }
+                        if (segRemaining <= 5 && segRemaining > 0) revealCurrentText(resolvedType);
                     }
 
                     if (timeRemaining <= 0) endDistraction(false);
@@ -1341,10 +1339,8 @@
 
             function endDistraction(skipped = false) {
                 if (timerInterval) clearInterval(timerInterval);
-                if (videoTimeout) clearTimeout(videoTimeout);
                 if (animFrame) cancelAnimationFrame(animFrame);
                 timerInterval = null;
-                videoTimeout = null;
                 animFrame = null;
                 progressBar.style.width = '0%';
                 progressBar.classList.remove('warning');
@@ -1360,8 +1356,6 @@
                     shuffledItems = [];
                 }, 1800);
             }
-
-            skipBtn.addEventListener('click', () => { if (timerInterval) endDistraction(true); });
 
             // ─────────────────── VISUALS ───────────────────
             function startVisuals() {
@@ -1411,7 +1405,7 @@
 
             // ─────────────────── INIT ───────────────────
             applyTheme();
-            renderWizard();
+            renderSetup();
             langToggle.textContent = 'EN';
         })();
     </script>
