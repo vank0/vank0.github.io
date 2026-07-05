@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1020" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>GymLog — Workout Tracker</title>
+    <script>
+      // Pre-paint theme apply so there's no flash of the wrong theme.
+      (function () {
+        try {
+          var m = localStorage.getItem("gymlog.theme.v1");
+          var t = m === "light" || m === "dark" ? m
+            : (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+          document.documentElement.setAttribute("data-theme", t);
+          var l = localStorage.getItem("gymlog.locale.v1");
+          document.documentElement.setAttribute("lang", l === "bg" ? "bg" : "en");
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-B052azXu.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DwjCLFav.css">
+  <link rel="manifest" href="./manifest.webmanifest"></head>
+  <body>
+    <div class="aurora"></div>
+    <div id="root"></div>
+  </body>
+</html>
