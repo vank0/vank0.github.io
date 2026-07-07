@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NutriPlate — Your Scientific Nutrition Plate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wood-dark: #5a3a22;
+    --wood-mid: #7a4f2d;
+    --wood-light: #9a6a3e;
+    --linen: #f5efe2;
+    --ink: #3a2c1c;
+    --ink-soft: #6b5a44;
+    --brass: #b08d3f;
+    --veg: #6a9a3f;
+    --fruit: #c94f3d;
+    --grain: #d9a441;
+    --protein: #a3583a;
+    --water: #4a8fc2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Raleway', sans-serif;
+    color: var(--ink);
+    /* skeuomorphic wooden table */
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 2px,
+        transparent 2px, transparent 90px),
+      repeating-linear-gradient(0deg,
+        rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px,
+        transparent 1px, transparent 7px),
+      linear-gradient(135deg, var(--wood-light) 0%, var(--wood-mid) 45%, var(--wood-dark) 100%);
+    min-height: 100dvh;
+    padding: 2rem 1rem 4rem;
+  }
+  h1, h2, h3 { font-family: 'Lora', serif; }
+  .sheet {
+    max-width: 900px;
+    margin: 0 auto;
+    background:
+      radial-gradient(ellipse at top left, rgba(255,255,255,0.55), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 4px),
+      var(--linen);
+    border-radius: 10px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.4) inset,
+      0 12px 30px rgba(20,10,0,0.55),
+      0 2px 6px rgba(20,10,0,0.35);
+    border: 1px solid rgba(120,90,50,0.45);
+    padding: 2rem clamp(1rem, 4vw, 3rem) 2.5rem;
+  }
+  header { text-align: center; margin-bottom: 1.5rem; }
+  header h1 {
+    margin: 0 0 .25rem;
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+    color: var(--ink);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+  }
+  header p { margin: 0; color: var(--ink-soft); }
+
+  /* ---------- segmented toggles (plate view + language) ---------- */
+  .seg-toggle {
+    display: flex; justify-content: center; gap: 0;
+    max-width: 340px; margin: 0 auto 0.5rem;
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid rgba(120,90,50,0.5);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .seg-toggle button {
+    grid-column: auto; flex: 1; margin: 0; border: none; border-radius: 0;
+    font: inherit; font-weight: 600; font-size: .9rem; color: var(--ink-soft);
+    cursor: pointer; text-shadow: none; box-shadow: none;
+    background: linear-gradient(180deg, #fffdf7, #ece1cb);
+    padding: .55rem .5rem;
+  }
+  .seg-toggle button + button { border-left: 1px solid rgba(120,90,50,0.35); }
+  .seg-toggle button.active {
+    color: #fff8ea; text-shadow: 0 -1px 1px rgba(0,0,0,0.4);
+    background: linear-gradient(180deg, #d2a94f 0%, var(--brass) 45%, #8a6c2c 100%);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.25);
+  }
+  .seg-toggle button:active { transform: none; }
+  .lang-toggle { max-width: 170px; margin-top: 1rem; }
+
+  /* ---------- form ---------- */
+  form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    align-items: end;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(0,0,0,0.03));
+    border: 1px solid rgba(120,90,50,0.35);
+    border-radius: 12px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6);
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  label { display: block; font-weight: 600; font-size: .85rem; margin-bottom: .3rem; }
+  input, select {
+    width: 100%;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    padding: .55rem .7rem;
+    border-radius: 8px;
+    border: 1px solid rgba(120,90,50,0.5);
+    background: linear-gradient(180deg, #fffdf7, #f1e9d8);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.7);
+  }
+  input:focus, select:focus, button:focus-visible {
+    outline: 3px solid var(--brass);
+    outline-offset: 1px;
+  }
+  fieldset { border: none; margin: 0; padding: 0; }
+  .sexes { display: flex; gap: .5rem; }
+  .sexes label {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: .4rem;
+    margin: 0; padding: .55rem .5rem; cursor: pointer;
+    border-radius: 8px; border: 1px solid rgba(120,90,50,0.5);
+    background: linear-gradient(180deg, #fffdf7, #ece1cb);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+  .sexes input { width: auto; accent-color: var(--brass); box-shadow: none; }
+  .sexes label:has(input:checked) {
+    background: linear-gradient(180deg, #e8d9b8, #d9c497);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.25);
+  }
+  button[type=submit] {
+    grid-column: 1 / -1;
+    font: inherit; font-weight: 700; font-size: 1.05rem;
+    color: #fff8ea;
+    text-shadow: 0 -1px 1px rgba(0,0,0,0.4);
+    padding: .8rem 1.5rem;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 1px solid #7c5a1f;
+    background: linear-gradient(180deg, #d2a94f 0%, var(--brass) 45%, #8a6c2c 100%);
+    box-shadow: 0 4px 8px rgba(30,15,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+  }
+  button[type=submit]:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 3px rgba(30,15,0,0.4), inset 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .error {
+    grid-column: 1 / -1; color: #8c2f22; font-weight: 600; margin: 0; display: none;
+  }
+
+  /* ---------- results ---------- */
+  #results { display: none; }
+  .table-scene {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 2rem;
+    padding: 1.5rem 0 0.5rem;
+  }
+  .plate-wrap, .glass-wrap { text-align: center; }
+  figcaption { margin-top: .6rem; font-family: 'Lora', serif; font-size: 1.05rem; color: var(--ink); }
+  figure { margin: 0; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: .8rem;
+    margin: 1.5rem 0;
+  }
+  .stat {
+    background: linear-gradient(180deg, #fffdf7, #efe5cf);
+    border: 1px solid rgba(120,90,50,0.4);
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(30,15,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+    padding: .8rem;
+    text-align: center;
+  }
+  .stat b { display: block; font-family: 'Lora', serif; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: .8rem; color: var(--ink-soft); }
+  .swatch { display: inline-block; width: .75em; height: .75em; border-radius: 50%; margin-right: .35em; border: 1px solid rgba(0,0,0,0.25); }
+
+  details {
+    margin-top: 1.5rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.45), rgba(0,0,0,0.02));
+    border: 1px solid rgba(120,90,50,0.35);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 4px rgba(30,15,0,0.15);
+    padding: .9rem 1.1rem;
+  }
+  summary { cursor: pointer; font-family: 'Lora', serif; font-weight: 600; font-size: 1.05rem; }
+  details p, details li { line-height: 1.6; color: var(--ink); }
+  code {
+    font-family: ui-monospace, monospace; font-size: .9em;
+    background: rgba(120,90,50,0.12); border-radius: 4px; padding: .1em .35em;
+  }
+  a { color: #7a4a12; }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+  <header>
+    <h1>NutriPlate</h1>
+    <p data-i18n="tagline">Your daily plate &amp; water intake, from peer-reviewed formulas</p>
+    <div class="seg-toggle lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="active" aria-pressed="true">English</button>
+      <button type="button" data-lang="bg" aria-pressed="false">Български</button>
+    </div>
+  </header>
+
+  <form id="f" novalidate>
+    <fieldset>
+      <label data-i18n="sexLabel">Sex</label>
+      <div class="sexes">
+        <label><input type="radio" name="sex" value="m" checked> <span data-i18n="male">Male</span></label>
+        <label><input type="radio" name="sex" value="f"> <span data-i18n="female">Female</span></label>
+      </div>
+    </fieldset>
+    <div>
+      <label for="age" data-i18n="ageLabel">Age (years)</label>
+      <input id="age" type="number" min="18" max="100" value="30" required inputmode="numeric">
+    </div>
+    <div>
+      <label for="weight" data-i18n="weightLabel">Weight (kg)</label>
+      <input id="weight" type="number" min="30" max="300" step="0.1" value="75" required inputmode="decimal">
+    </div>
+    <div>
+      <label for="height" data-i18n="heightLabel">Height (cm)</label>
+      <input id="height" type="number" min="120" max="230" value="175" required inputmode="numeric">
+    </div>
+    <div>
+      <label for="activity" data-i18n="activityLabel">Activity level</label>
+      <select id="activity"></select>
+    </div>
+    <div>
+      <label for="goal" data-i18n="goalLabel">Goal</label>
+      <select id="goal"></select>
+    </div>
+    <div id="rateWrap" style="display:none">
+      <label for="rate" data-i18n="paceLabel">Pace (kg per week)</label>
+      <select id="rate"></select>
+    </div>
+    <p class="error" id="err" role="alert" data-i18n="error">Please enter valid age (18–100), weight (30–300 kg) and height (120–230 cm).</p>
+    <button type="submit" data-i18n="submit">Serve my plate</button>
+  </form>
+
+  <section id="results" aria-live="polite">
+    <div class="seg-toggle plate-toggle" role="group" aria-label="Plate view mode">
+      <button type="button" data-mode="weight" class="active" aria-pressed="true" data-i18n="byWeight">By weight (g)</button>
+      <button type="button" data-mode="kcal" aria-pressed="false" data-i18n="byCalories">By calories (kcal)</button>
+    </div>
+    <div class="table-scene">
+      <figure class="plate-wrap">
+        <svg id="plate" width="340" height="340" viewBox="0 0 340 340" role="img" aria-labelledby="plateTitle">
+          <title id="plateTitle" data-i18n="plateAria">Nutrition plate divided into vegetables, fruits, whole grains and protein</title>
+          <defs>
+            <radialGradient id="rim" cx="38%" cy="32%" r="75%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="70%" stop-color="#e9e4da"/>
+              <stop offset="100%" stop-color="#b9b2a4"/>
+            </radialGradient>
+            <radialGradient id="well" cx="42%" cy="36%" r="80%">
+              <stop offset="0%" stop-color="#fdfcf8"/>
+              <stop offset="85%" stop-color="#eae4d6"/>
+              <stop offset="100%" stop-color="#cfc7b5"/>
+            </radialGradient>
+            <filter id="plateShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#1e0f00" flood-opacity="0.45"/>
+            </filter>
+          </defs>
+          <!-- plate rim + well -->
+          <circle cx="170" cy="170" r="160" fill="url(#rim)" filter="url(#plateShadow)"/>
+          <circle cx="170" cy="170" r="158" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/>
+          <circle cx="170" cy="170" r="128" fill="url(#well)" stroke="rgba(120,110,90,0.35)"/>
+          <!-- food segments drawn by JS into this group -->
+          <g id="segments"></g>
+          <!-- glossy highlight -->
+          <ellipse cx="120" cy="95" rx="80" ry="38" fill="rgba(255,255,255,0.28)" transform="rotate(-25 120 95)"/>
+        </svg>
+        <figcaption id="plateCap"></figcaption>
+      </figure>
+
+      <figure class="glass-wrap">
+        <svg width="150" height="270" viewBox="0 0 150 270" role="img" aria-labelledby="glassTitle">
+          <title id="glassTitle" data-i18n="glassAria">Glass showing recommended daily water intake</title>
+          <defs>
+            <linearGradient id="waterG" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#7db8dd"/>
+              <stop offset="50%" stop-color="#4a8fc2"/>
+              <stop offset="100%" stop-color="#356e9c"/>
+            </linearGradient>
+            <linearGradient id="glassG" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+              <stop offset="18%" stop-color="rgba(255,255,255,0.06)"/>
+              <stop offset="80%" stop-color="rgba(255,255,255,0.06)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.5)"/>
+            </linearGradient>
+            <clipPath id="glassClip"><path d="M30 20 L120 20 L108 240 Q107 252 95 252 L55 252 Q43 252 42 240 Z"/></clipPath>
+            <filter id="glassShadow"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#1e0f00" flood-opacity="0.4"/></filter>
+          </defs>
+          <g filter="url(#glassShadow)">
+            <path d="M30 20 L120 20 L108 240 Q107 252 95 252 L55 252 Q43 252 42 240 Z"
+                  fill="rgba(210,230,245,0.35)" stroke="rgba(140,170,190,0.8)" stroke-width="2"/>
+          </g>
+          <g clip-path="url(#glassClip)">
+            <rect id="waterFill" x="20" y="252" width="110" height="0" fill="url(#waterG)"/>
+            <ellipse id="waterTop" cx="75" cy="252" rx="55" ry="7" fill="#a8d2ec" opacity="0"/>
+          </g>
+          <path d="M30 20 L120 20 L108 240 Q107 252 95 252 L55 252 Q43 252 42 240 Z"
+                fill="url(#glassG)" stroke="none" pointer-events="none"/>
+          <text id="waterLabel" x="75" y="150" text-anchor="middle"
+                font-family="Lora, serif" font-size="26" font-weight="700" fill="#123c5c"></text>
+        </svg>
+        <figcaption id="glassCap"></figcaption>
+      </figure>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <details open>
+      <summary data-i18n="formulasTitle">Formulas used</summary>
+      <div data-i18n-html="formulas"></div>
+      <p id="worked"></p>
+    </details>
+
+    <details>
+      <summary data-i18n="sourcesTitle">Scientific sources (peer-reviewed)</summary>
+      <ul>
+        <li>Mifflin MD, St Jeor ST, et&nbsp;al. <i>A new predictive equation for resting energy expenditure in healthy individuals.</i> Am J Clin Nutr. 1990;51(2):241–7. <a href="https://pubmed.ncbi.nlm.nih.gov/2305711/" target="_blank" rel="noopener">PubMed 2305711</a></li>
+        <li>Institute of Medicine. <i>Dietary Reference Intakes for Energy, Carbohydrate, Fiber, Fat, Fatty Acids, Cholesterol, Protein, and Amino Acids.</i> National Academies Press; 2005. <a href="https://nap.nationalacademies.org/catalog/10490/" target="_blank" rel="noopener">doi:10.17226/10490</a></li>
+        <li>EFSA Panel on Dietetic Products, Nutrition and Allergies. <i>Scientific Opinion on Dietary Reference Values for water.</i> EFSA Journal. 2010;8(3):1459. <a href="https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2010.1459" target="_blank" rel="noopener">doi:10.2903/j.efsa.2010.1459</a></li>
+        <li>Jensen MD, Ryan DH, et&nbsp;al. <i>2013 AHA/ACC/TOS Guideline for the Management of Overweight and Obesity in Adults.</i> Circulation. 2014;129(25 Suppl 2):S102–38. <a href="https://pubmed.ncbi.nlm.nih.gov/24222017/" target="_blank" rel="noopener">PubMed 24222017</a></li>
+        <li>Wycherley TP, et&nbsp;al. <i>Effects of energy-restricted high-protein, low-fat compared with standard-protein, low-fat diets: a meta-analysis.</i> Am J Clin Nutr. 2012;96(6):1281–98. <a href="https://pubmed.ncbi.nlm.nih.gov/23097268/" target="_blank" rel="noopener">PubMed 23097268</a></li>
+        <li>Morton RW, et&nbsp;al. <i>A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains.</i> Br J Sports Med. 2018;52(6):376–84. <a href="https://pubmed.ncbi.nlm.nih.gov/28698222/" target="_blank" rel="noopener">PubMed 28698222</a></li>
+        <li>Jäger R, et&nbsp;al. <i>International Society of Sports Nutrition Position Stand: protein and exercise.</i> J Int Soc Sports Nutr. 2017;14:20. <a href="https://pubmed.ncbi.nlm.nih.gov/28642676/" target="_blank" rel="noopener">PubMed 28642676</a></li>
+        <li>Helms ER, et&nbsp;al. <i>A systematic review of dietary protein during caloric restriction in resistance trained lean athletes.</i> Int J Sport Nutr Exerc Metab. 2014;24(2):127–38. <a href="https://pubmed.ncbi.nlm.nih.gov/24092765/" target="_blank" rel="noopener">PubMed 24092765</a></li>
+        <li>Iraki J, et&nbsp;al. <i>Nutrition Recommendations for Bodybuilders in the Off-Season: A Narrative Review.</i> Sports (Basel). 2019;7(7):154. <a href="https://pubmed.ncbi.nlm.nih.gov/31247944/" target="_blank" rel="noopener">PubMed 31247944</a></li>
+        <li>Hall KD, et&nbsp;al. <i>Energy balance and its components: implications for body weight regulation.</i> Am J Clin Nutr. 2012;95(4):989–94. <a href="https://pubmed.ncbi.nlm.nih.gov/22434603/" target="_blank" rel="noopener">PubMed 22434603</a></li>
+        <li>Wishnofsky M. <i>Caloric equivalents of gained or lost weight.</i> Am J Clin Nutr. 1958;6(5):542–6. <a href="https://pubmed.ncbi.nlm.nih.gov/13594881/" target="_blank" rel="noopener">PubMed 13594881</a></li>
+        <li>Hall KD. <i>What is the required energy deficit per unit weight loss?</i> Int J Obes. 2008;32(3):573–6. <a href="https://pubmed.ncbi.nlm.nih.gov/17700582/" target="_blank" rel="noopener">PubMed 17700582</a></li>
+        <li>National Research Council. <i>Recommended Dietary Allowances: 10th Edition.</i> National Academies Press; 1989. <a href="https://nap.nationalacademies.org/catalog/1349/" target="_blank" rel="noopener">doi:10.17226/1349</a></li>
+        <li>Volkert D, et&nbsp;al. <i>ESPEN guideline on clinical nutrition and hydration in geriatrics.</i> Clin Nutr. 2019;38(1):10–47. <a href="https://pubmed.ncbi.nlm.nih.gov/30005900/" target="_blank" rel="noopener">PubMed 30005900</a></li>
+        <li>Harvard T.H. Chan School of Public Health. <i>Healthy Eating Plate.</i> <a href="https://nutritionsource.hsph.harvard.edu/healthy-eating-plate/" target="_blank" rel="noopener">nutritionsource.hsph.harvard.edu</a> (Willett WC et&nbsp;al., 2019, <a href="https://pubmed.ncbi.nlm.nih.gov/30660336/" target="_blank" rel="noopener">Lancet, PubMed 30660336</a>)</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const r2 = x => Math.round(x * 100) / 100;
+
+/* ---------- i18n ---------- */
+const T = {
+  en: {
+    tagline: 'Your daily plate & water intake, from peer-reviewed formulas',
+    sexLabel: 'Sex', male: 'Male', female: 'Female',
+    ageLabel: 'Age (years)', weightLabel: 'Weight (kg)', heightLabel: 'Height (cm)',
+    activityLabel: 'Activity level', goalLabel: 'Goal', paceLabel: 'Pace (kg per week)',
+    error: 'Please enter valid age (18–100), weight (30–300 kg) and height (120–230 cm).',
+    submit: 'Serve my plate',
+    byWeight: 'By weight (g)', byCalories: 'By calories (kcal)',
+    plateAria: 'Nutrition plate divided into vegetables, fruits, whole grains and protein',
+    glassAria: 'Glass showing recommended daily water intake',
+    formulasTitle: 'Formulas used', sourcesTitle: 'Scientific sources (peer-reviewed)',
+    activity: ['Sedentary (little exercise)', 'Light (1–3 days/week)', 'Moderate (3–5 days/week)', 'Active (6–7 days/week)', 'Very active (physical job)'],
+    goals: { maintain: 'Maintain weight', lose: 'Lose weight', gain: 'Gain weight', muscle: 'Build muscle' },
+    recommended: 'recommended', kgWeek: 'kg/week', kgWk: 'kg/wk',
+    seg: { 'Veg & fruits': 'Veg & fruits', 'Whole grains': 'Whole grains', 'Protein': 'Protein', 'Fats': 'Fats' },
+    fiber: 'fiber', carbs: 'carbs', g: 'g', L: 'L',
+    plateMain: 'Your daily plate', shareGrams: 'Slice size = share of grams eaten', shareKcal: 'Slice size = share of calories',
+    carbsNote: '*total carbs incl. veg & fruits',
+    drink: 'Drink', totalWater: (t, ml, w) => `${t} L total (${ml} mL/kg × ${w} kg), ~80 % from drinks`,
+    stBmr: 'BMR (Mifflin–St Jeor)', stTdee: 'Maintenance (TDEE)', stTarget: 'Target',
+    stCarbs: 'Carbohydrates', stProtein: 'Protein', stFat: 'Fat',
+    stFiber: 'Fiber (14 g/1000 kcal)', stWater: 'Water to drink', gPerKg: 'g/kg',
+    yourNumbers: 'Your numbers:', wTarget: 'target', wProtein: 'protein',
+    flooredNote: f => ` <b>Note:</b> pace was capped — intake never goes below ${f} kcal/day (AHA/ACC/TOS 2013). Choose a slower pace.`,
+    formulas: `<ul>
+      <li><b>Basal metabolic rate</b> — Mifflin–St&nbsp;Jeor equation:<br>
+        men: <code>BMR = 10·weight + 6.25·height − 5·age + 5</code><br>
+        women: <code>BMR = 10·weight + 6.25·height − 5·age − 161</code> (kcal/day)</li>
+      <li><b>Total energy</b> — <code>TDEE = BMR × activity factor</code> (1.2–1.9)</li>
+      <li><b>Goal &amp; pace adjustment</b> — 1 kg of body weight ≈ 7700 kcal, so
+        <code>daily adjustment = pace (kg/week) × 7700 ÷ 7</code> subtracted (lose) or added (gain) to TDEE — a first approximation; real loss slows over time (Hall 2008).
+        Intake never goes below 1500&nbsp;kcal (men) / 1200&nbsp;kcal (women). Build muscle: <code>TDEE + 10 %</code>.</li>
+      <li><b>Protein target</b> — set per goal, in grams per kg of body weight (capped at 35&nbsp;% of calories, the AMDR upper bound); carbohydrate takes the remaining calories:
+        maintain <code>1.2 g/kg</code>, gain <code>1.6 g/kg</code>, build muscle <code>1.8 g/kg</code>, lose weight <code>2.0 g/kg</code> (more protein preserves lean mass while in a calorie deficit)</li>
+      <li><b>Fat &amp; fiber</b> — fat 30&nbsp;% of kcal ÷ 9 kcal/g (IOM AMDR 20–35&nbsp;%); fiber <code>14 g per 1000 kcal</code> (IOM)</li>
+      <li><b>Plate layout</b> — Harvard Healthy Eating Plate: ½ vegetables &amp; fruits, ¼ whole grains, ¼ healthy protein</li>
+      <li><b>Water</b> — body-weight formula: <code>total water = mL/kg × body weight</code>. Adult clinical standard 30–40&nbsp;mL/kg/day (ESPEN); rate set by activity (sedentary 30 → very active 40&nbsp;mL/kg), reduced with age (−5 above 55, −10 above 65, floor 25). ≈80&nbsp;% comes from beverages (EFSA 2010)</li>
+    </ul>`,
+  },
+  bg: {
+    tagline: 'Твоята дневна чиния и прием на вода по рецензирани научни формули',
+    sexLabel: 'Пол', male: 'Мъж', female: 'Жена',
+    ageLabel: 'Възраст (години)', weightLabel: 'Тегло (кг)', heightLabel: 'Ръст (см)',
+    activityLabel: 'Ниво на активност', goalLabel: 'Цел', paceLabel: 'Темп (кг на седмица)',
+    error: 'Моля, въведете валидни възраст (18–100), тегло (30–300 кг) и ръст (120–230 см).',
+    submit: 'Сервирай чинията',
+    byWeight: 'По тегло (г)', byCalories: 'По калории (kcal)',
+    plateAria: 'Хранителна чиния, разделена на зеленчуци, плодове, пълнозърнести храни и протеин',
+    glassAria: 'Чаша, показваща препоръчителния дневен прием на вода',
+    formulasTitle: 'Използвани формули', sourcesTitle: 'Научни източници (рецензирани)',
+    activity: ['Заседнал (малко движение)', 'Лека (1–3 дни/седмица)', 'Умерена (3–5 дни/седмица)', 'Активна (6–7 дни/седмица)', 'Много активна (физически труд)'],
+    goals: { maintain: 'Поддържане на тегло', lose: 'Отслабване', gain: 'Качване на тегло', muscle: 'Изграждане на мускули' },
+    recommended: 'препоръчано', kgWeek: 'кг/седмица', kgWk: 'кг/седм',
+    seg: { 'Veg & fruits': 'Зеленчуци и плодове', 'Whole grains': 'Пълнозърнести', 'Protein': 'Протеин', 'Fats': 'Мазнини' },
+    fiber: 'фибри', carbs: 'въгл.', g: 'г', L: 'л',
+    plateMain: 'Твоята дневна чиния', shareGrams: 'Размер на дяла = дял от изядените грамове', shareKcal: 'Размер на дяла = дял от калориите',
+    carbsNote: '*общо въглехидрати вкл. зеленчуци и плодове',
+    drink: 'Пий', totalWater: (t, ml, w) => `${t} л общо (${ml} мл/кг × ${w} кг), ~80 % от напитки`,
+    stBmr: 'Базов метаболизъм (Mifflin–St Jeor)', stTdee: 'Поддържане (TDEE)', stTarget: 'Цел',
+    stCarbs: 'Въглехидрати', stProtein: 'Протеин', stFat: 'Мазнини',
+    stFiber: 'Фибри (14 г/1000 kcal)', stWater: 'Вода за пиене', gPerKg: 'г/кг',
+    yourNumbers: 'Твоите числа:', wTarget: 'цел', wProtein: 'протеин',
+    flooredNote: f => ` <b>Забележка:</b> темпото е ограничено — приемът никога не пада под ${f} kcal/ден (AHA/ACC/TOS 2013). Изберете по-бавно темпо.`,
+    formulas: `<ul>
+      <li><b>Базов метаболизъм</b> — уравнение на Mifflin–St&nbsp;Jeor:<br>
+        мъже: <code>BMR = 10·тегло + 6.25·ръст − 5·възраст + 5</code><br>
+        жени: <code>BMR = 10·тегло + 6.25·ръст − 5·възраст − 161</code> (kcal/ден)</li>
+      <li><b>Общ разход на енергия</b> — <code>TDEE = BMR × коефициент на активност</code> (1.2–1.9)</li>
+      <li><b>Корекция според целта и темпото</b> — 1 кг телесно тегло ≈ 7700 kcal, затова
+        <code>дневна корекция = темп (кг/седмица) × 7700 ÷ 7</code> се изважда (отслабване) или добавя (качване) към TDEE — първо приближение; реалното отслабване се забавя с времето (Hall 2008).
+        Приемът никога не пада под 1500&nbsp;kcal (мъже) / 1200&nbsp;kcal (жени). Изграждане на мускули: <code>TDEE + 10 %</code>.</li>
+      <li><b>Целеви протеин</b> — определя се според целта, в грамове на кг телесно тегло (ограничен до 35&nbsp;% от калориите, горната граница на AMDR); въглехидратите поемат останалите калории:
+        поддържане <code>1.2 г/кг</code>, качване <code>1.6 г/кг</code>, мускули <code>1.8 г/кг</code>, отслабване <code>2.0 г/кг</code> (повече протеин пази чистата мускулна маса при калориен дефицит)</li>
+      <li><b>Мазнини и фибри</b> — мазнини 30&nbsp;% от kcal ÷ 9 kcal/г (IOM AMDR 20–35&nbsp;%); фибри <code>14 г на 1000 kcal</code> (IOM)</li>
+      <li><b>Подредба на чинията</b> — Harvard Healthy Eating Plate: ½ зеленчуци и плодове, ¼ пълнозърнести, ¼ здравословен протеин</li>
+      <li><b>Вода</b> — формула по телесно тегло: <code>обща вода = мл/кг × телесно тегло</code>. Клиничен стандарт за възрастни 30–40&nbsp;мл/кг/ден (ESPEN); коефициентът зависи от активността (заседнал 30 → много активен 40&nbsp;мл/кг), намалява с възрастта (−5 над 55, −10 над 65, минимум 25). ≈80&nbsp;% идва от напитки (EFSA 2010)</li>
+    </ul>`,
+  },
+};
+let lang = (navigator.language || 'en').toLowerCase().startsWith('bg') ? 'bg' : 'en';
+const t = () => T[lang];
+
+const COLORS = {
+  'Veg & fruits': '#6a9a3f',
+  'Whole grains': '#d9a441',
+  'Protein': '#a3583a',
+  'Fats': '#c9a83d',
+};
+
+// simple SVG food illustrations, centered on (0,0), ~44px wide
+const ICONS = {
+  'Veg & fruits': `<g transform="translate(-8 0)"><rect x="-4" y="2" width="8" height="16" rx="3" fill="#7fae4c"/>
+    <circle cx="-10" cy="-4" r="9" fill="#3e6b1f"/><circle cx="0" cy="-10" r="10" fill="#4a7d26"/>
+    <circle cx="10" cy="-4" r="9" fill="#3e6b1f"/><circle cx="0" cy="-2" r="8" fill="#558c2e"/>
+    <circle cx="-5" cy="-8" r="2" fill="#6da33f"/><circle cx="6" cy="-9" r="2" fill="#6da33f"/></g>
+    <g transform="translate(14 6) scale(0.75)"><circle cx="0" cy="3" r="13" fill="#c0392b"/>
+    <circle cx="-4" cy="-1" r="9" fill="#d95445" opacity="0.7"/>
+    <path d="M0 -9 Q1 -15 4 -17" stroke="#5a3a22" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M2 -13 Q10 -19 14 -13 Q7 -9 2 -13" fill="#4a7d26"/>
+    <ellipse cx="-5" cy="-2" rx="3" ry="4" fill="#fff" opacity="0.35" transform="rotate(-20 -5 -2)"/></g>`,
+  'Fats': `<g><path d="M0 -17 Q11 -7 11 6 A11 12 0 1 1 -11 6 Q-11 -7 0 -17" fill="#7fae4c" stroke="#4a7d26" stroke-width="2.5"/>
+    <path d="M0 -13 Q7.5 -5 7.5 6 A7.5 8.5 0 1 1 -7.5 6 Q-7.5 -5 0 -13" fill="#cfe08a"/>
+    <circle cx="0" cy="6" r="5.5" fill="#8a5a2e"/>
+    <circle cx="-2" cy="4" r="2" fill="#a97a4a" opacity="0.8"/></g>`,
+  'Whole grains': `<g stroke="#8a6a24" stroke-width="1.6" fill="#e0b45a">
+    <path d="M0 16 L0 -14" fill="none"/>
+    <ellipse cx="-6" cy="-10" rx="5" ry="3" transform="rotate(-35 -6 -10)"/>
+    <ellipse cx="6" cy="-10" rx="5" ry="3" transform="rotate(35 6 -10)"/>
+    <ellipse cx="-6" cy="-3" rx="5" ry="3" transform="rotate(-35 -6 -3)"/>
+    <ellipse cx="6" cy="-3" rx="5" ry="3" transform="rotate(35 6 -3)"/>
+    <ellipse cx="-6" cy="4" rx="5" ry="3" transform="rotate(-35 -6 4)"/>
+    <ellipse cx="6" cy="4" rx="5" ry="3" transform="rotate(35 6 4)"/>
+    <ellipse cx="0" cy="-15" rx="4" ry="5"/></g>`,
+  Protein: `<g><ellipse cx="-3" cy="-3" rx="14" ry="10" fill="#b5714e" transform="rotate(-35 -3 -3)"/>
+    <ellipse cx="-6" cy="-6" rx="9" ry="6" fill="#c98a63" transform="rotate(-35 -6 -6)" opacity="0.8"/>
+    <rect x="6" y="6" width="14" height="4" rx="2" fill="#e8d9b8" transform="rotate(45 6 6)"/>
+    <circle cx="17" cy="14" r="4" fill="#f2e8d0"/><circle cx="13" cy="18" r="4" fill="#f2e8d0"/></g>`,
+};
+
+function arcPath(cx, cy, rad, a0, a1) {
+  const p = a => [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+  const [x0, y0] = p(a0), [x1, y1] = p(a1);
+  const large = (a1 - a0) > Math.PI ? 1 : 0;
+  return `M ${cx} ${cy} L ${x0} ${y0} A ${rad} ${rad} 0 ${large} 1 ${x1} ${y1} Z`;
+}
+
+// segments: [{name, frac, label}] — frac of total energy, must sum to ~1
+function drawPlate(segments) {
+  const g = $('segments');
+  g.innerHTML = '';
+  let angle = -Math.PI / 2;
+  const R = 126, cx = 170, cy = 170;
+  for (const s of segments) {
+    const a1 = angle + s.frac * 2 * Math.PI;
+    const mid = (angle + a1) / 2;
+    const path = `<path d="${arcPath(cx, cy, R, angle, a1)}" fill="${COLORS[s.name]}" opacity="0.88"
+      stroke="#fdfcf8" stroke-width="3"/>`;
+    // small slices: push icon+label outward, shrink icon
+    const small = s.frac < 0.14;
+    const rr = small ? 0.78 : 0.62;
+    const ix = cx + rr * R * Math.cos(mid), iy = cy + rr * R * Math.sin(mid);
+    const sub = s.label ? `<tspan x="${ix}" dy="13" font-size="10.5">${s.label}</tspan>` : '';
+    g.innerHTML += path +
+      `<g transform="translate(${ix} ${iy - 12})${small ? ' scale(0.7)' : ''}">${ICONS[s.name]}</g>` +
+      `<text x="${ix}" y="${iy + 22}" text-anchor="middle" font-family="Raleway, sans-serif"
+        font-size="12" font-weight="700" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="2.5"
+        paint-order="stroke">${t().seg[s.name]}${sub}</text>`;
+    angle = a1;
+  }
+}
+
+// plate view: 'weight' = slice by grams eaten, 'kcal' = slice by calorie share
+let plateMode = 'weight';
+let lastMacros = null;
+function renderPlate() {
+  if (!lastMacros) return;
+  const { carbsG, proteinG, fatG, fiberG, target, goalKey, rate } = lastMacros;
+  const tt = t();
+  let pP, pF, pC;
+  if (plateMode === 'kcal') {
+    pP = proteinG * 4 / target; pF = fatG * 9 / target; pC = 1 - pP - pF;
+  } else {
+    const totG = carbsG + proteinG + fatG;
+    pP = proteinG / totG; pF = fatG / totG; pC = carbsG / totG;
+  }
+  const pctL = f => Math.round(f * 100) + ' %';
+  // carbohydrate split produce : grains = 2 : 1 (Harvard plate: ½ veg+fruit vs ¼ grains)
+  drawPlate([
+    { name: 'Veg & fruits', frac: pC * 2 / 3, label: `${pctL(pC * 2 / 3)} · ${fiberG} ${tt.g} ${tt.fiber}` },
+    { name: 'Whole grains', frac: pC / 3,     label: `${pctL(pC / 3)} · ${carbsG} ${tt.g} ${tt.carbs}*` },
+    { name: 'Protein',      frac: pP,         label: `${pctL(pP)} · ${proteinG} ${tt.g}` },
+    { name: 'Fats',         frac: pF,         label: `${pctL(pF)} · ${fatG} ${tt.g}` },
+  ]);
+  const note = plateMode === 'kcal' ? tt.shareKcal : tt.shareGrams;
+  const paceStr = rate ? `, ${rate} ${tt.kgWk}` : '';
+  $('plateCap').innerHTML = `${tt.plateMain} — ${Math.round(target)} kcal (${tt.goals[goalKey].toLowerCase()}${paceStr})<br>
+    <small style="color:var(--ink-soft)">${note} · ${tt.carbsNote}</small>`;
+}
+document.querySelectorAll('.plate-toggle button').forEach(b =>
+  b.addEventListener('click', () => {
+    plateMode = b.dataset.mode;
+    document.querySelectorAll('.plate-toggle button').forEach(x => {
+      const on = x === b;
+      x.classList.toggle('active', on);
+      x.setAttribute('aria-pressed', on);
+    });
+    renderPlate();
+  }));
+
+// pace select: options depend on goal (safe ranges; lose ≤1 kg/wk per AHA/ACC/TOS)
+const PACES = { lose: [0.25, 0.5, 0.75, 1], gain: [0.25, 0.5] };
+function buildRate(keep) {
+  const paces = PACES[$('goal').value];
+  $('rateWrap').style.display = paces ? '' : 'none';
+  if (paces) $('rate').innerHTML = paces.map(p =>
+    `<option value="${p}"${p === (keep || 0.5) ? ' selected' : ''}>${p} ${t().kgWeek}${p === 0.5 ? ' (' + t().recommended + ')' : ''}</option>`).join('');
+}
+$('goal').addEventListener('change', () => buildRate());
+
+// Goal adjustments (see sources): pace-driven kcal delta or % surplus,
+// plus a goal-specific protein target in g/kg body weight
+const GOALS = {
+  maintain: { proteinPerKg: 1.2 },              // ISSN (Jäger 2017): 1.4–2.0 active; 1.2 general
+  lose:     { dir: -1, proteinPerKg: 2.0 },     // Helms 2014 / Wycherley 2012: high protein preserves lean mass in a deficit
+  gain:     { dir: +1, proteinPerKg: 1.6 },     // Iraki 2019 / Morton 2018
+  muscle:   { pct: +0.10, proteinPerKg: 1.8 },  // Morton 2018 (~1.6) / ISSN (up to 2.2): 1.8 g/kg
+};
+const KCAL_PER_KG = 7700;  // energy content of 1 kg body weight (Wishnofsky 1958)
+
+// build the localized <option> lists, preserving current selection
+function buildSelects() {
+  const acts = ['1.2', '1.375', '1.55', '1.725', '1.9'];
+  const keepAct = $('activity').value || '1.55';
+  $('activity').innerHTML = acts.map((v, i) =>
+    `<option value="${v}"${v === keepAct ? ' selected' : ''}>${t().activity[i]}</option>`).join('');
+  const keepGoal = $('goal').value || 'maintain';
+  $('goal').innerHTML = Object.keys(GOALS).map(k =>
+    `<option value="${k}"${k === keepGoal ? ' selected' : ''}>${t().goals[k]}</option>`).join('');
+}
+
+function applyLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(e => e.textContent = t()[e.dataset.i18n]);
+  document.querySelectorAll('[data-i18n-html]').forEach(e => e.innerHTML = t()[e.dataset.i18nHtml]);
+  const keepRate = +$('rate').value || 0.5;
+  buildSelects();
+  buildRate(keepRate);
+  document.querySelectorAll('.lang-toggle button').forEach(b => {
+    const on = b.dataset.lang === l;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  if (lastMacros) $('f').requestSubmit();
+}
+document.querySelectorAll('.lang-toggle button').forEach(b =>
+  b.addEventListener('click', () => applyLang(b.dataset.lang)));
+
+$('f').addEventListener('submit', e => {
+  e.preventDefault();
+  const tt = t();
+  const sex = document.querySelector('input[name=sex]:checked').value;
+  const age = +$('age').value, w = +$('weight').value, h = +$('height').value;
+  const pal = +$('activity').value;
+  const goalKey = $('goal').value, goal = GOALS[goalKey];
+  const bad = !(age >= 18 && age <= 100 && w >= 30 && w <= 300 && h >= 120 && h <= 230);
+  $('err').style.display = bad ? 'block' : 'none';
+  if (bad) return;
+
+  // Mifflin–St Jeor (Am J Clin Nutr 1990)
+  const bmr = 10 * w + 6.25 * h - 5 * age + (sex === 'm' ? 5 : -161);
+  const tdee = bmr * pal;
+  // pace-driven target energy: rate kg/wk × 7700 kcal/kg ÷ 7 days;
+  // weight-loss floor 1500/1200 kcal (AHA/ACC/TOS 2013)
+  const rate = goal.dir ? +$('rate').value : 0;
+  const dailyAdj = goal.dir ? goal.dir * rate * KCAL_PER_KG / 7 : tdee * (goal.pct || 0);
+  const floor = sex === 'm' ? 1500 : 1200;
+  const target = Math.max(tdee + dailyAdj, floor);
+  const floored = tdee + dailyAdj < floor;
+  // protein: goal-specific g/kg body weight (capped at AMDR 35 % of kcal)
+  const proteinG = r2(Math.min(goal.proteinPerKg * w, target * 0.35 / 4));
+  const fatG = r2(target * 0.30 / 9);        // IOM AMDR 20–35 %
+  const carbsG = r2((target - proteinG * 4 - target * 0.30) / 4);  // remainder
+  const fiberG = r2(target / 1000 * 14);     // IOM: 14 g / 1000 kcal
+  // total water from body weight: adult clinical standard 30–40 mL/kg/day, set by
+  // activity level, reduced with age (ESPEN/DGE). Uses weight + activity + age.
+  const mlPerKgByAct = { 1.2: 30, 1.375: 33, 1.55: 35, 1.725: 38, 1.9: 40 };
+  const ageAdj = age > 65 ? -10 : age > 55 ? -5 : 0;
+  const mlPerKg = Math.max(25, (mlPerKgByAct[pal] || 35) + ageAdj);
+  const waterTotal = r2(mlPerKg * w / 1000);
+  const waterDrink = r2(waterTotal * 0.8);
+
+  lastMacros = { carbsG, proteinG, fatG, fiberG, target, goalKey, rate };
+  renderPlate();
+
+  // glass: fill proportional to intake, 4 L = full
+  const maxH = 225, fillH = Math.min(1, waterDrink / 4) * maxH;
+  $('waterFill').setAttribute('y', 252 - fillH);
+  $('waterFill').setAttribute('height', fillH);
+  $('waterTop').setAttribute('cy', 252 - fillH);
+  $('waterTop').setAttribute('opacity', 0.9);
+  $('waterLabel').textContent = waterDrink + ' ' + tt.L;
+  $('glassCap').innerHTML = `${tt.drink} ${waterDrink} ${tt.L}<br>
+    <small style="color:var(--ink-soft)">${tt.totalWater(waterTotal, mlPerKg, w)}</small>`;
+
+  const pct = g => Math.round(g / target * 100);
+  const gU = tt.g, pk = tt.gPerKg;
+  $('stats').innerHTML = [
+    [`${Math.round(bmr)} kcal`, tt.stBmr, ''],
+    [`${Math.round(tdee)} kcal`, tt.stTdee, ''],
+    [`${Math.round(target)} kcal`, `${tt.stTarget} · ${tt.goals[goalKey].toLowerCase()}`, ''],
+    [`${carbsG} ${gU}`, `${tt.stCarbs} · ${pct(carbsG * 4)} % kcal`, '#d9a441'],
+    [`${proteinG} ${gU}`, `${tt.stProtein} · ${pct(proteinG * 4)} % kcal (${goal.proteinPerKg} ${pk})`, '#a3583a'],
+    [`${fatG} ${gU}`, `${tt.stFat} · ${pct(fatG * 9)} % kcal`, '#c98a63'],
+    [`${fiberG} ${gU}`, tt.stFiber, '#6a9a3f'],
+    [`${waterDrink} ${tt.L}`, tt.stWater, '#4a8fc2'],
+  ].map(([v, l, c]) =>
+    `<div class="stat"><b>${c ? `<span class="swatch" style="background:${c}"></span>` : ''}${v}</b><span>${l}</span></div>`
+  ).join('');
+
+  const adj = goal.dir ? `${goal.dir > 0 ? '+' : '−'} ${rate} ${tt.kgWk} × 7700 ÷ 7 = ${goal.dir > 0 ? '+' : '−'}${Math.round(rate * KCAL_PER_KG / 7)} kcal`
+            : goal.pct ? `+ ${goal.pct * 100} %` : '± 0';
+  $('worked').innerHTML = `${tt.yourNumbers} <code>BMR = 10·${w} + 6.25·${h} − 5·${age} ${sex === 'm' ? '+ 5' : '− 161'} = ${Math.round(bmr)} kcal</code>,
+    <code>TDEE = ${Math.round(bmr)} × ${pal} = ${Math.round(tdee)} kcal</code>,
+    <code>${tt.wTarget} = TDEE ${adj} = ${Math.round(target)} kcal</code>,
+    <code>${tt.wProtein} = min(${goal.proteinPerKg} ${pk} × ${w} ${tt.g}, 35 % kcal) = ${proteinG} ${tt.g}</code>.` +
+    (floored ? tt.flooredNote(floor) : '');
+
+  $('results').style.display = 'block';
+  $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// initial paint
+applyLang(lang);
+</script>
+</body>
+</html>
