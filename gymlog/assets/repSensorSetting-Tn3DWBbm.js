@@ -1,1 +1,0 @@
-import{r as a}from"./index-VcSNliPZ.js";const r="gymlog.repSensor.v1";function l(){try{return localStorage.getItem(r)==="1"}catch{return!1}}let o=l();const t=new Set;function n(){return o}function u(e){o=e;try{localStorage.setItem(r,e?"1":"0")}catch{}for(const s of t)s()}function i(){return a.useSyncExternalStore(e=>(t.add(e),()=>t.delete(e)),n,n)}export{u as s,i as u};
