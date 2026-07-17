@@ -1,1 +1,0 @@
-import{k as s}from"./index-CEd_sKwL.js";function c({tabs:e,active:n,onChange:r,className:a,style:t}){return s.jsx("div",{className:"tabs"+(a?` ${a}`:""),style:t,children:e.map(i=>s.jsx("button",{className:"tab"+(i.id===n?" active":""),onClick:()=>r(i.id),children:i.label},i.id))})}export{c as T};
