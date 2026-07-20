@@ -1,1 +1,0 @@
-import{j as r,b0 as e,I as t}from"./index-D3w5GVm6.js";function l({bpm:s,zone:a}){if(!s||s<=0)return null;const n=a!=null&&a>0?e[a]:"#f43f5e";return r.jsxs("span",{className:"hr-badge",style:{background:n,boxShadow:`0 2px 6px ${n}80`},children:[r.jsx("span",{className:"hr-heart",style:{animationDuration:`${60/s}s`},children:r.jsx(t,{name:"heart",size:9})}),s]})}export{l as H};
