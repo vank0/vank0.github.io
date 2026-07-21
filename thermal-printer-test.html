@@ -45,6 +45,7 @@ th{background:var(--bg)}
 .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
 #log{font-family:var(--mono);font-size:0.78rem;background:var(--bg);border:1px solid var(--line);
   border-radius:6px;padding:8px;max-height:180px;overflow-y:auto;white-space:pre-wrap}
+#log .ok{color:var(--ok)} #log .bad{color:var(--bad)} #log .warn{color:var(--warn)}
 #imgPreview{max-width:100%;image-rendering:pixelated;border:1px solid var(--line);display:none;background:#fff}
 details summary{cursor:pointer;font-weight:600}
 .hint{font-size:0.82rem;color:var(--mut);margin:6px 0 0}
@@ -56,7 +57,7 @@ code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4
 <body>
 <main>
 <header>
-  <h1>BT Thermal Print<small>Web Bluetooth · ESC/POS</small></h1>
+  <h1>BT Thermal Print<small>Web Bluetooth · ESC/POS · pocket &amp; cat printers</small></h1>
   <span id="status" class="pill">disconnected</span>
   <span style="flex:1"></span>
   <button id="btnConnect" class="primary">Connect printer</button>
@@ -83,7 +84,7 @@ code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4
     <button id="btnFeed" class="needs-conn" disabled>Feed</button>
     <button id="btnCut" class="needs-conn" disabled>Cut</button>
   </div>
-  <p class="hint">Non-ASCII characters map to CP437 where possible, otherwise print as “?”.</p>
+  <p class="hint">ESC/POS mode uses printer fonts (non-ASCII maps to CP437 or “?”). Pocket/cat modes render text as an image, so any characters work.</p>
 </section>
 
 <section class="card">
@@ -108,11 +109,11 @@ code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4
     <input type="text" id="bcData" placeholder="Barcode content (ASCII)" style="flex:1;min-width:200px" maxlength="60">
     <button id="btnBc" class="primary needs-conn" disabled>Print CODE128</button>
   </div>
-  <p class="hint">Rendered by the printer itself — needs firmware QR/barcode support (most ESC/POS models have it).</p>
+  <p class="hint">Rendered by the printer firmware — ESC/POS mode only. Pocket/cat printers have no QR/barcode commands.</p>
 </section>
 
 <section class="card">
-  <h2>Raw ESC/POS (hex)</h2>
+  <h2>Raw bytes (hex)</h2>
   <div class="row">
     <input type="text" id="hexData" placeholder="e.g. 1B 40 1B 61 01 48 69 0A" style="flex:1;min-width:200px">
     <button id="btnHex" class="needs-conn" disabled>Send bytes</button>
@@ -122,15 +123,32 @@ code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4
 <section class="card">
   <h2>Settings</h2>
   <div class="row">
+    <label>Protocol <select id="proto">
+      <option value="auto">auto</option>
+      <option value="escpos">ESC/POS</option>
+      <option value="tiny">Pocket printer (tiny)</option>
+      <option value="cat">Cat printer</option>
+    </select></label>
+    <label>Darkness (cat) <select id="darkness"><option value="8000">low</option><option value="12000" selected>medium</option><option value="17500">high</option></select></label>
+  </div>
+  <div class="row">
+    <label>Characteristic <select id="charSel" disabled><option>— connect first —</option></select></label>
+    <label>Write mode <select id="writeMode">
+      <option value="auto">auto</option>
+      <option value="noresp">without response</option>
+      <option value="resp">with response</option>
+    </select></label>
+  </div>
+  <div class="row">
     <label>Paper <select id="dots"><option value="384">58 mm (384 dots)</option><option value="576">80 mm (576 dots)</option></select></label>
     <label>Chunk <input type="number" id="chunk" min="20" max="512" value="100"> bytes</label>
     <label>Delay <input type="number" id="delay" min="0" max="200" value="20"> ms</label>
   </div>
   <div class="row">
     <label>Feed after print <input type="number" id="feedAfter" min="0" max="10" value="3"> lines</label>
-    <label><input type="checkbox" id="cutAfter"> cut after print</label>
+    <label><input type="checkbox" id="cutAfter"> cut after print (ESC/POS)</label>
   </div>
-  <p class="hint">Prints garbled or stops mid-job? Lower chunk size and/or raise delay. Portable printers usually have no cutter.</p>
+  <p class="hint">Protocol “auto” picks from the device name and GATT layout — the log shows what it chose. Prints garbled or stops mid-job? Lower chunk size, raise delay, or try the other write mode. Pocket/cat printers are always 384 dots; the paper setting only affects ESC/POS.</p>
 </section>
 
 <section class="card">
@@ -152,19 +170,20 @@ code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4
   <p class="hint">Also required: HTTPS or <code>localhost</code>, and a user click to open the device chooser.</p>
 
   <h3 style="font-size:0.95rem">Printers</h3>
-  <p class="hint" style="margin:0 0 6px">Rule of thumb: the printer must speak <strong>Bluetooth Low Energy (BLE)</strong> and <strong>ESC/POS</strong>. Web Bluetooth cannot see Bluetooth Classic (SPP) devices at all.</p>
+  <p class="hint" style="margin:0 0 6px">The printer must speak <strong>Bluetooth Low Energy</strong> — Web Bluetooth cannot see Bluetooth Classic (SPP) devices at all. The wire protocol is handled per family below.</p>
   <table>
     <tr><th>Printer</th><th>Status</th></tr>
-    <tr><td>Goojprt PT-210, PT-120 (58 mm portable)</td><td class="ok">✔ works</td></tr>
-    <tr><td>Phomemo M02, M02S, M02 Pro, T02</td><td class="ok">✔ works</td></tr>
-    <tr><td>Zjiang ZJ-5802, ZJ-5805, ZJ-5809</td><td class="ok">✔ works</td></tr>
-    <tr><td>Xprinter XP-P300, XP-P323B (BLE mode)</td><td class="ok">✔ works</td></tr>
-    <tr><td>Rongta RPP02, RPP200, RPP300</td><td class="ok">✔ works</td></tr>
-    <tr><td>Star Micronics SM-L200, SM-L300 (ESC/POS mode)</td><td class="ok">✔ works</td></tr>
-    <tr><td>Generic “MTP-II / MPT-3” 58 mm BLE printers (AliExpress/Amazon)</td><td class="ok">✔ usually work</td></tr>
+    <tr><td>Goojprt PT-210, PT-120 (58 mm portable)</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Phomemo M02, M02S, M02 Pro, T02</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Zjiang ZJ-5802, ZJ-5805, ZJ-5809</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Xprinter XP-P300, XP-P323B (BLE mode)</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Rongta RPP02, RPP200, RPP300</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Star Micronics SM-L200, SM-L300 (ESC/POS mode)</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Generic “MTP-II / MPT-3” 58 mm BLE printers (AliExpress/Amazon)</td><td class="ok">✔ usually ESC/POS</td></tr>
+    <tr><td>Pocket-printer family — KDC-0019B, “Pocket Printer”, X2h/X5h/X6h/X7h, EMX-040256, DL_GE225, ROSSMANN and other <em>Tiny Print</em>-app clones</td><td class="ok">✔ pocket (tiny) mode — text/QR printed as image</td></tr>
+    <tr><td>“Cat printers” — GB01, GB02, GB03, GT01, MX05/MX06, YT01</td><td class="ok">✔ cat mode — text/QR printed as image</td></tr>
     <tr><td>Epson TM-P20/P60/P80, most Xprinter 58IIH, Bixolon SPP-R</td><td class="bad">✘ Bluetooth Classic only — invisible to Web Bluetooth</td></tr>
-    <tr><td>“Cat printers” (GB01, GB02, GT01, MX05/MX06)</td><td class="bad">✘ BLE but proprietary protocol, not ESC/POS</td></tr>
-    <tr><td>Paperang P1/P2, Peripage A6/A8</td><td class="bad">✘ proprietary protocol</td></tr>
+    <tr><td>Paperang P1/P2, Peripage A6/A8</td><td class="bad">✘ proprietary protocol (not implemented)</td></tr>
     <tr><td>Label printers (Niimbot, Phomemo D30/M110, Brother PT)</td><td class="bad">✘ different protocols</td></tr>
     <tr><td>Wi-Fi / USB / AirPrint-only printers</td><td class="bad">✘ no Bluetooth path</td></tr>
   </table>
@@ -173,9 +192,10 @@ code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4
     <summary>Troubleshooting</summary>
     <ul>
       <li><strong>Printer not in the chooser</strong> — it is Classic-only, powered off, or already connected to a phone. Unpair it elsewhere first.</li>
-      <li><strong>Connects but nothing prints</strong> — check the log below; if no writable characteristic was found it is not a serial-style BLE printer.</li>
-      <li><strong>Prints garbage</strong> — the printer is not ESC/POS (e.g. a cat printer).</li>
-      <li><strong>Stops mid-print / missing lines</strong> — chunks arrive too fast; lower chunk size, raise delay.</li>
+      <li><strong>Connects, “sent N bytes”, but nothing prints</strong> — wrong protocol for the device. Switch Protocol in Settings (pocket ↔ cat ↔ ESC/POS) and check the auto-detect line in the log.</li>
+      <li><strong>Connects but no writable characteristic</strong> — not a serial-style BLE printer; check the GATT dump in the log.</li>
+      <li><strong>Prints garbage</strong> — protocol mismatch; try the other modes.</li>
+      <li><strong>Stops mid-print / missing lines</strong> — chunks arrive too fast; lower chunk size, raise delay, or switch write mode to “with response”.</li>
     </ul>
   </details>
 </section>
@@ -196,12 +216,18 @@ const KNOWN_SERVICES = [
   '0000ff00-0000-1000-8000-00805f9b34fb', // Phomemo and friends
   '0000ffe0-0000-1000-8000-00805f9b34fb', // HM-10 style UART
   '0000ffe5-0000-1000-8000-00805f9b34fb',
-  '0000ae30-0000-1000-8000-00805f9b34fb', // cat printers (raw hex only)
+  '0000ae30-0000-1000-8000-00805f9b34fb', // pocket/cat printer family
+  '0000ae3a-0000-1000-8000-00805f9b34fb',
+  '0000ae00-0000-1000-8000-00805f9b34fb',
+  '0000ae80-0000-1000-8000-00805f9b34fb',
+  '0000ab00-0000-1000-8000-00805f9b34fb',
   '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC/Microchip transparent UART
   'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // generic BLE serial
 ];
+const PREF_WRITE = ['ae01', 'ae3b', 'ae81', 'ff02', 'ab01', '2af1'];
+const PREF_SVC   = ['ae30', 'ae3a', 'ae00', 'ae80', 'ff00', 'ab00', '18f0'];
 
-let device = null, chr = null;
+let device = null, chr = null, writableChars = [], detectedProto = 'escpos';
 
 function log(msg, cls){
   const el = $('log');
@@ -209,19 +235,40 @@ function log(msg, cls){
   if (cls) line.className = cls;
   line.textContent = `${new Date().toLocaleTimeString()}  ${msg}`;
   el.appendChild(line);
-  while (el.childElementCount > 200) el.firstChild.remove();
+  while (el.childElementCount > 300) el.firstChild.remove();
   el.scrollTop = el.scrollHeight;
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const short = uuid => uuid.startsWith('0000') && uuid.endsWith('-0000-1000-8000-00805f9b34fb') ? uuid.slice(4, 8) : uuid;
 
 function setConnected(on){
   $('status').textContent = on ? `connected — ${device.name || 'unnamed'}` : 'disconnected';
   $('status').classList.toggle('on', on);
   $('btnConnect').disabled = on;
   $('btnDisconnect').disabled = !on;
+  $('charSel').disabled = !on;
   document.querySelectorAll('.needs-conn').forEach(b => b.disabled = !on);
 }
 
+/* ---------- protocol auto-detection ---------- */
+// name prefixes from TiMini-Print's catalog (pocket_printer detections + cat family)
+const TINY_NAMES = ['0019B', 'KDC', 'Pocket Printer', 'EMX-', 'Luxorp', 'SeznikEcho', 'TCM', 'UXPORTMIP',
+  'DL_GE', 'ML-MP-01', 'ROSSMANN', 'DTR-R0', 'GB03PL', 'HT0125', 'RT034h', 'DT1-0', 'SC03h', 'SC04h',
+  'X103h', 'DY03', 'X100', 'X2h', 'X5h', 'X6h', 'X7h'];
+const CAT_NAMES = ['GB01', 'GB02', 'GB03', 'GB04', 'GT01', 'MX05', 'MX06', 'MX08', 'MX09', 'MX10', 'MX11', 'YT01'];
+
+function guessProtocol(name, charUuid){
+  const n = (name || '').trim();
+  if (TINY_NAMES.some(p => n.startsWith(p))) return 'tiny'; // checked first: GB03PL (tiny) beats GB03 (cat)
+  if (CAT_NAMES.some(p => n.startsWith(p))) return 'cat';
+  // ponytail: ae01-family char without a known name — tiny is the most common clone protocol; user can flip in Settings
+  if (['ae01', 'ae3b', 'ae81', 'ab01'].includes(short(charUuid))) return 'tiny';
+  return 'escpos';
+}
+const activeProto = () => $('proto').value === 'auto' ? detectedProto : $('proto').value;
+const isRasterProto = () => activeProto() !== 'escpos';
+
+/* ---------- connection ---------- */
 async function connect(){
   try {
     device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: KNOWN_SERVICES });
@@ -229,18 +276,35 @@ async function connect(){
     device.addEventListener('gattserverdisconnected', () => { log('printer disconnected', 'bad'); setConnected(false); });
     const server = await device.gatt.connect();
     const services = await server.getPrimaryServices();
-    chr = null;
+    writableChars = [];
     for (const s of services){
       for (const c of await s.getCharacteristics()){
         const p = c.properties;
+        const props = ['read', 'write', 'writeWithoutResponse', 'notify', 'indicate'].filter(k => p[k]).join(',');
+        log(`gatt: svc ${short(s.uuid)} chr ${short(c.uuid)} [${props || 'none'}]`);
         if (p.write || p.writeWithoutResponse){
-          log(`writable characteristic: svc ${s.uuid.slice(4,8)} chr ${c.uuid.slice(4,8)}${p.writeWithoutResponse ? ' (no-response)' : ''}`);
-          if (!chr || (!chr.properties.writeWithoutResponse && p.writeWithoutResponse)) chr = c;
+          const score = (PREF_WRITE.includes(short(c.uuid)) ? 100 : 0)
+                      + (PREF_SVC.includes(short(s.uuid)) ? 50 : 0)
+                      + (p.writeWithoutResponse ? 10 : 5);
+          writableChars.push({ c, s, score });
         }
       }
     }
-    if (!chr) throw new Error('no writable characteristic found — printer is probably not a BLE ESC/POS device');
+    if (!writableChars.length) throw new Error('no writable characteristic found — see GATT dump above');
+    writableChars.sort((a, b) => b.score - a.score);
+    const sel = $('charSel');
+    sel.innerHTML = '';
+    writableChars.forEach((w, i) => {
+      const o = document.createElement('option');
+      o.value = i;
+      o.textContent = `${short(w.s.uuid)} / ${short(w.c.uuid)}`;
+      sel.appendChild(o);
+    });
+    chr = writableChars[0].c;
+    detectedProto = guessProtocol(device.name, chr.uuid);
+    document.querySelector('#proto option[value=auto]').textContent = `auto (${detectedProto})`;
     setConnected(true);
+    log(`using chr ${short(chr.uuid)}, protocol: ${detectedProto}${$('proto').value === 'auto' ? ' (auto)' : ` (manual: ${$('proto').value})`}`, 'ok');
     log('ready', 'ok');
   } catch (e){
     log(`connect failed: ${e.message}`, 'bad');
@@ -252,14 +316,17 @@ async function send(bytes){
   if (!chr) throw new Error('not connected');
   const chunk = Math.min(512, Math.max(20, +$('chunk').value || 100));
   const delay = Math.max(0, +$('delay').value || 0);
+  const mode = $('writeMode').value;
+  const useWNR = chr.properties.writeWithoutResponse && chr.writeValueWithoutResponse
+              && (mode === 'noresp' || (mode === 'auto' && true));
   const data = bytes instanceof Uint8Array ? bytes : Uint8Array.from(bytes);
   for (let i = 0; i < data.length; i += chunk){
     const slice = data.subarray(i, i + chunk);
-    if (chr.properties.writeWithoutResponse && chr.writeValueWithoutResponse) await chr.writeValueWithoutResponse(slice);
+    if (useWNR && mode !== 'resp') await chr.writeValueWithoutResponse(slice);
     else await chr.writeValue(slice);
     if (delay) await sleep(delay);
   }
-  log(`sent ${data.length} bytes`);
+  log(`sent ${data.length} bytes (${activeProto()})`);
 }
 
 /* ---------- ESC/POS ---------- */
@@ -279,16 +346,14 @@ function enc(str){
   return out;
 }
 
-function tail(){
+function escposTail(){
   const out = [ESC, 0x64, Math.max(0, +$('feedAfter').value || 0)]; // feed n
   if ($('cutAfter').checked) out.push(GS, 0x56, 0x42, 0x00);        // partial cut
   return out;
 }
 
-async function printText(){
-  const t = $('text').value;
-  if (!t.trim()) return log('nothing to print', 'warn');
-  const bytes = [
+function escposText(t){
+  return [
     ...INIT,
     ESC, 0x61, +$('align').value,            // align
     GS, 0x21, +$('size').value,              // size
@@ -296,26 +361,199 @@ async function printText(){
     ESC, 0x2d, $('underline').checked ? 1 : 0,
     ...enc(t.endsWith('\n') ? t : t + '\n'),
     GS, 0x21, 0, ESC, 0x45, 0, ESC, 0x2d, 0, ESC, 0x61, 0,
-    ...tail(),
+    ...escposTail(),
   ];
-  await send(bytes).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+function escposRaster(canvas){
+  const { width, height } = canvas;
+  const px = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+  const rowBytes = width / 8;
+  const BAND = 96; // rows per GS v 0 command — safer on small buffers
+  const out = [...INIT, ESC, 0x61, 1];
+  for (let y0 = 0; y0 < height; y0 += BAND){
+    const rows = Math.min(BAND, height - y0);
+    out.push(GS, 0x76, 0x30, 0x00, rowBytes & 255, rowBytes >> 8, rows & 255, rows >> 8);
+    for (let y = y0; y < y0 + rows; y++){
+      for (let bx = 0; bx < rowBytes; bx++){
+        let byte = 0;
+        for (let bit = 0; bit < 8; bit++)
+          if (px[(y * width + bx * 8 + bit) * 4] === 0) byte |= 0x80 >> bit; // black = 1, MSB first
+        out.push(byte);
+      }
+    }
+  }
+  out.push(ESC, 0x61, 0, ...escposTail());
+  return out;
+}
+
+/* ---------- 51 78 packet protocols: pocket "tiny" (KDC-0019B etc.) and cat printers ----------
+   frame: 51 78 cmd 00 lenLo lenHi payload crc8(payload) FF — CRC-8 poly 0x07 init 0.
+   Wire format cross-checked against TiMini-Print (tiny family) and catprinter projects. */
+function crc8(bytes){
+  let c = 0;
+  for (const b of bytes){
+    c ^= b;
+    for (let i = 0; i < 8; i++) c = c & 0x80 ? ((c << 1) ^ 0x07) & 0xff : (c << 1) & 0xff;
+  }
+  return c;
+}
+const frame = (cmd, payload) =>
+  [0x51, 0x78, cmd, 0x00, payload.length & 255, payload.length >> 8, ...payload, crc8(payload), 0xFF];
+
+function packRowLSB(px, width, y){ // black = 1, LSB first (opposite of ESC/POS)
+  const row = new Array(width >> 3).fill(0);
+  for (let x = 0; x < width; x++)
+    if (px[(y * width + x) * 4] === 0) row[x >> 3] |= 1 << (x & 7);
+  return row;
+}
+
+function tinyJob(canvas, isText){
+  // mirrors TiMini's tiny-family job for the pocket_printer/d1 profile:
+  // energy, print mode, speed, one A2 packet per row (speed re-sent every 200), feed, dev-state
+  const { width, height } = canvas;
+  const px = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+  const energy = isText ? 8000 : 5000, speed = 10;
+  const out = [
+    ...frame(0xAF, [energy & 255, energy >> 8]),
+    ...frame(0xBE, [isText ? 1 : 0]),
+    ...frame(0xBD, [speed]),
+  ];
+  for (let y = 0; y < height; y++){
+    out.push(...frame(0xA2, packRowLSB(px, width, y)));
+    if ((y + 1) % 200 === 0) out.push(...frame(0xBD, [speed]));
+  }
+  const feeds = Math.max(1, +$('feedAfter').value || 0);
+  for (let i = 0; i < feeds; i++) out.push(...frame(0xA1, [0x30, 0x00])); // 48 dots each at 200 dpi
+  out.push(...frame(0xA3, [0x00]));
+  return out;
+}
+
+const LATTICE_START = [0xAA, 0x55, 0x17, 0x38, 0x44, 0x5F, 0x5F, 0x5F, 0x44, 0x38, 0x2C];
+const LATTICE_END   = [0xAA, 0x55, 0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x17];
+function catJob(canvas){
+  const { width, height } = canvas;
+  const px = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+  const energy = +$('darkness').value;
+  const out = [
+    ...frame(0xA3, [0x00]),
+    ...frame(0xA4, [0x32]),                       // quality / 200 dpi
+    ...frame(0xAF, [energy & 255, energy >> 8]),
+    ...frame(0xBE, [0x01]),                       // apply energy
+    ...frame(0xBD, [0x23]),
+    ...frame(0xA6, LATTICE_START),
+  ];
+  for (let y = 0; y < height; y++) out.push(...frame(0xA2, packRowLSB(px, width, y)));
+  const feedDots = Math.max(1, +$('feedAfter').value || 0) * 48;
+  out.push(...frame(0xBD, [0x19]),
+           ...frame(0xA1, [feedDots & 255, feedDots >> 8]),
+           ...frame(0xA6, LATTICE_END),
+           ...frame(0xA3, [0x00]));
+  return out;
+}
+
+async function printCanvas(canvas, isText){
+  const p = activeProto();
+  const job = p === 'tiny' ? tinyJob(canvas, isText) : p === 'cat' ? catJob(canvas) : escposRaster(canvas);
+  await send(job).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+/* ---------- text rendered to canvas (pocket/cat printers have no text mode) ---------- */
+function textToCanvas(text){
+  const width = 384, pad = 8;
+  const fs = +$('size').value ? 32 : 24;
+  const lh = Math.round(fs * 1.3);
+  const font = `${$('bold').checked ? '700' : '400'} ${fs}px ui-monospace, Menlo, Consolas, monospace`;
+  const cv = document.createElement('canvas');
+  let ctx = cv.getContext('2d');
+  ctx.font = font;
+  const maxW = width - 2 * pad;
+  const lines = [];
+  for (const raw of text.replace(/\r\n/g, '\n').split('\n')){
+    let line = '';
+    for (const word of raw.split(' ')){
+      const cand = line ? line + ' ' + word : word;
+      if (ctx.measureText(cand).width <= maxW){ line = cand; continue; }
+      if (line) lines.push(line);
+      let w = word;
+      while (ctx.measureText(w).width > maxW){ // hard-split overlong words
+        let cut = 1;
+        while (cut < w.length && ctx.measureText(w.slice(0, cut + 1)).width <= maxW) cut++;
+        lines.push(w.slice(0, cut));
+        w = w.slice(cut);
+      }
+      line = w;
+    }
+    lines.push(line);
+  }
+  cv.width = width;
+  cv.height = lines.length * lh + 2 * pad;
+  ctx = cv.getContext('2d'); // resize reset state
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.font = font; ctx.textBaseline = 'top'; ctx.fillStyle = '#000';
+  const align = +$('align').value;
+  ctx.textAlign = ['left', 'center', 'right'][align];
+  const x = [pad, width / 2, width - pad][align];
+  lines.forEach((l, i) => {
+    const y = pad + i * lh;
+    ctx.fillText(l, x, y);
+    if ($('underline').checked && l){
+      const tw = ctx.measureText(l).width;
+      const lx = align === 0 ? x : align === 1 ? x - tw / 2 : x - tw;
+      ctx.fillRect(lx, y + fs + 1, tw, 2);
+    }
+  });
+  const im = ctx.getImageData(0, 0, cv.width, cv.height); // threshold to pure 1-bit
+  const d = im.data;
+  for (let i = 0; i < d.length; i += 4){
+    const v = (0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2]) < 128 ? 0 : 255;
+    d[i] = d[i+1] = d[i+2] = v; d[i+3] = 255;
+  }
+  ctx.putImageData(im, 0, 0);
+  return cv;
+}
+
+/* ---------- actions ---------- */
+async function printText(){
+  const t = $('text').value;
+  if (!t.trim()) return log('nothing to print', 'warn');
+  if (activeProto() === 'escpos')
+    return send(escposText(t)).catch(e => log(`print failed: ${e.message}`, 'bad'));
+  await printCanvas(textToCanvas(t), true);
 }
 
 async function printTest(){
+  const stamp = new Date().toLocaleString();
+  if (activeProto() !== 'escpos')
+    return printCanvas(textToCanvas(`TEST PAGE\n${stamp}\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789 !"#$%&'()*+,-./\näöü ßñç 你好 →`), true);
   const b = [...INIT,
     ESC, 0x61, 1, GS, 0x21, 0x11, ...enc('TEST PAGE\n'), GS, 0x21, 0,
-    ...enc(new Date().toLocaleString() + '\n\n'),
+    ...enc(stamp + '\n\n'),
     ESC, 0x61, 0, ...enc('left  '), ESC, 0x61, 1, ...enc('center  '), ESC, 0x61, 2, ...enc('right\n'), ESC, 0x61, 0,
     ESC, 0x45, 1, ...enc('bold\n'), ESC, 0x45, 0,
     ESC, 0x2d, 1, ...enc('underline\n'), ESC, 0x2d, 0,
     GS, 0x42, 1, ...enc('inverted\n'), GS, 0x42, 0,
     GS, 0x21, 0x10, ...enc('wide '), GS, 0x21, 0x01, ...enc('tall\n'), GS, 0x21, 0,
     ...enc('!"#$%&\'()*+,-./0123456789\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n'),
-    ...tail()];
+    ...escposTail()];
   await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
 }
 
+async function feed(){
+  const p = activeProto();
+  const b = p === 'escpos' ? [ESC, 0x64, 3]
+    : [...frame(0xA1, [0x30, 0x00]), ...frame(0xA1, [0x30, 0x00]), ...frame(0xA1, [0x30, 0x00])];
+  await send(b).catch(e => log(e.message, 'bad'));
+}
+
+async function cut(){
+  if (activeProto() !== 'escpos') return log('pocket/cat printers have no cutter', 'warn');
+  await send([GS, 0x56, 0x42, 0x00]).catch(e => log(e.message, 'bad'));
+}
+
 async function printQr(){
+  if (activeProto() !== 'escpos')
+    return log('QR needs ESC/POS firmware — pocket/cat printers can’t render it. Screenshot a QR and use “Print image”.', 'warn');
   const data = enc($('qrData').value);
   if (!data.length) return log('QR content empty', 'warn');
   if (data.length > 700) return log('QR content too long', 'warn');
@@ -326,11 +564,13 @@ async function printQr(){
     GS, 0x28, 0x6b, 3, 0, 0x31, 0x45, 0x31,                   // EC level M
     GS, 0x28, 0x6b, len & 255, len >> 8, 0x31, 0x50, 0x30, ...data,
     GS, 0x28, 0x6b, 3, 0, 0x31, 0x51, 0x30,                   // print
-    ESC, 0x61, 0, ...tail()];
+    ESC, 0x61, 0, ...escposTail()];
   await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
 }
 
 async function printBarcode(){
+  if (activeProto() !== 'escpos')
+    return log('barcodes need ESC/POS firmware — pocket/cat printers can’t render them.', 'warn');
   const s = $('bcData').value;
   if (!s) return log('barcode content empty', 'warn');
   if (!/^[\x20-\x7e]+$/.test(s)) return log('CODE128 here supports printable ASCII only', 'warn');
@@ -340,7 +580,7 @@ async function printBarcode(){
     GS, 0x77, 2,         // module width
     GS, 0x48, 2,         // HRI below
     GS, 0x6b, 73, data.length + 2, 0x7b, 0x42, ...data, // CODE128, code set B
-    ESC, 0x61, 0, ...tail()];
+    ESC, 0x61, 0, ...escposTail()];
   await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
 }
 
@@ -351,10 +591,10 @@ async function sendHex(){
 }
 
 /* ---------- image ---------- */
-let rasterCanvas = null; // 1-bit preview, source of truth for printing
+let rasterCanvas = null, lastImg = null; // 1-bit preview, source of truth for printing
 
 function processImage(img){
-  const width = +$('dots').value;
+  const width = isRasterProto() ? 384 : +$('dots').value; // pocket/cat hardware is always 384 dots
   const height = Math.max(1, Math.round(img.naturalHeight * width / img.naturalWidth));
   const cv = document.createElement('canvas');
   cv.width = width; cv.height = height;
@@ -395,28 +635,11 @@ function processImage(img){
 
 async function printImage(){
   if (!rasterCanvas) return log('no image loaded', 'warn');
-  const { width, height } = rasterCanvas;
-  const px = rasterCanvas.getContext('2d').getImageData(0, 0, width, height).data;
-  const rowBytes = width / 8;
-  const BAND = 96; // rows per GS v 0 command — safer on small buffers
-  const out = [...INIT, ESC, 0x61, 1];
-  for (let y0 = 0; y0 < height; y0 += BAND){
-    const rows = Math.min(BAND, height - y0);
-    out.push(GS, 0x76, 0x30, 0x00, rowBytes & 255, rowBytes >> 8, rows & 255, rows >> 8);
-    for (let y = y0; y < y0 + rows; y++){
-      for (let bx = 0; bx < rowBytes; bx++){
-        let byte = 0;
-        for (let bit = 0; bit < 8; bit++)
-          if (px[(y * width + bx * 8 + bit) * 4] === 0) byte |= 0x80 >> bit; // black = 1
-        out.push(byte);
-      }
-    }
-  }
-  out.push(ESC, 0x61, 0, ...tail());
-  await send(out).catch(e => log(`print failed: ${e.message}`, 'bad'));
+  const wanted = isRasterProto() ? 384 : +$('dots').value;
+  if (rasterCanvas.width !== wanted && lastImg) processImage(lastImg); // protocol changed since load
+  await printCanvas(rasterCanvas, false);
 }
 
-let lastImg = null;
 $('imgFile').addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
@@ -427,24 +650,33 @@ $('imgFile').addEventListener('change', e => {
 });
 $('dither').addEventListener('change', () => lastImg && processImage(lastImg));
 $('dots').addEventListener('change', () => lastImg && processImage(lastImg));
+$('proto').addEventListener('change', () => lastImg && processImage(lastImg));
 
 /* ---------- wiring ---------- */
 $('btnConnect').onclick = connect;
 $('btnDisconnect').onclick = () => device?.gatt?.disconnect();
 $('btnPrint').onclick = printText;
 $('btnTest').onclick = printTest;
-$('btnFeed').onclick = () => send([ESC, 0x64, 3]).catch(e => log(e.message, 'bad'));
-$('btnCut').onclick = () => send([GS, 0x56, 0x42, 0x00]).catch(e => log(e.message, 'bad'));
+$('btnFeed').onclick = feed;
+$('btnCut').onclick = cut;
 $('btnPrintImg').onclick = printImage;
 $('btnQr').onclick = printQr;
 $('btnBc').onclick = printBarcode;
 $('btnHex').onclick = sendHex;
+$('charSel').addEventListener('change', e => {
+  const w = writableChars[+e.target.value];
+  if (!w) return;
+  chr = w.c;
+  detectedProto = guessProtocol(device?.name, chr.uuid);
+  document.querySelector('#proto option[value=auto]').textContent = `auto (${detectedProto})`;
+  log(`switched to chr ${short(chr.uuid)} (svc ${short(w.s.uuid)})`);
+});
 $('text').addEventListener('keydown', e => {
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !$('btnPrint').disabled) printText();
 });
 
 /* settings persistence */
-const SETTINGS = ['dots', 'chunk', 'delay', 'feedAfter', 'cutAfter', 'dither'];
+const SETTINGS = ['dots', 'chunk', 'delay', 'feedAfter', 'cutAfter', 'dither', 'proto', 'darkness', 'writeMode'];
 try {
   const saved = JSON.parse(localStorage.getItem('btprint') || '{}');
   for (const id of SETTINGS){
@@ -474,6 +706,12 @@ if (!navigator.bluetooth){
   const data = enc('HELLO'), len = data.length + 3;
   console.assert(len === 8 && (len & 255) === 8 && (len >> 8) === 0, 'qr: pL/pH math');
   console.assert((384 / 8) === 48, 'raster: bytes per row');
+  // 51 78 protocol vectors (known-good constants from TiMini/catprinter captures)
+  console.assert(crc8([0x32]) === 0x9E, 'crc8: quality cmd vector');
+  console.assert(crc8(LATTICE_START) === 0xA1, 'crc8: lattice start vector');
+  console.assert(crc8(LATTICE_END) === 0x11, 'crc8: lattice end vector');
+  const f = frame(0xA3, [0x00]);
+  console.assert(f.join() === [0x51, 0x78, 0xA3, 0x00, 0x01, 0x00, 0x00, 0x00, 0xFF].join(), 'frame: dev-state packet');
   console.log('self-test ok');
 })();
 </script>
