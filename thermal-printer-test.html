@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BT Thermal Print</title>
+<style>
+:root{
+  --bg:#f3f1ec; --card:#ffffff; --ink:#1c1b18; --mut:#6f6a60; --line:#e3ded4;
+  --acc:#0f766e; --acc-ink:#ffffff; --ok:#15803d; --bad:#b3261e; --warn:#a16207;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#161512; --card:#201e1a; --ink:#ece7dd; --mut:#a09a8c; --line:#37332b;
+         --acc:#2dd4bf; --acc-ink:#04211d; --ok:#4ade80; --bad:#f87171; --warn:#fbbf24; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px 16px 64px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:20px 0 8px}
+h1{font-size:1.35rem;margin:0;letter-spacing:-0.01em}
+h1 small{color:var(--mut);font-weight:400;font-size:0.85rem;display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}
+.card h2{font-size:1rem;margin:0 0 10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+label{font-size:0.85rem;color:var(--mut)}
+textarea,input[type=text],input[type=number],select{
+  background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;
+  padding:8px;font:inherit}
+textarea{width:100%;min-height:130px;font-family:var(--mono);font-size:0.9rem;resize:vertical}
+input[type=number]{width:5.5em}
+button{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;
+  padding:8px 14px;font:inherit;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--acc)}
+button.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+button:disabled{opacity:0.45;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;
+  padding:4px 12px;font-size:0.85rem;color:var(--mut)}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.pill.on{color:var(--ok)} .pill.on::before{background:var(--ok)}
+.banner{border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:10px 14px;margin:12px 0;display:none}
+table{border-collapse:collapse;width:100%;font-size:0.9rem;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+#log{font-family:var(--mono);font-size:0.78rem;background:var(--bg);border:1px solid var(--line);
+  border-radius:6px;padding:8px;max-height:180px;overflow-y:auto;white-space:pre-wrap}
+#imgPreview{max-width:100%;image-rendering:pixelated;border:1px solid var(--line);display:none;background:#fff}
+details summary{cursor:pointer;font-weight:600}
+.hint{font-size:0.82rem;color:var(--mut);margin:6px 0 0}
+ul{margin:6px 0;padding-left:22px}
+li{margin:3px 0}
+code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4px;border-radius:4px}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>BT Thermal Print<small>Web Bluetooth · ESC/POS</small></h1>
+  <span id="status" class="pill">disconnected</span>
+  <span style="flex:1"></span>
+  <button id="btnConnect" class="primary">Connect printer</button>
+  <button id="btnDisconnect" disabled>Disconnect</button>
+</header>
+
+<div id="noBt" class="banner">
+  This browser has no Web Bluetooth. Use Chrome, Edge or Opera over HTTPS (or localhost).
+  See the compatibility section below.
+</div>
+
+<section class="card">
+  <h2>Text</h2>
+  <textarea id="text" placeholder="Type receipt text here… (Ctrl+Enter prints)">Hello from the browser!</textarea>
+  <div class="row">
+    <label>Align <select id="align"><option value="0">left</option><option value="1">center</option><option value="2">right</option></select></label>
+    <label>Size <select id="size"><option value="0">normal</option><option value="16">wide</option><option value="1">tall</option><option value="17">big (2×2)</option></select></label>
+    <label><input type="checkbox" id="bold"> bold</label>
+    <label><input type="checkbox" id="underline"> underline</label>
+  </div>
+  <div class="row">
+    <button id="btnPrint" class="primary needs-conn" disabled>Print text</button>
+    <button id="btnTest" class="needs-conn" disabled>Test page</button>
+    <button id="btnFeed" class="needs-conn" disabled>Feed</button>
+    <button id="btnCut" class="needs-conn" disabled>Cut</button>
+  </div>
+  <p class="hint">Non-ASCII characters map to CP437 where possible, otherwise print as “?”.</p>
+</section>
+
+<section class="card">
+  <h2>Image</h2>
+  <div class="row">
+    <input type="file" id="imgFile" accept="image/*">
+    <label><input type="checkbox" id="dither" checked> dither (off = threshold)</label>
+  </div>
+  <canvas id="imgPreview"></canvas>
+  <div class="row"><button id="btnPrintImg" class="primary needs-conn" disabled>Print image</button></div>
+  <p class="hint">Scaled to printer width, converted to 1-bit black/white. Preview above is what prints.</p>
+</section>
+
+<section class="card">
+  <h2>QR code &amp; barcode</h2>
+  <div class="row">
+    <input type="text" id="qrData" placeholder="QR content (URL, text…)" style="flex:1;min-width:200px">
+    <label>Size <select id="qrSize"><option>4</option><option selected>6</option><option>8</option><option>10</option></select></label>
+    <button id="btnQr" class="primary needs-conn" disabled>Print QR</button>
+  </div>
+  <div class="row">
+    <input type="text" id="bcData" placeholder="Barcode content (ASCII)" style="flex:1;min-width:200px" maxlength="60">
+    <button id="btnBc" class="primary needs-conn" disabled>Print CODE128</button>
+  </div>
+  <p class="hint">Rendered by the printer itself — needs firmware QR/barcode support (most ESC/POS models have it).</p>
+</section>
+
+<section class="card">
+  <h2>Raw ESC/POS (hex)</h2>
+  <div class="row">
+    <input type="text" id="hexData" placeholder="e.g. 1B 40 1B 61 01 48 69 0A" style="flex:1;min-width:200px">
+    <button id="btnHex" class="needs-conn" disabled>Send bytes</button>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Settings</h2>
+  <div class="row">
+    <label>Paper <select id="dots"><option value="384">58 mm (384 dots)</option><option value="576">80 mm (576 dots)</option></select></label>
+    <label>Chunk <input type="number" id="chunk" min="20" max="512" value="100"> bytes</label>
+    <label>Delay <input type="number" id="delay" min="0" max="200" value="20"> ms</label>
+  </div>
+  <div class="row">
+    <label>Feed after print <input type="number" id="feedAfter" min="0" max="10" value="3"> lines</label>
+    <label><input type="checkbox" id="cutAfter"> cut after print</label>
+  </div>
+  <p class="hint">Prints garbled or stops mid-job? Lower chunk size and/or raise delay. Portable printers usually have no cutter.</p>
+</section>
+
+<section class="card">
+  <h2>Compatibility</h2>
+
+  <h3 style="font-size:0.95rem">Browsers (Web Bluetooth)</h3>
+  <table>
+    <tr><th>Browser</th><th>Status</th></tr>
+    <tr><td>Chrome — Windows, macOS, ChromeOS, Android</td><td class="ok">✔ works</td></tr>
+    <tr><td>Edge — Windows, macOS</td><td class="ok">✔ works</td></tr>
+    <tr><td>Opera — desktop, Android</td><td class="ok">✔ works</td></tr>
+    <tr><td>Samsung Internet — Android</td><td class="ok">✔ works</td></tr>
+    <tr><td>Chrome — Linux</td><td class="warn">⚠ may need <code>chrome://flags/#enable-experimental-web-platform-features</code></td></tr>
+    <tr><td>Brave</td><td class="warn">⚠ off by default — enable <code>brave://flags/#brave-web-bluetooth-api</code></td></tr>
+    <tr><td>Firefox — all platforms</td><td class="bad">✘ no Web Bluetooth</td></tr>
+    <tr><td>Safari — macOS, iOS, iPadOS</td><td class="bad">✘ no Web Bluetooth</td></tr>
+    <tr><td>iOS / iPadOS (any browser)</td><td class="warn">⚠ use the <em>Bluefy</em> app (WebBLE browser)</td></tr>
+  </table>
+  <p class="hint">Also required: HTTPS or <code>localhost</code>, and a user click to open the device chooser.</p>
+
+  <h3 style="font-size:0.95rem">Printers</h3>
+  <p class="hint" style="margin:0 0 6px">Rule of thumb: the printer must speak <strong>Bluetooth Low Energy (BLE)</strong> and <strong>ESC/POS</strong>. Web Bluetooth cannot see Bluetooth Classic (SPP) devices at all.</p>
+  <table>
+    <tr><th>Printer</th><th>Status</th></tr>
+    <tr><td>Goojprt PT-210, PT-120 (58 mm portable)</td><td class="ok">✔ works</td></tr>
+    <tr><td>Phomemo M02, M02S, M02 Pro, T02</td><td class="ok">✔ works</td></tr>
+    <tr><td>Zjiang ZJ-5802, ZJ-5805, ZJ-5809</td><td class="ok">✔ works</td></tr>
+    <tr><td>Xprinter XP-P300, XP-P323B (BLE mode)</td><td class="ok">✔ works</td></tr>
+    <tr><td>Rongta RPP02, RPP200, RPP300</td><td class="ok">✔ works</td></tr>
+    <tr><td>Star Micronics SM-L200, SM-L300 (ESC/POS mode)</td><td class="ok">✔ works</td></tr>
+    <tr><td>Generic “MTP-II / MPT-3” 58 mm BLE printers (AliExpress/Amazon)</td><td class="ok">✔ usually work</td></tr>
+    <tr><td>Epson TM-P20/P60/P80, most Xprinter 58IIH, Bixolon SPP-R</td><td class="bad">✘ Bluetooth Classic only — invisible to Web Bluetooth</td></tr>
+    <tr><td>“Cat printers” (GB01, GB02, GT01, MX05/MX06)</td><td class="bad">✘ BLE but proprietary protocol, not ESC/POS</td></tr>
+    <tr><td>Paperang P1/P2, Peripage A6/A8</td><td class="bad">✘ proprietary protocol</td></tr>
+    <tr><td>Label printers (Niimbot, Phomemo D30/M110, Brother PT)</td><td class="bad">✘ different protocols</td></tr>
+    <tr><td>Wi-Fi / USB / AirPrint-only printers</td><td class="bad">✘ no Bluetooth path</td></tr>
+  </table>
+
+  <details>
+    <summary>Troubleshooting</summary>
+    <ul>
+      <li><strong>Printer not in the chooser</strong> — it is Classic-only, powered off, or already connected to a phone. Unpair it elsewhere first.</li>
+      <li><strong>Connects but nothing prints</strong> — check the log below; if no writable characteristic was found it is not a serial-style BLE printer.</li>
+      <li><strong>Prints garbage</strong> — the printer is not ESC/POS (e.g. a cat printer).</li>
+      <li><strong>Stops mid-print / missing lines</strong> — chunks arrive too fast; lower chunk size, raise delay.</li>
+    </ul>
+  </details>
+</section>
+
+<section class="card">
+  <h2>Log</h2>
+  <div id="log"></div>
+</section>
+</main>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+/* ---------- known BLE serial/printer services (also whitelists them for GATT) ---------- */
+const KNOWN_SERVICES = [
+  '000018f0-0000-1000-8000-00805f9b34fb', // common ESC/POS BLE service (char 2af1)
+  '0000ff00-0000-1000-8000-00805f9b34fb', // Phomemo and friends
+  '0000ffe0-0000-1000-8000-00805f9b34fb', // HM-10 style UART
+  '0000ffe5-0000-1000-8000-00805f9b34fb',
+  '0000ae30-0000-1000-8000-00805f9b34fb', // cat printers (raw hex only)
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC/Microchip transparent UART
+  'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // generic BLE serial
+];
+
+let device = null, chr = null;
+
+function log(msg, cls){
+  const el = $('log');
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = `${new Date().toLocaleTimeString()}  ${msg}`;
+  el.appendChild(line);
+  while (el.childElementCount > 200) el.firstChild.remove();
+  el.scrollTop = el.scrollHeight;
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function setConnected(on){
+  $('status').textContent = on ? `connected — ${device.name || 'unnamed'}` : 'disconnected';
+  $('status').classList.toggle('on', on);
+  $('btnConnect').disabled = on;
+  $('btnDisconnect').disabled = !on;
+  document.querySelectorAll('.needs-conn').forEach(b => b.disabled = !on);
+}
+
+async function connect(){
+  try {
+    device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: KNOWN_SERVICES });
+    log(`chosen: ${device.name || device.id}`);
+    device.addEventListener('gattserverdisconnected', () => { log('printer disconnected', 'bad'); setConnected(false); });
+    const server = await device.gatt.connect();
+    const services = await server.getPrimaryServices();
+    chr = null;
+    for (const s of services){
+      for (const c of await s.getCharacteristics()){
+        const p = c.properties;
+        if (p.write || p.writeWithoutResponse){
+          log(`writable characteristic: svc ${s.uuid.slice(4,8)} chr ${c.uuid.slice(4,8)}${p.writeWithoutResponse ? ' (no-response)' : ''}`);
+          if (!chr || (!chr.properties.writeWithoutResponse && p.writeWithoutResponse)) chr = c;
+        }
+      }
+    }
+    if (!chr) throw new Error('no writable characteristic found — printer is probably not a BLE ESC/POS device');
+    setConnected(true);
+    log('ready', 'ok');
+  } catch (e){
+    log(`connect failed: ${e.message}`, 'bad');
+    try { device?.gatt?.disconnect(); } catch {}
+  }
+}
+
+async function send(bytes){
+  if (!chr) throw new Error('not connected');
+  const chunk = Math.min(512, Math.max(20, +$('chunk').value || 100));
+  const delay = Math.max(0, +$('delay').value || 0);
+  const data = bytes instanceof Uint8Array ? bytes : Uint8Array.from(bytes);
+  for (let i = 0; i < data.length; i += chunk){
+    const slice = data.subarray(i, i + chunk);
+    if (chr.properties.writeWithoutResponse && chr.writeValueWithoutResponse) await chr.writeValueWithoutResponse(slice);
+    else await chr.writeValue(slice);
+    if (delay) await sleep(delay);
+  }
+  log(`sent ${data.length} bytes`);
+}
+
+/* ---------- ESC/POS ---------- */
+const ESC = 0x1b, GS = 0x1d;
+const INIT = [ESC, 0x40];
+
+// minimal CP437 map for common accented chars; everything else prints "?"
+const CP437 = {'ä':132,'à':133,'á':160,'â':131,'Ä':142,'é':130,'è':138,'ê':136,'É':144,'í':161,'ì':141,'î':140,
+  'ó':162,'ò':149,'ô':147,'ö':148,'Ö':153,'ú':163,'ù':151,'û':150,'ü':129,'Ü':154,'ñ':164,'Ñ':165,'ç':135,
+  'ß':225,'£':156,'°':248,'¿':168,'¡':173,'·':250};
+function enc(str){
+  const out = [];
+  for (const ch of str.replace(/\r\n/g, '\n')){
+    const cc = ch.codePointAt(0);
+    out.push(cc === 10 ? 10 : cc < 128 ? cc : (CP437[ch] ?? 63));
+  }
+  return out;
+}
+
+function tail(){
+  const out = [ESC, 0x64, Math.max(0, +$('feedAfter').value || 0)]; // feed n
+  if ($('cutAfter').checked) out.push(GS, 0x56, 0x42, 0x00);        // partial cut
+  return out;
+}
+
+async function printText(){
+  const t = $('text').value;
+  if (!t.trim()) return log('nothing to print', 'warn');
+  const bytes = [
+    ...INIT,
+    ESC, 0x61, +$('align').value,            // align
+    GS, 0x21, +$('size').value,              // size
+    ESC, 0x45, $('bold').checked ? 1 : 0,    // bold
+    ESC, 0x2d, $('underline').checked ? 1 : 0,
+    ...enc(t.endsWith('\n') ? t : t + '\n'),
+    GS, 0x21, 0, ESC, 0x45, 0, ESC, 0x2d, 0, ESC, 0x61, 0,
+    ...tail(),
+  ];
+  await send(bytes).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+async function printTest(){
+  const b = [...INIT,
+    ESC, 0x61, 1, GS, 0x21, 0x11, ...enc('TEST PAGE\n'), GS, 0x21, 0,
+    ...enc(new Date().toLocaleString() + '\n\n'),
+    ESC, 0x61, 0, ...enc('left  '), ESC, 0x61, 1, ...enc('center  '), ESC, 0x61, 2, ...enc('right\n'), ESC, 0x61, 0,
+    ESC, 0x45, 1, ...enc('bold\n'), ESC, 0x45, 0,
+    ESC, 0x2d, 1, ...enc('underline\n'), ESC, 0x2d, 0,
+    GS, 0x42, 1, ...enc('inverted\n'), GS, 0x42, 0,
+    GS, 0x21, 0x10, ...enc('wide '), GS, 0x21, 0x01, ...enc('tall\n'), GS, 0x21, 0,
+    ...enc('!"#$%&\'()*+,-./0123456789\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n'),
+    ...tail()];
+  await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+async function printQr(){
+  const data = enc($('qrData').value);
+  if (!data.length) return log('QR content empty', 'warn');
+  if (data.length > 700) return log('QR content too long', 'warn');
+  const len = data.length + 3;
+  const b = [...INIT, ESC, 0x61, 1,
+    GS, 0x28, 0x6b, 4, 0, 0x31, 0x41, 0x32, 0x00,             // model 2
+    GS, 0x28, 0x6b, 3, 0, 0x31, 0x43, +$('qrSize').value,     // module size
+    GS, 0x28, 0x6b, 3, 0, 0x31, 0x45, 0x31,                   // EC level M
+    GS, 0x28, 0x6b, len & 255, len >> 8, 0x31, 0x50, 0x30, ...data,
+    GS, 0x28, 0x6b, 3, 0, 0x31, 0x51, 0x30,                   // print
+    ESC, 0x61, 0, ...tail()];
+  await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+async function printBarcode(){
+  const s = $('bcData').value;
+  if (!s) return log('barcode content empty', 'warn');
+  if (!/^[\x20-\x7e]+$/.test(s)) return log('CODE128 here supports printable ASCII only', 'warn');
+  const data = [...s].map(c => c.charCodeAt(0));
+  const b = [...INIT, ESC, 0x61, 1,
+    GS, 0x68, 80,        // height
+    GS, 0x77, 2,         // module width
+    GS, 0x48, 2,         // HRI below
+    GS, 0x6b, 73, data.length + 2, 0x7b, 0x42, ...data, // CODE128, code set B
+    ESC, 0x61, 0, ...tail()];
+  await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+async function sendHex(){
+  const m = $('hexData').value.replace(/0x/gi, ' ').match(/[0-9a-f]{2}/gi);
+  if (!m) return log('no hex bytes found', 'warn');
+  await send(m.map(h => parseInt(h, 16))).catch(e => log(`send failed: ${e.message}`, 'bad'));
+}
+
+/* ---------- image ---------- */
+let rasterCanvas = null; // 1-bit preview, source of truth for printing
+
+function processImage(img){
+  const width = +$('dots').value;
+  const height = Math.max(1, Math.round(img.naturalHeight * width / img.naturalWidth));
+  const cv = document.createElement('canvas');
+  cv.width = width; cv.height = height;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height); // composite alpha on white
+  ctx.drawImage(img, 0, 0, width, height);
+  const im = ctx.getImageData(0, 0, width, height);
+  const px = im.data;
+  const gray = new Float32Array(width * height);
+  for (let i = 0; i < gray.length; i++)
+    gray[i] = 0.299 * px[i*4] + 0.587 * px[i*4+1] + 0.114 * px[i*4+2];
+  const useDither = $('dither').checked;
+  for (let y = 0; y < height; y++){
+    for (let x = 0; x < width; x++){
+      const i = y * width + x;
+      const black = gray[i] < 128;
+      if (useDither){ // Floyd–Steinberg
+        const err = gray[i] - (black ? 0 : 255);
+        if (x + 1 < width)                gray[i + 1]         += err * 7 / 16;
+        if (y + 1 < height){
+          if (x > 0)                      gray[i + width - 1] += err * 3 / 16;
+                                          gray[i + width]     += err * 5 / 16;
+          if (x + 1 < width)              gray[i + width + 1] += err * 1 / 16;
+        }
+      }
+      const v = black ? 0 : 255;
+      px[i*4] = px[i*4+1] = px[i*4+2] = v; px[i*4+3] = 255;
+    }
+  }
+  ctx.putImageData(im, 0, 0);
+  rasterCanvas = cv;
+  const prev = $('imgPreview');
+  prev.width = width; prev.height = height;
+  prev.getContext('2d').drawImage(cv, 0, 0);
+  prev.style.display = 'block';
+  log(`image ready: ${width}×${height}px`);
+}
+
+async function printImage(){
+  if (!rasterCanvas) return log('no image loaded', 'warn');
+  const { width, height } = rasterCanvas;
+  const px = rasterCanvas.getContext('2d').getImageData(0, 0, width, height).data;
+  const rowBytes = width / 8;
+  const BAND = 96; // rows per GS v 0 command — safer on small buffers
+  const out = [...INIT, ESC, 0x61, 1];
+  for (let y0 = 0; y0 < height; y0 += BAND){
+    const rows = Math.min(BAND, height - y0);
+    out.push(GS, 0x76, 0x30, 0x00, rowBytes & 255, rowBytes >> 8, rows & 255, rows >> 8);
+    for (let y = y0; y < y0 + rows; y++){
+      for (let bx = 0; bx < rowBytes; bx++){
+        let byte = 0;
+        for (let bit = 0; bit < 8; bit++)
+          if (px[(y * width + bx * 8 + bit) * 4] === 0) byte |= 0x80 >> bit; // black = 1
+        out.push(byte);
+      }
+    }
+  }
+  out.push(ESC, 0x61, 0, ...tail());
+  await send(out).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+let lastImg = null;
+$('imgFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const img = new Image();
+  img.onload = () => { lastImg = img; processImage(img); URL.revokeObjectURL(img.src); };
+  img.onerror = () => log('could not load image', 'bad');
+  img.src = URL.createObjectURL(f);
+});
+$('dither').addEventListener('change', () => lastImg && processImage(lastImg));
+$('dots').addEventListener('change', () => lastImg && processImage(lastImg));
+
+/* ---------- wiring ---------- */
+$('btnConnect').onclick = connect;
+$('btnDisconnect').onclick = () => device?.gatt?.disconnect();
+$('btnPrint').onclick = printText;
+$('btnTest').onclick = printTest;
+$('btnFeed').onclick = () => send([ESC, 0x64, 3]).catch(e => log(e.message, 'bad'));
+$('btnCut').onclick = () => send([GS, 0x56, 0x42, 0x00]).catch(e => log(e.message, 'bad'));
+$('btnPrintImg').onclick = printImage;
+$('btnQr').onclick = printQr;
+$('btnBc').onclick = printBarcode;
+$('btnHex').onclick = sendHex;
+$('text').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !$('btnPrint').disabled) printText();
+});
+
+/* settings persistence */
+const SETTINGS = ['dots', 'chunk', 'delay', 'feedAfter', 'cutAfter', 'dither'];
+try {
+  const saved = JSON.parse(localStorage.getItem('btprint') || '{}');
+  for (const id of SETTINGS){
+    if (!(id in saved)) continue;
+    const el = $(id);
+    if (el.type === 'checkbox') el.checked = saved[id]; else el.value = saved[id];
+  }
+} catch {}
+for (const id of SETTINGS)
+  $(id).addEventListener('change', () => {
+    const o = {};
+    for (const k of SETTINGS) o[k] = $(k).type === 'checkbox' ? $(k).checked : $(k).value;
+    localStorage.setItem('btprint', JSON.stringify(o));
+  });
+
+if (!navigator.bluetooth){
+  $('noBt').style.display = 'block';
+  $('btnConnect').disabled = true;
+  log('Web Bluetooth unavailable in this browser', 'bad');
+} else {
+  log('ready — click “Connect printer”');
+}
+
+/* ponytail: one runnable self-check for the byte builders */
+(function selfTest(){
+  console.assert(enc('Aü€\n').join() === [65, 129, 63, 10].join(), 'enc: CP437 map + fallback');
+  const data = enc('HELLO'), len = data.length + 3;
+  console.assert(len === 8 && (len & 255) === 8 && (len >> 8) === 0, 'qr: pL/pH math');
+  console.assert((384 / 8) === 48, 'raster: bytes per row');
+  console.log('self-test ok');
+})();
+</script>
+</body>
+</html>
