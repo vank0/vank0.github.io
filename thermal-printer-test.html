@@ -74,7 +74,8 @@ code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4
   <textarea id="text" placeholder="Type receipt text here… (Ctrl+Enter prints)">Hello from the browser!</textarea>
   <div class="row">
     <label>Align <select id="align"><option value="0">left</option><option value="1">center</option><option value="2">right</option></select></label>
-    <label>Size <select id="size"><option value="0">normal</option><option value="16">wide</option><option value="1">tall</option><option value="17">big (2×2)</option></select></label>
+    <label>Size (ESC/POS) <select id="size"><option value="0">normal</option><option value="16">wide</option><option value="1">tall</option><option value="17">big (2×2)</option></select></label>
+    <label>Font (pocket/cat) <input type="number" id="fontPx" min="10" max="96" value="24"> px</label>
     <label><input type="checkbox" id="bold"> bold</label>
     <label><input type="checkbox" id="underline"> underline</label>
   </div>
@@ -461,9 +462,9 @@ async function printCanvas(canvas, isText){
 /* ---------- text rendered to canvas (pocket/cat printers have no text mode) ---------- */
 function textToCanvas(text){
   const width = 384, pad = 8;
-  const fs = +$('size').value ? 32 : 24;
+  const fs = Math.max(10, Math.min(96, +$('fontPx').value || 24));
   const lh = Math.round(fs * 1.3);
-  const font = `${$('bold').checked ? '700' : '400'} ${fs}px ui-monospace, Menlo, Consolas, monospace`;
+  const font = `${$('bold').checked ? '700' : '400'} ${fs}px Menlo, Consolas, "Courier New", monospace`;
   const cv = document.createElement('canvas');
   let ctx = cv.getContext('2d');
   ctx.font = font;
@@ -676,7 +677,7 @@ $('text').addEventListener('keydown', e => {
 });
 
 /* settings persistence */
-const SETTINGS = ['dots', 'chunk', 'delay', 'feedAfter', 'cutAfter', 'dither', 'proto', 'darkness', 'writeMode'];
+const SETTINGS = ['dots', 'chunk', 'delay', 'feedAfter', 'cutAfter', 'dither', 'proto', 'darkness', 'writeMode', 'fontPx'];
 try {
   const saved = JSON.parse(localStorage.getItem('btprint') || '{}');
   for (const id of SETTINGS){
