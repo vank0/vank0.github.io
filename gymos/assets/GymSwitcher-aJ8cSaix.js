@@ -1,1 +1,0 @@
-import{j as n}from"./index-BczN1TQW.js";function l({gyms:e,activeId:i,onChange:r}){return e.length<=1?null:n.jsx("select",{className:"text-input",style:{width:"auto",minWidth:140},value:i??"",onChange:t=>r(t.target.value),children:e.map(t=>n.jsx("option",{value:t.org_id,children:t.name},t.org_id))})}export{l as G};
