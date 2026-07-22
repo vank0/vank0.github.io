@@ -1,0 +1,1 @@
+import{j as r,be as n,I as t}from"./index-DTIUGN6e.js";function l({bpm:s,zone:a}){if(!s||s<=0)return null;const e=a!=null&&a>0?n[a]:"#f43f5e";return r.jsxs("span",{className:"hr-badge",style:{background:e,boxShadow:`0 2px 6px ${e}80`},children:[r.jsx("span",{className:"hr-heart",style:{animationDuration:`${60/s}s`},children:r.jsx(t,{name:"heart",size:9})}),s]})}export{l as H};
