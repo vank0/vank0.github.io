@@ -1,0 +1,1 @@
+import{j as r,aY as e,I as t}from"./index-DCCkk2ow.js";function l({bpm:a,zone:s}){if(!a||a<=0)return null;const n=s!=null&&s>0?e[s]:"#f43f5e";return r.jsxs("span",{className:"hr-badge",style:{background:n,boxShadow:`0 2px 6px ${n}80`},children:[r.jsx("span",{className:"hr-heart",style:{animationDuration:`${60/a}s`},children:r.jsx(t,{name:"heart",size:9})}),a]})}export{l as H};
