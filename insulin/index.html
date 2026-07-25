@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="description" content="Connect multiple Bluetooth heart-rate straps and run a group circuit class on a big screen." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" />
+  <title>ZoneBoard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+  </div>
+
+  <!-- ==================== SETUP ==================== -->
+  <main id="setup" class="screen setup-screen">
+    <header class="app-head">
+      <h1>Zone<span class="dot">Board</span></h1>
+    </header>
+
+    <div id="btWarn" class="glass warn" hidden>
+      Web Bluetooth isn't available in this browser. Use <b>Chrome</b> or <b>Edge</b> over HTTPS or localhost.
+    </div>
+
+    <section class="glass card">
+      <div class="card-title"><h2>Presets</h2>
+        <button id="savePresetBtn" class="glass btn-ghost small" data-icon="plus"><span>Save current</span></button>
+      </div>
+      <div id="presetList" class="preset-list"></div>
+    </section>
+
+    <section class="glass card">
+      <div class="card-title"><h2>People</h2>
+        <button id="addPersonBtn" class="glass btn-primary small" data-icon="person"><span>Add person</span></button>
+      </div>
+      <button id="reconnectBtn" class="glass btn-ghost small" hidden data-icon="reset"><span>Reconnect known straps</span></button>
+      <div id="sensorList" class="sensor-list"></div>
+      <p id="sensorEmpty" class="hint">No one yet. Add people, then optionally connect a HR monitor to each. People without a monitor still get a station and rotate.</p>
+    </section>
+
+    <section class="glass card">
+      <h2>Workout</h2>
+      <div class="grid" id="workoutGrid">
+        <label class="field"><span>Sets</span><div class="stepper" data-key="sets"><button class="dec" data-icon="minus"></button><input type="number" min="1" max="20" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-station-label>Rounds / set</span><div class="stepper" data-key="rounds"><button class="dec" data-icon="minus"></button><input type="number" min="1" max="30" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span>Set repeat (laps)</span><div class="stepper" data-key="setRepeat"><button class="dec" data-icon="minus"></button><input type="number" min="1" max="20" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span>Work (sec)</span><div class="stepper" data-key="work"><button class="dec" data-icon="minus"></button><input type="number" min="1" max="900" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span>Rest (sec)</span><div class="stepper" data-key="rest"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="600" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span>Rest between sets (sec)</span><div class="stepper" data-key="restSet"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="900" step="5" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span>Prepare (sec)</span><div class="stepper" data-key="prepare"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="60" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span>Warmup (sec)</span><div class="stepper" data-key="warmup"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="900" step="5" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span>Cooldown (sec)</span><div class="stepper" data-key="cooldown"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="900" step="5" /><button class="inc" data-icon="plus"></button></div></label>
+      </div>
+      <div class="row target-row">
+        <span>Adaptive target zone</span>
+        <div class="target-selects">
+          <select id="targetLow" class="glass mini-select"></select>
+          <span>to</span>
+          <select id="targetHigh" class="glass mini-select"></select>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass card">
+      <div class="card-title"><h2>Exercises (per station · light / medium / hard)</h2>
+        <input id="exToggle" type="checkbox" class="switch" aria-label="name exercises" />
+      </div>
+      <p id="exHint" class="hint">Toggle on to name each station's three difficulty variants. The app shows each member the variant its adaptive logic picks from their heart rate.</p>
+      <div id="exTabs" class="ex-tabs" hidden></div>
+      <div id="exStations" class="ex-stations" hidden></div>
+      <button id="shuffleBtn" class="glass btn-ghost small" hidden data-icon="shuffle"><span>Shuffle start stations</span></button>
+      <datalist id="exOptions"></datalist>
+    </section>
+
+    <section class="glass card">
+      <h2>YouTube playlist</h2>
+      <input id="playlistUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube playlist or video link" />
+      <p id="playlistStatus" class="hint">Plays behind the workout on the big screen.</p>
+    </section>
+
+    <p class="foot key-hint">Keyboard / TV remote — during a class: <b>OK/Space</b> play·pause · <b>▶</b> skip · <b>◀</b> reset · <b>▲▼</b> switch view · <b>Back/Esc</b> end · <b>F</b> fullscreen · <b>M</b> mute</p>
+    <p class="foot copyright">Developed by Ivan. M. Ivanov &lt;/&gt; 2026</p>
+
+    <div class="start-bar">
+      <div class="start-bar-inner">
+        <div class="start-stats">
+          <div><span id="sumTotal">0:00</span><small>total</small></div>
+          <div><span id="sumRounds">0</span><small>intervals</small></div>
+          <div><span id="sumMembers">0</span><small>members</small></div>
+        </div>
+        <button id="startBtn" class="glass btn-primary">Start class</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== WORKOUT ==================== -->
+  <section id="workout" class="screen workout-screen" hidden>
+    <div class="yt-bg" id="ytBg" hidden><div id="ytPlayer"></div></div>
+    <div class="yt-scrim" id="ytScrim" hidden></div>
+
+    <div class="wk-top">
+      <div class="wk-controls">
+        <button id="endBtn" class="ctrl" aria-label="end" data-icon="close"></button>
+        <button id="resetBtn" class="ctrl" aria-label="reset" data-icon="reset"></button>
+        <button id="playBtn" class="ctrl ctrl-main" aria-label="play/pause" data-icon="pause"></button>
+        <button id="skipBtn" class="ctrl" aria-label="skip" data-icon="skip"></button>
+        <button id="fullscreenBtn" class="ctrl" aria-label="fullscreen" data-icon="expand"></button>
+      </div>
+      <div class="phase-beacon"><span class="pb-text"><span id="phaseLabel">Prepare</span><span class="pb-dot"> · </span><span id="bigCount">00</span></span></div>
+      <div class="wk-top-right">
+        <button id="muteBtn" class="ctrl" aria-label="mute" data-icon="volume"></button>
+        <div class="view-toggle glass">
+          <button id="viewMembers" class="vt active">Members</button>
+          <button id="viewStations" class="vt">Stations</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wk-grid" id="wkGrid"><!-- member / station cards injected here --></div>
+
+    <div class="wk-timeline">
+      <div class="tl-side"><small>Elapsed</small><span id="elapsed">0:00</span></div>
+      <div class="wk-progress">
+        <div class="prog-track" id="progTrack"></div>
+        <div class="prog-bubble" id="progBubble"><span id="progBubbleSec">0</span></div>
+      </div>
+      <div class="tl-side"><small>Remaining</small><span id="remaining">0:00</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== RESULTS ==================== -->
+  <section id="results" class="screen results-screen" hidden>
+    <canvas id="confetti" class="confetti"></canvas>
+    <div class="results-inner">
+      <h1 class="results-title">Class Complete<span class="rt-bang">!</span></h1>
+      <p class="results-sub" id="resultsSub"></p>
+      <div class="podium" id="podium"></div>
+      <div class="results-list" id="resultsList"></div>
+      <button id="resultsBack" class="glass btn-primary">Back to setup</button>
+    </div>
+  </section>
+
+  <!-- preset name modal -->
+  <div id="modal" class="modal-backdrop" hidden>
+    <div class="glass modal">
+      <h3>Save preset</h3>
+      <input id="presetName" type="text" placeholder="Preset name" maxlength="30" />
+      <div class="modal-actions">
+        <button id="modalCancel" class="glass btn-ghost">Cancel</button>
+        <button id="modalOk" class="glass btn-primary small">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

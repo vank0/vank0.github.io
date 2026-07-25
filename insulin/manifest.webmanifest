@@ -1,0 +1,13 @@
+{
+  "name": "ZoneBoard",
+  "short_name": "ZoneBoard",
+  "description": "Connect multiple Bluetooth heart-rate straps and run a group circuit class on a big screen.",
+  "start_url": ".",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
