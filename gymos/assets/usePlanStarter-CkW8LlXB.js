@@ -1,1 +1,0 @@
-import{u as o,O as e,P as n}from"./index-B4DYfK7i.js";import{s as u}from"./plannedWorkoutsDb-BzQy5WAw.js";function m(){const s=o(),r=e();return{start:a=>r(async()=>{const t=await u(a);return t.ok?t.sessionId:(n({variant:"error",message:s("sched.routineGone","That routine was deleted.")}),null)})}}export{m as u};
