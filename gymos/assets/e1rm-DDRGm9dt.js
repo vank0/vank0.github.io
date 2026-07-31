@@ -1,0 +1,1 @@
+function e(e,t,n){return n==null?t!=null&&t>0?e+Math.max(0,10-t):e:e+Math.max(0,n)}function t(e,t){return e*(1+t/30)}function n(e,t){return t>=37?e:e*36/(37-t)}function r(r,i,a,o,s=0){if(r<=0||i<=0)return 0;let c=e(i,a,o);return s!==0&&(a!=null||o!=null)&&(c=Math.max(i,c+s)),c<=1?r:c<=6?n(r,c):t(r,c)}export{r as t};
