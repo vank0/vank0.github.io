@@ -1,0 +1,1 @@
+import{u as e}from"./Gloss-TftHkH2b.js";import{s as t}from"./src-BCLdvcym.js";import{H as n}from"./index-DKfzcqfF.js";import{o as r}from"./plannedWorkoutsDb-DUvRGenc.js";function i(){let i=e(),a=n();return{start:e=>a(async()=>{let n=await r(e);return n.ok?n.sessionId:(t({variant:`error`,message:i(`sched.routineGone`,`That routine was deleted.`)}),null)})}}export{i as t};
