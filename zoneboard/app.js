@@ -480,7 +480,7 @@ const cssId = (id) => id.replace(/[^a-zA-Z0-9_-]/g, '');
    SETUP: sensors list
    ============================================================ */
 function saveRoster() {
-  store.set('zb_roster', memberList().map(m => ({
+  store.set('zb_roster', memberList().filter(m => !m.demo).map(m => ({
     id: m.id, name: m.name, sex: m.sex, age: m.age, weightKg: m.weightKg, heightCm: m.heightCm,
     restHR: m.restHR, maxHROverride: m.maxHROverride, betaBlocker: m.betaBlocker, startStation: m.startStation, deviceId: m.deviceId,
   })));
@@ -702,6 +702,44 @@ function updateSummary() {
   // Bulgarian needs the singular for 1; English does too.
   $('sumRoundsLabel').textContent = t(tot.workCount === 1 ? 'intervalsOne' : 'intervals');
   $('sumMembersLabel').textContent = t(members.size === 1 ? 'membersLowerOne' : 'membersLower');
+}
+
+/* ============================================================
+   DEMO MODE — ?demo=8 fills the roster with simulated straps.
+   For showing the board off (or testing on a TV, where there's no console).
+   Demo people are never written to the saved roster.
+   ============================================================ */
+const DEMO_NAMES = ['Anna', 'Ben', 'Cara', 'Dan', 'Eve', 'Finn', 'Gina', 'Hugo', 'Iris', 'Jon', 'Kim', 'Lena'];
+function startDemo(n) {
+  n = clamp(n, 1, 12);
+  for (let i = 0; i < n; i++) {
+    const p = newPerson(DEMO_NAMES[i]);
+    p.demo = true;
+    p.age = 24 + (i * 4) % 28;
+    p.deviceId = 'demo-' + i;
+    p.connected = true;
+    p.battery = 60 + (i * 7) % 40;
+    members.set(p.id, p);
+    deviceToPerson.set(p.deviceId, p.id);
+  }
+  renderSensorList();
+  // Feed through the real sensor callback so the simulated path is identical
+  // to a live strap. Everyone drifts round a personal baseline and lifts
+  // during work intervals.
+  let tick = 0;
+  setInterval(() => {
+    tick++;
+    let i = 0;
+    for (const m of members.values()) {
+      if (!m.demo) continue;
+      const working = engine.running && engine.plan[engine.idx]?.type === 'work';
+      const target = 104 + i * 7 + (working ? 26 : 0);
+      const bpm = clamp(Math.round(target + 8 * Math.sin(tick / 7 + i) + (Math.random() * 6 - 3)), 55, 205);
+      sensors.onSample(m.deviceId, bpm, Date.now());
+      i++;
+    }
+  }, 1000);
+  toast(`Demo mode · ${n} simulated members`);
 }
 
 /* ============================================================
@@ -1321,6 +1359,9 @@ function init() {
   $('getResultsBtn').onclick = showHandout;
   $('handoutBack').onclick = () => { $('handout').hidden = true; $('setup').hidden = false; renderSensorList(); focusSoon('addPersonBtn'); };
   document.addEventListener('keydown', onKey);
+
+  const demo = new URLSearchParams(location.search).get('demo');
+  if (demo !== null) startDemo(parseInt(demo, 10) || 6);
   // Tapping the video to skip an ad moves focus into the YouTube iframe, which
   // would swallow every keyboard/remote shortcut. Take focus straight back.
   window.addEventListener('blur', () => setTimeout(() => {
