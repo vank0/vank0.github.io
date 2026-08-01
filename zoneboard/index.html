@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="description" content="Connect multiple Bluetooth heart-rate straps and run a group circuit class on a big screen." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" />
+  <title>ZoneBoard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+  </div>
+
+  <!-- ==================== SETUP ==================== -->
+  <main id="setup" class="screen setup-screen">
+    <header class="app-head">
+      <h1>Zone<span class="dot">Board</span></h1>
+      <select id="langSelect" class="mini-select" aria-label="Language"></select>
+    </header>
+
+    <div id="btWarn" class="glass warn" hidden data-i18n-html="btWarn"></div>
+
+    <section class="glass card">
+      <div class="card-title"><h2 data-i18n="presets"></h2>
+        <button id="savePresetBtn" class="glass btn-ghost small" data-icon="plus"><span data-i18n="saveCurrent"></span></button>
+      </div>
+      <div id="presetList" class="preset-list"></div>
+    </section>
+
+    <section class="glass card">
+      <div class="card-title"><h2 data-i18n="people"></h2>
+        <button id="addPersonBtn" class="glass btn-primary small" data-icon="person"><span data-i18n="addPerson"></span></button>
+      </div>
+      <button id="reconnectBtn" class="glass btn-ghost small" hidden data-icon="reset"><span data-i18n="reconnectStraps"></span></button>
+      <div id="sensorList" class="sensor-list"></div>
+      <p id="sensorEmpty" class="hint" data-i18n="noPeopleYet"></p>
+    </section>
+
+    <section class="glass card">
+      <h2 data-i18n="workout"></h2>
+      <div class="grid" id="workoutGrid">
+        <label class="field"><span data-i18n="sets"></span><div class="stepper" data-key="sets"><button class="dec" data-icon="minus"></button><input type="number" min="1" max="20" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-station-label></span><div class="stepper" data-key="rounds"><button class="dec" data-icon="minus"></button><input type="number" min="1" max="30" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-i18n="setRepeat"></span><div class="stepper" data-key="setRepeat"><button class="dec" data-icon="minus"></button><input type="number" min="1" max="20" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-i18n="workSec"></span><div class="stepper" data-key="work"><button class="dec" data-icon="minus"></button><input type="number" min="1" max="900" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-i18n="restSec"></span><div class="stepper" data-key="rest"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="600" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-i18n="restBetweenSets"></span><div class="stepper" data-key="restSet"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="900" step="5" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-i18n="prepareSec"></span><div class="stepper" data-key="prepare"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="60" step="1" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-i18n="warmupSec"></span><div class="stepper" data-key="warmup"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="900" step="5" /><button class="inc" data-icon="plus"></button></div></label>
+        <label class="field"><span data-i18n="cooldownSec"></span><div class="stepper" data-key="cooldown"><button class="dec" data-icon="minus"></button><input type="number" min="0" max="900" step="5" /><button class="inc" data-icon="plus"></button></div></label>
+      </div>
+      <div class="row target-row">
+        <span data-i18n="adaptiveTarget"></span>
+        <div class="target-selects">
+          <select id="targetLow" class="glass mini-select"></select>
+          <span data-i18n="toWord"></span>
+          <select id="targetHigh" class="glass mini-select"></select>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass card">
+      <div class="card-title"><h2 data-i18n="exercisesPerStation"></h2>
+        <input id="exToggle" type="checkbox" class="switch" data-i18n-aria="nameExercises" />
+      </div>
+      <p id="exHint" class="hint" data-i18n="exHint"></p>
+      <div id="exModeRow" class="row ex-mode-row" hidden>
+        <span data-i18n="difficulty"></span>
+        <div class="view-toggle glass">
+          <button id="modeSimple" class="vt active" data-i18n="modeSimple"></button>
+          <button id="modeLevels" class="vt" data-i18n="modeLevels"></button>
+        </div>
+      </div>
+      <p id="exModeHint" class="hint" hidden></p>
+      <div class="ex-tabs-row">
+        <div id="exTabs" class="ex-tabs" hidden></div>
+        <button id="applyAllBtn" class="glass btn-ghost small" hidden data-icon="copy"><span data-i18n="applyToAll"></span></button>
+      </div>
+      <div id="exStations" class="ex-stations" hidden></div>
+      <button id="shuffleBtn" class="glass btn-ghost small" hidden data-icon="shuffle"><span data-i18n="shuffleStations"></span></button>
+      <datalist id="exOptions"></datalist>
+    </section>
+
+    <section class="glass card">
+      <h2 data-i18n="youtubePlaylist"></h2>
+      <input id="playlistUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false" data-i18n-ph="playlistPh" />
+      <p id="playlistStatus" class="hint" data-i18n="videoHintIdle"></p>
+      <p class="hint" data-i18n="musicVolumeHint"></p>
+      <div id="videoLib" class="video-lib"></div>
+    </section>
+
+    <p class="foot key-hint" data-i18n-html="keyHint"></p>
+    <p class="foot copyright">Developed by Ivan. M. Ivanov &lt;/&gt; 2026</p>
+
+    <div class="start-bar">
+      <div class="start-bar-inner">
+        <div class="start-stats">
+          <div><span id="sumTotal">0:00</span><small data-i18n="total"></small></div>
+          <div><span id="sumRounds">0</span><small id="sumRoundsLabel"></small></div>
+          <div><span id="sumMembers">0</span><small id="sumMembersLabel"></small></div>
+        </div>
+        <button id="startBtn" class="glass btn-primary" data-i18n="startClass"></button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== WORKOUT ==================== -->
+  <section id="workout" class="screen workout-screen" hidden>
+    <div class="yt-bg" id="ytBg" hidden><div id="ytPlayer"></div></div>
+    <div class="yt-scrim" id="ytScrim" hidden></div>
+
+    <div class="wk-top">
+      <div class="wk-controls">
+        <button id="endBtn" class="ctrl" data-i18n-aria="backToSetupAria" data-icon="chevronLeft"></button>
+        <button id="fullscreenBtn" class="ctrl" data-i18n-aria="fullscreenAria" data-icon="expand"></button>
+        <div class="view-toggle glass">
+          <button id="viewMembers" class="vt active" data-i18n="membersView"></button>
+          <button id="viewStations" class="vt" data-i18n="stationsView"></button>
+        </div>
+      </div>
+      <div class="phase-beacon"><span class="pb-text"><span id="phaseLabel"></span><span class="pb-dot"> · </span><span id="bigCount">00</span></span></div>
+      <div class="wk-top-right">
+        <div class="btn-group glass">
+          <button id="resetBtn" class="grp-btn" data-i18n-aria="resetAria" data-icon="reset"></button>
+          <button id="playBtn" class="grp-btn grp-main" data-i18n-aria="playPauseAria" data-icon="pause"></button>
+          <button id="skipBtn" class="grp-btn" data-i18n-aria="skipAria" data-icon="skip"></button>
+        </div>
+        <div class="vol-group glass" id="volGroup" role="group" data-i18n-aria="musicVolumeGroup">
+          <span class="vol-fill" aria-hidden="true"></span>
+          <button id="volDown" class="grp-btn" data-i18n-aria="musicQuieter" data-icon="minus"></button>
+          <button id="muteBtn" class="grp-btn" data-i18n-aria="muteMusic" data-icon="volume"></button>
+          <button id="volUp" class="grp-btn" data-i18n-aria="musicLouder" data-icon="plus"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wk-grid" id="wkGrid"><!-- member / station cards injected here --></div>
+
+    <div class="wk-timeline">
+      <div class="tl-side"><small data-i18n="elapsed"></small><span id="elapsed">0:00</span></div>
+      <div class="wk-progress">
+        <div class="prog-track" id="progTrack"></div>
+        <div class="prog-bubble" id="progBubble"><span id="progBubbleSec">0</span></div>
+      </div>
+      <div class="tl-side"><small data-i18n="remaining"></small><span id="remaining">0:00</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== RESULTS ==================== -->
+  <section id="results" class="screen results-screen" hidden>
+    <canvas id="confetti" class="confetti"></canvas>
+    <div class="results-inner">
+      <h1 class="results-title"><span data-i18n="classComplete"></span><span class="rt-bang">!</span></h1>
+      <p class="results-sub" id="resultsSub"></p>
+      <div class="podium" id="podium"></div>
+      <div class="results-list" id="resultsList"></div>
+      <div class="results-actions">
+        <button id="resultsBack" class="glass btn-ghost" data-i18n="backToSetup"></button>
+        <button id="getResultsBtn" class="glass btn-primary" data-icon="qr"><span data-i18n="getResults"></span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== HANDOUT (per-member QR) ==================== -->
+  <section id="handout" class="screen handout-screen" hidden>
+    <div class="wk-top">
+      <button id="handoutBack" class="ctrl" aria-label="back" data-icon="close"></button>
+      <div class="handout-title" data-i18n="scanTitle"></div>
+      <div class="wk-top-right"><span class="handout-hint" data-i18n="scanHint"></span></div>
+    </div>
+    <div class="wk-grid" id="handoutGrid"></div>
+  </section>
+
+  <!-- preset name modal -->
+  <div id="modal" class="modal-backdrop" hidden>
+    <div class="glass modal">
+      <h3 data-i18n="savePreset"></h3>
+      <input id="presetName" type="text" data-i18n-ph="presetNamePh" maxlength="30" />
+      <div class="modal-actions">
+        <button id="modalCancel" class="glass btn-ghost" data-i18n="cancel"></button>
+        <button id="modalOk" class="glass btn-primary small" data-i18n="save"></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="qrcode.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
