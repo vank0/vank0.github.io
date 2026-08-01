@@ -269,6 +269,13 @@ input:focus, select:focus, .stepper:focus-within { border-color: var(--accent); 
 .chip { padding: calc(var(--s, 1) * 4px) calc(var(--s, 1) * 10px); border-radius: 999px; font-size: calc(var(--s, 1) * 14px); font-weight: 700; color: #06121e; }
 .chip.empty { color: var(--muted); background: rgba(255,255,255,0.08); }
 
+/* staggered card enter/exit — the per-card delay is set in layoutCards/swapView */
+@keyframes cardIn  { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes cardOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
+.card-enter { animation: cardIn 220ms cubic-bezier(.2,.7,.3,1) both; }
+.card-exit  { animation: cardOut 140ms ease-in both; }
+@media (prefers-reduced-motion: reduce) { .card-enter, .card-exit { animation: none !important; } }
+
 /* 50% opaque over a heavy blur — colour and motion of the video still read
    through the cards, but the detail is smeared so it never fights the numbers. */
 .member-card, .st-card, .timer-cell {

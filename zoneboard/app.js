@@ -164,6 +164,7 @@ function startWorkout() {
   startLoops();
   startSampleLoop();
   setPlayIcon();
+  renderWorkout(true);            // first paint of the board animates in
   focusSoon('playBtn');
 }
 function enterPhase(i, firstEnter) {
@@ -322,10 +323,11 @@ function toggleFullscreen() {
   else document.documentElement.requestFullscreen?.().catch(() => {});
 }
 function setView(v) {
+  if (v === currentView || viewAnimating) return;   // ignore re-taps mid-transition
   currentView = v;
   $('viewMembers').classList.toggle('active', v === 'members');
   $('viewStations').classList.toggle('active', v === 'stations');
-  renderWorkout();
+  swapView();
 }
 function toggleView() { setView(currentView === 'members' ? 'stations' : 'members'); }
 function focusSoon(id) { setTimeout(() => { try { $(id).focus(); } catch {} }, 30); }
@@ -812,10 +814,18 @@ function exerciseAt(setNum, station, level) {
   if (!isLevels()) return (slot.medium || '').trim();          // simple mode: one exercise for everyone
   return (slot[LEVELS[level]] || slot.medium || slot.light || slot.hard || '').trim();
 }
+/* Card transitions. The HR tick re-renders once a second, so the enter
+   animation must fire only on a view switch or first paint — never on a tick,
+   or every card would pulse every second. `viewAnimating` holds off the tick
+   for the length of the transition. */
+const ENTER_MS = 220, ENTER_STAGGER = 22, EXIT_MS = 140, EXIT_STAGGER = 14;
+const CARD_SEL = '.member-card, .st-card, .qr-card';
+let viewAnimating = false;
+
 // Lay out `cards` into balanced rows that fill the container (see gridRows).
 // Each row carries --s, the type scale for its cards: a 4-across card is the
 // 1x baseline, so a 2-across card (twice the width) gets 2x the type.
-function layoutCards(container, cards) {
+function layoutCards(container, cards, animate = false) {
   container.innerHTML = '';
   const rows = gridRows(cards.length);
   let i = 0;
@@ -823,13 +833,44 @@ function layoutCards(container, cards) {
     const row = document.createElement('div');
     row.className = 'wk-row';
     row.style.setProperty('--s', (4 / count).toFixed(3));
-    for (let c = 0; c < count; c++) row.appendChild(cards[i++]);
+    for (let c = 0; c < count; c++) {
+      const card = cards[i];
+      if (animate) {
+        card.classList.add('card-enter');
+        card.style.animationDelay = (i * ENTER_STAGGER) + 'ms';
+        // Drop the class once it's done: `animation-fill-mode: both` would
+        // otherwise pin opacity to 1 and undo the dimming on dropped cards.
+        card.addEventListener('animationend', () => {
+          card.classList.remove('card-enter');
+          card.style.animationDelay = '';
+        }, { once: true });
+      }
+      row.appendChild(card);
+      i++;
+    }
     container.appendChild(row);
   }
 }
-function renderWorkout() {
+function renderWorkout(animate = false) {
   if ($('workout').hidden) return;
-  layoutCards($('wkGrid'), currentView === 'members' ? renderMembers() : renderStations());
+  if (viewAnimating && !animate) return;      // don't stomp a transition in flight
+  layoutCards($('wkGrid'), currentView === 'members' ? renderMembers() : renderStations(), animate);
+}
+// Staggered exit, then staggered entry of the other view.
+function swapView() {
+  const grid = $('wkGrid');
+  const leaving = [...grid.querySelectorAll(CARD_SEL)];
+  viewAnimating = true;
+  leaving.forEach((c, i) => {
+    c.classList.add('card-exit');
+    c.style.animationDelay = (i * EXIT_STAGGER) + 'ms';
+  });
+  const outMs = leaving.length ? EXIT_MS + (leaving.length - 1) * EXIT_STAGGER : 0;
+  setTimeout(() => {
+    renderWorkout(true);
+    const n = grid.querySelectorAll(CARD_SEL).length;
+    setTimeout(() => { viewAnimating = false; }, ENTER_MS + Math.max(0, n - 1) * ENTER_STAGGER);
+  }, outMs);
 }
 function renderMembers() {
   const cards = [];
@@ -1045,7 +1086,7 @@ function showHandout() {
         : t('qrMeta', { kcal: Math.round(s.kcal), pts: round2(s.points) }))}</div>`;
     return card;
   });
-  layoutCards($('handoutGrid'), cards);
+  layoutCards($('handoutGrid'), cards, true);
   focusSoon('handoutBack');
 }
 

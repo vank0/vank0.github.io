@@ -1,4 +1,4 @@
-const CACHE = 'zoneboard-v29';
+const CACHE = 'zoneboard-v30';
 const ASSETS = ['.', 'index.html', 'styles.css', 'app.js', 'hr.js', 'charts.js', 'sensors.js', 'i18n.js', 'qrcode.js', 'manifest.webmanifest', 'icons/icon.svg'];
 
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(() => {})); });
