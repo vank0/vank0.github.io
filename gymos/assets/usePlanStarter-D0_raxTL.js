@@ -1,1 +1,0 @@
-import{u as e}from"./Gloss-CYlyHkvV.js";import{l as t}from"./src-BvWvjPpR.js";import{U as n,ut as r}from"./index-CyekmvDZ.js";function i(){let i=e(),a=n();return{start:e=>a(async()=>{let n=await r(e);return n.ok?n.sessionId:(t({variant:`error`,message:i(`sched.routineGone`,`That routine was deleted.`)}),null)})}}export{i as t};
