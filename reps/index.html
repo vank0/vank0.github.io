@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0b0f14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="RepCount" />
+  <title>RepCount — sensor rep counter</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Resolve theme before first paint to avoid a flash of the wrong theme.
+    (function () {
+      try {
+        var pref = localStorage.getItem("rc.theme"); // "light" | "dark" | "auto" | null
+        var dark = pref === "dark" ||
+          ((!pref || pref === "auto") && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      } catch (_) { document.documentElement.dataset.theme = "light"; }
+    })();
+  </script>
+</head>
+<body>
+  <main id="app">
+    <header>
+      <h1>RepCount</h1>
+      <div class="header-actions">
+        <button id="themeBtn" class="chip" aria-label="Theme">
+          <svg id="themeIconAuto" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 3 a9 9 0 0 1 0 18 z" fill="currentColor" stroke="none"/>
+          </svg>
+          <svg id="themeIconLight" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <svg id="themeIconDark" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <button id="langBtn" class="chip" aria-label="Language">EN</button>
+      </div>
+    </header>
+
+    <!-- Big counter -->
+    <section id="counterCard" class="card">
+      <div id="repDisplay" aria-live="off">
+        <span id="repCount">0</span>
+        <span id="repTarget" class="target">/ 12</span>
+      </div>
+      <div id="stateLine" data-i18n="state.idle">Ready — place phone on the weight stack</div>
+      <canvas id="wave" width="640" height="120" aria-hidden="true"></canvas>
+    </section>
+
+    <!-- Controls -->
+    <section class="card controls">
+      <button id="startBtn" class="primary" data-i18n="btn.start">▶ Start set</button>
+      <button id="resetBtn" data-i18n="btn.reset">Reset</button>
+    </section>
+
+    <!-- Settings -->
+    <section class="card settings">
+      <h2 data-i18n="settings.title">Settings</h2>
+
+      <label class="row">
+        <span data-i18n="settings.target">Target reps</span>
+        <span class="stepper">
+          <button class="step" data-step="-1" aria-label="decrease">−</button>
+          <input id="targetInput" type="number" inputmode="numeric" min="1" max="200" value="12" />
+          <button class="step" data-step="1" aria-label="increase">+</button>
+        </span>
+      </label>
+
+      <label class="row">
+        <span data-i18n="settings.sensitivity">Sensitivity</span>
+        <input id="sensInput" type="range" min="1" max="10" step="1" value="5" />
+      </label>
+
+      <label class="row">
+        <span data-i18n="settings.minRep">Min. seconds per rep</span>
+        <span class="stepper">
+          <button class="step2" data-step="-0.5" aria-label="decrease">−</button>
+          <input id="minRepInput" type="number" inputmode="decimal" min="0.5" max="10" step="0.5" value="1.5" />
+          <button class="step2" data-step="0.5" aria-label="increase">+</button>
+        </span>
+      </label>
+
+      <label class="row toggle">
+        <span data-i18n="settings.voice">Speak the count</span>
+        <input id="voiceToggle" type="checkbox" />
+      </label>
+
+      <label class="row toggle">
+        <span data-i18n="settings.beep">Beep on each rep</span>
+        <input id="beepToggle" type="checkbox" checked />
+      </label>
+    </section>
+
+    <section class="card help">
+      <h2 data-i18n="help.title">How to use</h2>
+      <ol>
+        <li data-i18n="help.1">Set your target reps, press <b>Start set</b>, then place the phone flat on the machine's weight stack (screen up).</li>
+        <li data-i18n="help.2">Each full up-and-down movement counts as one rep, with a beep.</li>
+        <li data-i18n="help.3">When you reach the target you'll hear a distinct fanfare; extra reps get a lower tone.</li>
+        <li data-i18n="help.4">If reps are missed or double-counted, adjust <b>Sensitivity</b> — the graph shows what the sensor sees.</li>
+      </ol>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

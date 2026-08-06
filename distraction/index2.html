@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Distraction Timer</title>
+<style>
+  :root{
+    --bg:#0b0d12; --bg2:#12151c;
+    --card:rgba(255,255,255,0.06); --card-border:rgba(255,255,255,0.12);
+    --text:#f2f3f5; --text-dim:#9aa0ac;
+    --accent:#6c8cff; --accent2:#8f6cff;
+    --gold:#ffcf5c; --danger:#ff6c6c; --good:#5cffa3;
+    --shadow:0 20px 60px rgba(0,0,0,0.45);
+    --radius:26px;
+    color-scheme:dark;
+  }
+  html.light{
+    --bg:#eef0f5; --bg2:#e3e6ee;
+    --card:rgba(255,255,255,0.55); --card-border:rgba(255,255,255,0.7);
+    --text:#1b1d24; --text-dim:#666c7a;
+    --shadow:0 20px 60px rgba(30,40,80,0.15);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 20% 15%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 55%),
+      radial-gradient(circle at 85% 80%, color-mix(in srgb, var(--accent2) 16%, transparent), transparent 55%),
+      var(--bg);
+    transition:background .28s cubic-bezier(.4,0,.2,1), color .28s cubic-bezier(.4,0,.2,1);
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;}
+  .glass{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    box-shadow:var(--shadow);
+    border-radius:var(--radius);
+  }
+  /* ---------- setup screen ---------- */
+  #setup{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:clamp(12px,4vw,40px);
+  }
+  .card{
+    width:100%; max-width:720px;
+    padding:clamp(20px,4vw,40px);
+    display:flex; flex-direction:column; gap:clamp(18px,3vw,28px);
+  }
+  .topbar{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .topbar h1{
+    font-size:clamp(20px,3vw,28px); margin:0; font-weight:700;
+    display:flex; align-items:center; gap:10px;
+  }
+  .topbar .controls{display:flex; gap:8px;}
+  .iconbtn{
+    width:42px; height:42px; border-radius:14px; border:1px solid var(--card-border);
+    background:var(--card); color:var(--text); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:transform .28s cubic-bezier(.4,0,.2,1), background .28s;
+  }
+  .iconbtn:hover{transform:translateY(-2px); background:color-mix(in srgb, var(--accent) 18%, var(--card));}
+  .iconbtn svg{width:20px; height:20px;}
+  .langbtn{width:auto; padding:0 14px; font-weight:700; font-size:13px; letter-spacing:.5px;}
+  section.q{display:flex; flex-direction:column; gap:12px;}
+  section.q h2{
+    font-size:clamp(15px,2vw,18px); margin:0; font-weight:600; color:var(--text-dim);
+  }
+  .chip-row{display:flex; flex-wrap:wrap; gap:10px;}
+  .chip{
+    padding:10px 18px; border-radius:16px; border:1px solid var(--card-border);
+    background:var(--card); color:var(--text); cursor:pointer; font-size:14px; font-weight:600;
+    transition:all .28s cubic-bezier(.4,0,.2,1);
+  }
+  .chip:hover{transform:translateY(-2px);}
+  .chip.active{
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color:transparent; color:#fff; box-shadow:0 8px 22px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .cat-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); gap:12px;
+  }
+  .cat-btn{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    padding:16px 8px; border-radius:20px; border:1px solid var(--card-border);
+    background:var(--card); color:var(--text); cursor:pointer;
+    transition:all .28s cubic-bezier(.4,0,.2,1);
+  }
+  .cat-btn:hover{transform:translateY(-3px);}
+  .cat-btn.active{
+    background:linear-gradient(135deg, color-mix(in srgb,var(--accent) 30%, var(--card)), color-mix(in srgb,var(--accent2) 30%, var(--card)));
+    border-color:var(--accent); box-shadow:0 10px 26px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .cat-btn svg{width:26px; height:26px;}
+  .cat-btn span{font-size:12.5px; font-weight:600; text-align:center;}
+  .start-btn{
+    margin-top:6px; padding:16px; border-radius:20px; border:none; cursor:pointer;
+    font-size:17px; font-weight:700; color:#fff;
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow:0 14px 34px color-mix(in srgb, var(--accent) 45%, transparent);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  .start-btn:hover{transform:translateY(-2px) scale(1.01);}
+
+  /* ---------- distraction screen ---------- */
+  #distraction{
+    position:fixed; inset:0; background:#000; display:none; overflow:hidden; z-index:10;
+  }
+  #distraction.show{display:block;}
+  .progress-track{position:absolute; top:0; left:0; right:0; height:4px; background:rgba(255,255,255,0.08); z-index:5;}
+  .progress-fill{height:100%; width:100%; background:var(--accent); transition:width .1s linear, background .3s;}
+  .progress-fill.warn{background:#ff9d3d; animation:pulse 0.6s infinite alternate;}
+  @keyframes pulse{from{opacity:1;} to{opacity:.45;}}
+  .hud-btn{
+    position:absolute; top:16px; z-index:6; padding:9px 16px; border-radius:999px; border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.08); backdrop-filter:blur(14px); color:#fff; cursor:pointer;
+    display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600;
+    transition:transform .28s cubic-bezier(.4,0,.2,1), background .28s;
+  }
+  .hud-btn:hover{transform:translateY(-2px); background:rgba(255,255,255,0.16);}
+  .hud-btn svg{width:15px; height:15px;}
+  #nextBtn{left:16px;}
+  #skipBtn{right:16px;}
+  #timeBadge{
+    position:absolute; top:16px; right:120px; z-index:6; padding:9px 16px; border-radius:999px;
+    border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.08); backdrop-filter:blur(14px);
+    color:#fff; font-variant-numeric:tabular-nums; font-weight:700; font-size:13px;
+  }
+  .stage{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:40px;}
+  .fade-overlay{
+    position:absolute; inset:0; background:#000; opacity:0; pointer-events:none; z-index:4;
+    transition:opacity .1s linear;
+  }
+  .times-up{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:7;
+    color:#fff; font-size:clamp(28px,6vw,64px); font-weight:800; opacity:0; letter-spacing:1px;
+    transition:opacity .5s ease; pointer-events:none;
+  }
+  .times-up.show{opacity:1;}
+
+  /* trivia layout */
+  .trivia-box{max-width:820px; width:100%; text-align:center; color:#fff;}
+  .trivia-q{
+    font-size:clamp(20px,3.4vw,34px); font-weight:700; margin-bottom:clamp(24px,4vw,40px); min-height:2.4em;
+    line-height:1.35;
+  }
+  .trivia-choices{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:560px){ .trivia-choices{grid-template-columns:1fr;} }
+  .choice{
+    padding:16px 20px; border-radius:18px; border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.06); color:#fff; font-size:clamp(14px,1.6vw,17px); font-weight:600;
+    transition:all .4s cubic-bezier(.4,0,.2,1); opacity:1;
+  }
+  .choice.correct{background:rgba(255,207,92,0.18); border-color:var(--gold); box-shadow:0 0 30px rgba(255,207,92,0.5); color:var(--gold);}
+  .choice.dim{opacity:.35;}
+
+  /* riddle/joke layout */
+  .text-box{max-width:780px; width:100%; text-align:center; color:#fff;}
+  .text-main{font-size:clamp(20px,3.6vw,36px); font-weight:700; line-height:1.4; min-height:2.4em;}
+  .text-answer{
+    margin-top:28px; font-size:clamp(16px,2.4vw,24px); color:var(--gold); font-weight:600;
+    opacity:0; transition:opacity .8s ease;
+  }
+  .text-answer.show{opacity:1;}
+  .cursor{opacity:.7; animation:blink 1s step-start infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* video */
+  .video-wrap{position:absolute; inset:0;}
+  .video-wrap iframe{width:100%; height:100%; border:0;}
+
+  /* visuals canvas */
+  #visualCanvas{position:absolute; inset:0; width:100%; height:100%;}
+
+  @media (max-width:480px){
+    #timeBadge{right:70px; padding:7px 12px; font-size:12px;}
+    .hud-btn{padding:7px 12px; font-size:12px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="setup"></div>
+<div id="distraction">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div id="timeBadge">0:30</div>
+  <button class="hud-btn" id="nextBtn"></button>
+  <button class="hud-btn" id="skipBtn"></button>
+  <div class="stage" id="stage"></div>
+  <div class="fade-overlay" id="fadeOverlay"></div>
+  <div class="times-up" id="timesUp"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ i18n ============ */
+const I18N = {
+  en:{
+    title:"Distraction Timer",
+    durationQ:"How long should the timer run?",
+    refreshQ:"How often should content refresh?",
+    categoryQ:"What would you like to do?",
+    start:"Start Timer",
+    next:"Next",
+    skip:"Skip",
+    timesUp:"Time's Up",
+    cat_questions:"Questions", cat_riddles:"Riddles", cat_jokes:"Jokes",
+    cat_movies:"Movies Trivia", cat_popculture:"Pop Culture", cat_shorts:"Shorts",
+    cat_music:"Music", cat_hiddencam:"Hidden Cam", cat_fitness:"Fitness",
+    cat_visuals:"Visuals", cat_random:"Random"
+  },
+  bg:{
+    title:"Таймер за разсейване",
+    durationQ:"Колко да продължи таймерът?",
+    refreshQ:"Колко често да се опреснява съдържанието?",
+    categoryQ:"С какво да се разсеете?",
+    start:"Старт",
+    next:"Напред",
+    skip:"Пропусни",
+    timesUp:"Времето изтече",
+    cat_questions:"Въпроси", cat_riddles:"Гатанки", cat_jokes:"Вицове",
+    cat_movies:"Филмови тестове", cat_popculture:"Поп култура", cat_shorts:"Кратки клипове",
+    cat_music:"Музика", cat_hiddencam:"Скрита камера", cat_fitness:"Фитнес",
+    cat_visuals:"Визуализация", cat_random:"Случайно"
+  }
+};
+
+/* ============ static video data (language-agnostic) ============ */
+/* ponytail: starter set of real, well-known YouTube IDs shared across the
+   4 video categories as placeholders — swap in curated per-category picks
+   (actual Shorts / prank / fitness clips) whenever convenient. */
+const VIDEO_POOL = [
+  "dQw4w9WgXcQ","9bZkp7q19f0","kJQP7kiw5Fk","JGwWNGJdvx8","OPf0YbXqDm0",
+  "fJ9rUzIMcZQ","YQHsXMglC9A","CevxZvSJLk8","RgKAFK5djSk","60ItHLz5WEA",
+  "e-ORhEE9VVg","09R8_2nJtjg","hT_nvWreIhg","YykjpeuMNEk","pRpeEdMmmQ0"
+];
+const VIDEOS = {
+  shorts: VIDEO_POOL, music: VIDEO_POOL, hiddencam: VIDEO_POOL, fitness: VIDEO_POOL
+};
+
+/* ============ text content ============ */
+function mc(q,choices,correct){ return {q,choices,correct}; }
+function tx(text,answer){ return {text,answer}; }
+
+const CONTENT = {
+en:{
+  questions:[
+    mc("What is the largest planet in our solar system?",["Earth","Jupiter","Saturn","Mars"],1),
+    mc("How many continents are there on Earth?",["5","6","7","8"],2),
+    mc("What is the chemical symbol for gold?",["Ag","Au","Gd","Go"],1),
+    mc("Which ocean is the largest?",["Atlantic","Indian","Arctic","Pacific"],3),
+    mc("How many strings does a standard guitar have?",["4","5","6","7"],2),
+    mc("What language has the most native speakers?",["English","Mandarin Chinese","Spanish","Hindi"],1),
+    mc("What is the tallest mountain in the world?",["K2","Kilimanjaro","Everest","Denali"],2),
+    mc("How many bones are in the adult human body?",["186","206","226","246"],1),
+    mc("What is the smallest country in the world?",["Monaco","San Marino","Vatican City","Liechtenstein"],2),
+    mc("Which planet is known as the Red Planet?",["Venus","Mars","Mercury","Jupiter"],1),
+    mc("What is the speed of light approximately?",["300,000 km/s","150,000 km/s","1,000 km/s","30,000 km/s"],0),
+    mc("How many players are on a soccer team on the field?",["9","10","11","12"],2)
+  ],
+  movies:[
+    mc("Who directed 'Jaws' and 'E.T.'?",["George Lucas","Steven Spielberg","James Cameron","Ridley Scott"],1),
+    mc("Which movie features the line 'I'll be back'?",["Predator","Terminator","RoboCop","Die Hard"],1),
+    mc("What is the name of the ship in Titanic?",["Titanic","Olympic","Britannic","Atlantic"],0),
+    mc("Which studio made 'Toy Story'?",["DreamWorks","Pixar","Illumination","Blue Sky"],1),
+    mc("Who played the Joker in 'The Dark Knight'?",["Jared Leto","Joaquin Phoenix","Heath Ledger","Jack Nicholson"],2),
+    mc("What year did the first 'Star Wars' film release?",["1975","1977","1980","1983"],1),
+    mc("Which film won Best Picture in 2020 (for 2019)?",["1917","Joker","Parasite","Ford v Ferrari"],2),
+    mc("Who directed 'Inception'?",["Denis Villeneuve","Christopher Nolan","David Fincher","Ridley Scott"],1),
+    mc("In 'The Matrix', what color pill does Neo take?",["Blue","Red","Green","Yellow"],1),
+    mc("Which actor plays Iron Man in the MCU?",["Chris Evans","Chris Hemsworth","Robert Downey Jr.","Mark Ruffalo"],2),
+    mc("What is the highest-grossing film of all time (unadjusted)?",["Titanic","Avatar","Avengers: Endgame","Star Wars"],1),
+    mc("Which movie is set in the fictional land of Wakanda?",["Black Panther","Thor","Doctor Strange","Ant-Man"],0)
+  ],
+  popculture:[
+    mc("Which social platform uses a small blue bird as its old logo?",["Instagram","Twitter (X)","Facebook","Snapchat"],1),
+    mc("Which artist released the album '1989'?",["Ariana Grande","Taylor Swift","Beyoncé","Adele"],1),
+    mc("What game features a battle royale on an island called 'the Island'?",["Valorant","Fortnite","Minecraft","Apex Legends"],1),
+    mc("Which brand's logo is a bitten apple?",["Samsung","Apple","Microsoft","Sony"],1),
+    mc("Who is known as the 'King of Pop'?",["Elvis Presley","Prince","Michael Jackson","James Brown"],2),
+    mc("Which streaming service produced 'Stranger Things'?",["Hulu","Netflix","Disney+","HBO Max"],1),
+    mc("What is the name of Elon Musk's car company?",["SpaceX","Tesla","Neuralink","Hyperloop"],1),
+    mc("Which app is known for short looping videos before Reels/Shorts existed?",["Vine","Snapchat","Periscope","Tumblr"],0),
+    mc("Which singer is nicknamed 'Queen Bey'?",["Rihanna","Beyoncé","Nicki Minaj","Cardi B"],1),
+    mc("What color is associated with the recycling symbol most often?",["Blue","Green","Yellow","Red"],1),
+    mc("Which console is made by Nintendo?",["PlayStation 5","Xbox Series X","Switch","Stadia"],2),
+    mc("What is TikTok primarily known for?",["Long documentaries","Short-form videos","Podcasts","Live sports"],1)
+  ],
+  riddles:[
+    tx("The more you take, the more you leave behind. What am I?","Footsteps"),
+    tx("I have keys but no locks, space but no room. You can enter but can't go outside. What am I?","A keyboard"),
+    tx("What has to be broken before you can use it?","An egg"),
+    tx("I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?","An echo"),
+    tx("What has one eye but cannot see?","A needle"),
+    tx("The more you take away from me, the bigger I become. What am I?","A hole"),
+    tx("What gets wetter as it dries?","A towel"),
+    tx("What has many teeth but cannot bite?","A comb"),
+    tx("What can travel around the world while staying in a corner?","A stamp"),
+    tx("What goes up but never comes down?","Your age"),
+    tx("What has a head and a tail but no body?","A coin"),
+    tx("What runs but never walks, has a mouth but never talks?","A river")
+  ],
+  jokes:[
+    tx("Why don't scientists trust atoms?","Because they make up everything!"),
+    tx("Why did the scarecrow win an award?","Because he was outstanding in his field."),
+    tx("Why can't a bicycle stand up by itself?","It's two tired."),
+    tx("What do you call fake spaghetti?","An impasta."),
+    tx("Why did the math book look sad?","It had too many problems."),
+    tx("What do you call a bear with no teeth?","A gummy bear."),
+    tx("Why did the coffee file a police report?","It got mugged."),
+    tx("What do you call a fish with no eyes?","A fsh."),
+    tx("Why don't skeletons fight each other?","They don't have the guts."),
+    tx("What do you call a factory that makes okay products?","A satisfactory."),
+    tx("Why did the golfer bring two pairs of pants?","In case he got a hole in one."),
+    tx("How do you organize a space party?","You planet.")
+  ]
+},
+bg:{
+  questions:[
+    mc("Коя е най-голямата планета в Слънчевата система?",["Земя","Юпитер","Сатурн","Марс"],1),
+    mc("Колко континента има на Земята?",["5","6","7","8"],2),
+    mc("Какъв е химическият символ на златото?",["Ag","Au","Gd","Go"],1),
+    mc("Кой е най-големият океан?",["Атлантически","Индийски","Северен ледовит","Тихи"],3),
+    mc("Колко струни има стандартна китара?",["4","5","6","7"],2),
+    mc("Кой език има най-много носители?",["Английски","Мандарин китайски","Испански","Хинди"],1),
+    mc("Кой е най-високият връх в света?",["К2","Килиманджаро","Еверест","Денали"],2),
+    mc("Колко кости има възрастен човек?",["186","206","226","246"],1),
+    mc("Коя е най-малката държава в света?",["Монако","Сан Марино","Ватикана","Лихтенщайн"],2),
+    mc("Коя планета е известна като Червената планета?",["Венера","Марс","Меркурий","Юпитер"],1),
+    mc("Каква е приблизителната скорост на светлината?",["300 000 км/с","150 000 км/с","1 000 км/с","30 000 км/с"],0),
+    mc("Колко играчи има футболен отбор на терена?",["9","10","11","12"],2)
+  ],
+  movies:[
+    mc("Кой режисира 'Челюсти' и 'Извънземното'?",["Джордж Лукас","Стивън Спилбърг","Джеймс Камерън","Ридли Скот"],1),
+    mc("В кой филм е репликата 'Ще се върна'?",["Хищникът","Терминатор","РобоКоп","Умирай трудно"],1),
+    mc("Как се казва корабът в 'Титаник'?",["Титаник","Олимпик","Британик","Атлантик"],0),
+    mc("Кое студио създаде 'Играта на играчките'?",["ДриймУъркс","Пиксар","Илюминейшън","Блу Скай"],1),
+    mc("Кой играе Джокера във 'Тъмният рицар'?",["Джаред Лето","Хоакин Финикс","Хийт Леджър","Джак Никълсън"],2),
+    mc("Коя година излиза първият филм 'Междузвездни войни'?",["1975","1977","1980","1983"],1),
+    mc("Кой филм печели Оскар за най-добър филм за 2019 г.?",["1917","Джокър","Паразит","Форд срещу Ферари"],2),
+    mc("Кой режисира 'Начало' (Inception)?",["Дени Вилньов","Кристофър Нолан","Дейвид Финчър","Ридли Скот"],1),
+    mc("В 'Матрицата' какво хапче взима Нео?",["Синьо","Червено","Зелено","Жълто"],1),
+    mc("Кой играе Железният човек в МКВ?",["Крис Евънс","Крис Хемсуърт","Робърт Дауни Джуниър","МаркРъфало"],2),
+    mc("Кой е филмът с най-високи приходи (без корекция за инфлация)?",["Титаник","Аватар","Отмъстителите: Краят","Междузвездни войни"],1),
+    mc("Кой филм се развива във фикционалната държава Уаканда?",["Черната пантера","Тор","Доктор Стрейндж","Ант-Мен"],0)
+  ],
+  popculture:[
+    mc("Коя социална платформа използва синя птичка като старо лого?",["Инстаграм","Туитър (X)","Фейсбук","Снапчат"],1),
+    mc("Кой изпълнител издаде албума '1989'?",["Ариана Гранде","Тейлър Суифт","Бионсе","Адел"],1),
+    mc("Коя игра предлага 'battle royale' на остров?",["Валорант","Фортнайт","Майнкрафт","Апекс Лиджендс"],1),
+    mc("Чие лого е отхапана ябълка?",["Самсунг","Епъл","Майкрософт","Сони"],1),
+    mc("Кой е известен като 'Кралят на попа'?",["Елвис Пресли","Принс","Майкъл Джексън","Джеймс Браун"],2),
+    mc("Коя стрийминг платформа продуцира 'Странни неща'?",["Хулу","Нетфликс","Дисни+","Ейч Би О Макс"],1),
+    mc("Как се казва автомобилната компания на Илон Мъск?",["СпейсЕкс","Тесла","Нюралинк","Хиперлуп"],1),
+    mc("Кое приложение е известно с кратки видеа в цикъл преди Reels/Shorts?",["Вайн","Снапчат","Периском","Тъмблър"],0),
+    mc("Коя певица е с прякор 'Кралица Бей'?",["Риана","Бионсе","Ники Минаж","Карди Би"],1),
+    mc("Кой цвят е свързан най-често със символа за рециклиране?",["Син","Зелен","Жълт","Червен"],1),
+    mc("Коя конзола е произведена от Нинтендо?",["ПлейСтейшън 5","Ексбокс Сириъс Екс","Суич","Стейдия"],2),
+    mc("С какво е известен ТикТок предимно?",["Дълги документални филми","Кратки видеа","Подкасти","Спорт на живо"],1)
+  ],
+  riddles:[
+    tx("Колкото повече взимаш, толкова повече оставяш зад себе си. Какво съм?","Стъпки"),
+    tx("Имам ключове, но без ключалки, място, но без стая. Можеш да влезеш, но не можеш да излезеш навън. Какво съм?","Клавиатура"),
+    tx("Какво трябва да се счупи, преди да го използваш?","Яйце"),
+    tx("Говоря без уста и чувам без уши. Нямам тяло, но оживявам с вятъра. Какво съм?","Ехо"),
+    tx("Какво има едно око, но не вижда?","Игла"),
+    tx("Колкото повече взимат от мен, толкова по-голяма ставам. Какво съм?","Дупка"),
+    tx("Какво става по-мокро, докато съхне?","Кърпа"),
+    tx("Какво има много зъби, но не хапе?","Гребен"),
+    tx("Какво може да пътува по света, оставайки в ъгъла?","Марка"),
+    tx("Какво се качва нагоре, но никога не слиза?","Възрастта ти"),
+    tx("Какво има глава и опашка, но няма тяло?","Монета"),
+    tx("Какво тича, но никога не ходи, има уста, но никога не говори?","Река")
+  ],
+  jokes:[
+    tx("Защо учените не вярват на атомите?","Защото те съставят всичко!"),
+    tx("Защо плашилото спечели награда?","Защото беше изключително на полето си."),
+    tx("Защо велосипедът не може да стои прав сам?","Защото е две уморен."),
+    tx("Как се казват фалшиви спагети?","Импаста."),
+    tx("Защо учебникът по математика изглеждаше тъжен?","Имаше твърде много проблеми."),
+    tx("Как се казва мечка без зъби?","Желирана мечка."),
+    tx("Защо кафето подаде жалба в полицията?","Защото го ограбиха (mugged)."),
+    tx("Как се казва риба без очи?","Рб."),
+    tx("Защо скелетите не се бият помежду си?","Нямат смелост (guts)."),
+    tx("Как се казва фабрика, която прави посредствени продукти?","Задоволителна."),
+    tx("Защо голфърът взе два чифта панталони?","В случай че направи дупка на един удар."),
+    tx("Как се организира купон в космоса?","Планираш го (You planet).")
+  ]
+}
+};
+
+/* ============ config ============ */
+const DURATIONS = [30000,60000,90000,120000,180000,300000];
+const DUR_LABELS = ["30s","1m","1.5m","2m","3m","5m"];
+const REFRESH = [15000,30000,45000,60000];
+const REFRESH_LABELS = ["15s","30s","45s","60s"];
+const TEXT_CATS = ["questions","riddles","jokes","movies","popculture"];
+const MC_CATS = ["questions","movies","popculture"];
+const VIDEO_CATS = ["shorts","music","hiddencam","fitness"];
+const CATEGORIES = ["questions","riddles","jokes","movies","popculture","shorts","music","hiddencam","fitness","visuals","random"];
+
+const ICONS = {
+  questions:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.2 9.5a2.8 2.8 0 1 1 3.8 2.6c-.9.5-1 .9-1 1.9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="currentColor"/>',
+  riddles:'<path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  jokes:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 14c1 1.4 2.2 2 3.5 2s2.5-.6 3.5-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/>',
+  movies:'<rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 5v14M17 5v14M3 9h4M17 9h4M3 15h4M17 15h4" stroke="currentColor" stroke-width="1.4"/>',
+  popculture:'<path d="M12 3l2 5 5 .7-3.7 3.4.9 5-4.2-2.5-4.2 2.5.9-5-3.7-3.4 5-.7z" fill="currentColor"/>',
+  shorts:'<rect x="7" y="2.5" width="10" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 9l4.5 3-4.5 3z" fill="currentColor"/>',
+  music:'<circle cx="7" cy="18" r="2.4" fill="currentColor"/><circle cx="17" cy="16" r="2.4" fill="currentColor"/><path d="M9.4 18V5.5L19.4 4v11.5" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+  hiddencam:'<rect x="3" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 10l5-2.5v9L16 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="9.5" cy="12" r="2.2" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  fitness:'<path d="M3 12h2M19 12h2M6 8v8M18 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="7" y="9" width="10" height="6" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+  visuals:'<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
+  random:'<path d="M4 6h5.5L18 18h2M4 18h5.5L18 6h2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 4l3 2-3 2M17 16l3 2-3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
+};
+const SUN = '<circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>';
+const MOON = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" fill="currentColor"/>';
+const NEXT_ICON = '<path d="M6 5l7 7-7 7M15 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+const SKIP_ICON = '<path d="M6 5v14M9 12l9-7v14z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"/>';
+
+function svg(paths){ return `<svg viewBox="0 0 24 24">${paths}</svg>`; }
+
+/* ============ state ============ */
+const state = {
+  lang: localStorage.getItem('dt.lang') || 'en',
+  theme: localStorage.getItem('dt.theme') || 'dark',
+  duration: DURATIONS[1],
+  refresh: REFRESH[1],
+  category: 'questions',
+  audioCtx: null
+};
+
+function t(key){ return I18N[state.lang][key] || key; }
+
+function applyTheme(){
+  document.documentElement.classList.toggle('light', state.theme==='light');
+}
+applyTheme();
+
+/* ============ setup screen render ============ */
+function renderSetup(){
+  const el = document.getElementById('setup');
+  el.innerHTML = `
+    <div class="card glass">
+      <div class="topbar">
+        <h1>${svg(ICONS.visuals)} ${t('title')}</h1>
+        <div class="controls">
+          <button class="iconbtn langbtn" id="langBtn">${state.lang.toUpperCase()}</button>
+          <button class="iconbtn" id="themeBtn">${svg(state.theme==='dark'?SUN:MOON)}</button>
+        </div>
+      </div>
+      <section class="q">
+        <h2>${t('durationQ')}</h2>
+        <div class="chip-row" id="durRow">
+          ${DURATIONS.map((d,i)=>`<button class="chip ${d===state.duration?'active':''}" data-dur="${d}">${DUR_LABELS[i]}</button>`).join('')}
+        </div>
+      </section>
+      <section class="q">
+        <h2>${t('refreshQ')}</h2>
+        <div class="chip-row" id="refRow">
+          ${REFRESH.map((r,i)=>`<button class="chip ${r===state.refresh?'active':''}" data-ref="${r}">${REFRESH_LABELS[i]}</button>`).join('')}
+        </div>
+      </section>
+      <section class="q">
+        <h2>${t('categoryQ')}</h2>
+        <div class="cat-grid" id="catGrid">
+          ${CATEGORIES.map(c=>`
+            <button class="cat-btn ${c===state.category?'active':''}" data-cat="${c}">
+              ${svg(ICONS[c])}
+              <span>${t('cat_'+c)}</span>
+            </button>`).join('')}
+        </div>
+      </section>
+      <button class="start-btn" id="startBtn">${t('start')}</button>
+    </div>
+  `;
+
+  document.getElementById('langBtn').onclick = ()=>{
+    state.lang = state.lang==='en'?'bg':'en';
+    localStorage.setItem('dt.lang', state.lang);
+    renderSetup();
+  };
+  document.getElementById('themeBtn').onclick = ()=>{
+    state.theme = state.theme==='dark'?'light':'dark';
+    localStorage.setItem('dt.theme', state.theme);
+    applyTheme();
+    renderSetup();
+  };
+  el.querySelectorAll('[data-dur]').forEach(b=>b.onclick=()=>{ state.duration=+b.dataset.dur; renderSetup(); });
+  el.querySelectorAll('[data-ref]').forEach(b=>b.onclick=()=>{ state.refresh=+b.dataset.ref; renderSetup(); });
+  el.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ state.category=b.dataset.cat; renderSetup(); });
+  document.getElementById('startBtn').onclick = startTimer;
+}
+
+/* ============ audio beep ============ */
+function ensureAudio(){
+  if(!state.audioCtx) state.audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return state.audioCtx;
+}
+function beep(){
+  try{
+    const ctx = ensureAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type='sine'; osc.frequency.value=880;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.35);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+
+/* ============ distraction runtime ============ */
+const run = {
+  active:false, totalMs:0, startTime:0, beeped:false, rafId:0, endTimeout:0,
+  category:'', pool:[], poolIdx:0,
+  itemStart:0, itemMs:0, typeTimer:0, typed:false,
+  videoList:[], videoIdx:0,
+  visualStart:0
+};
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function startTimer(){
+  ensureAudio();
+  let cat = state.category;
+  if(cat==='random'){
+    const all = CATEGORIES.filter(c=>c!=='random');
+    cat = all[Math.floor(Math.random()*all.length)];
+  }
+  run.active = true;
+  run.category = cat;
+  run.totalMs = state.duration;
+  run.startTime = performance.now();
+  run.beeped = false;
+
+  if(TEXT_CATS.includes(cat)){
+    run.pool = shuffle(CONTENT[state.lang][cat]);
+    run.poolIdx = 0;
+    startItem();
+  } else if(VIDEO_CATS.includes(cat)){
+    run.videoList = shuffle(VIDEOS[cat]);
+    run.videoIdx = 0;
+    renderVideo();
+  } else if(cat==='visuals'){
+    run.visualStart = performance.now();
+    renderVisual();
+  }
+
+  document.getElementById('distraction').classList.add('show');
+  document.getElementById('nextBtn').innerHTML = `${svg(NEXT_ICON)} ${t('next')}`;
+  document.getElementById('skipBtn').innerHTML = `${svg(SKIP_ICON)} ${t('skip')}`;
+  document.getElementById('nextBtn').onclick = onNext;
+  document.getElementById('skipBtn').onclick = ()=>endSession(true);
+  document.getElementById('timesUp').textContent = t('timesUp');
+  document.getElementById('timesUp').classList.remove('show');
+  document.getElementById('fadeOverlay').style.opacity = 0;
+
+  cancelAnimationFrame(run.rafId);
+  loop();
+}
+
+function loop(){
+  if(!run.active) return;
+  const now = performance.now();
+  const remaining = Math.max(0, run.totalMs - (now-run.startTime));
+
+  const fill = document.getElementById('progressFill');
+  fill.style.width = (remaining/run.totalMs*100)+'%';
+  fill.classList.toggle('warn', remaining<=5000);
+  document.getElementById('timeBadge').textContent = fmtTime(remaining);
+  document.getElementById('fadeOverlay').style.opacity = remaining<=5000 ? (1 - remaining/5000) : 0;
+  document.getElementById('timesUp').classList.toggle('show', remaining<=2000 && remaining>0 || remaining<=0);
+
+  if(!run.beeped && remaining<=3000 && remaining>0){ run.beeped = true; beep(); }
+
+  if(TEXT_CATS.includes(run.category)){
+    const itemRemaining = Math.max(0, run.itemMs - (now-run.itemStart));
+    updateItemReveal(itemRemaining);
+    if(itemRemaining<=0) startItem();
+  }
+
+  if(remaining<=0){ endSession(false); return; }
+  run.rafId = requestAnimationFrame(loop);
+}
+
+function fmtTime(ms){
+  const s = Math.ceil(ms/1000);
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return m>0 ? `${m}:${sec.toString().padStart(2,'0')}` : `0:${sec.toString().padStart(2,'0')}`;
+}
+
+function endSession(skipped){
+  run.active = false;
+  cancelAnimationFrame(run.rafId);
+  clearInterval(run.typeTimer);
+  document.getElementById('timesUp').classList.add('show');
+  clearTimeout(run.endTimeout);
+  run.endTimeout = setTimeout(()=>{
+    document.getElementById('distraction').classList.remove('show');
+    document.getElementById('stage').innerHTML = '';
+    document.getElementById('progressFill').style.width='100%';
+    document.getElementById('progressFill').classList.remove('warn');
+    document.getElementById('fadeOverlay').style.opacity = 0;
+    document.getElementById('timesUp').classList.remove('show');
+  }, 2000);
+}
+
+function onNext(){
+  if(!run.active) return;
+  if(TEXT_CATS.includes(run.category)){
+    startItem();
+  } else if(VIDEO_CATS.includes(run.category)){
+    run.videoIdx = (run.videoIdx+1) % run.videoList.length;
+    renderVideo();
+  } else if(run.category==='visuals'){
+    run.visualStart = performance.now();
+  }
+}
+
+/* ---- text categories ---- */
+function startItem(){
+  clearInterval(run.typeTimer);
+  if(run.poolIdx >= run.pool.length){ run.pool = shuffle(run.pool); run.poolIdx = 0; }
+  const item = run.pool[run.poolIdx++];
+  run.itemStart = performance.now();
+  run.itemMs = state.refresh;
+  run.typed = false;
+
+  const isMc = MC_CATS.includes(run.category);
+  const fullText = isMc ? item.q : item.text;
+  const stage = document.getElementById('stage');
+
+  if(isMc){
+    stage.innerHTML = `
+      <div class="trivia-box">
+        <div class="trivia-q" id="mainText"><span class="cursor">|</span></div>
+        <div class="trivia-choices">
+          ${item.choices.map((c,i)=>`<div class="choice" data-i="${i}">${c}</div>`).join('')}
+        </div>
+      </div>`;
+  } else {
+    stage.innerHTML = `
+      <div class="text-box">
+        <div class="text-main" id="mainText"><span class="cursor">|</span></div>
+        <div class="text-answer" id="answerEl">${item.answer}</div>
+      </div>`;
+  }
+
+  typeWriter(fullText, state.refresh);
+  run.currentItem = item;
+}
+
+function typeWriter(fullText, refreshMs){
+  const el = document.getElementById('mainText');
+  const available = Math.max(500, refreshMs - 5000);
+  const perChar = Math.min(40, available / Math.max(1,fullText.length));
+  let i = 0;
+  clearInterval(run.typeTimer);
+  run.typeTimer = setInterval(()=>{
+    i++;
+    if(!el) { clearInterval(run.typeTimer); return; }
+    el.innerHTML = escapeHtml(fullText.slice(0,i)) + '<span class="cursor">|</span>';
+    if(i>=fullText.length){
+      clearInterval(run.typeTimer);
+      run.typed = true;
+      el.innerHTML = escapeHtml(fullText);
+    }
+  }, perChar);
+}
+function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function updateItemReveal(itemRemaining){
+  const reveal = itemRemaining<=5000;
+  if(reveal && !run.typed){
+    clearInterval(run.typeTimer);
+    run.typed = true;
+    const el = document.getElementById('mainText');
+    const item = run.currentItem;
+    if(el && item) el.innerHTML = escapeHtml(MC_CATS.includes(run.category)?item.q:item.text);
+  }
+  if(!reveal) return;
+  if(MC_CATS.includes(run.category)){
+    const stage = document.getElementById('stage');
+    if(!stage) return;
+    stage.querySelectorAll('.choice').forEach(ch=>{
+      const idx = +ch.dataset.i;
+      ch.classList.toggle('correct', idx===run.currentItem.correct);
+      ch.classList.toggle('dim', idx!==run.currentItem.correct);
+    });
+  } else {
+    const ans = document.getElementById('answerEl');
+    if(ans) ans.classList.add('show');
+  }
+}
+
+/* ---- video categories ---- */
+function renderVideo(){
+  const list = run.videoList;
+  const current = list[run.videoIdx];
+  const rest = list.slice(run.videoIdx+1).concat(list.slice(0,run.videoIdx));
+  const src = `https://www.youtube.com/embed/${current}?autoplay=1&mute=0&playlist=${rest.join(',')}&controls=1&rel=0`;
+  document.getElementById('stage').innerHTML =
+    `<div class="video-wrap"><iframe src="${src}" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>`;
+}
+
+/* ---- visuals: breathing ring ---- */
+function renderVisual(){
+  const stage = document.getElementById('stage');
+  stage.innerHTML = `<canvas id="visualCanvas"></canvas>`;
+  const canvas = document.getElementById('visualCanvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize(){
+    const dpr = window.devicePixelRatio||1;
+    const w = canvas.clientWidth || window.innerWidth;
+    const h = canvas.clientHeight || window.innerHeight;
+    canvas.width = w*dpr;
+    canvas.height = h*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  requestAnimationFrame(resize);
+  window.addEventListener('resize', resize);
+
+  function draw(){
+    if(!document.body.contains(canvas)) return;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    const t = (performance.now()-run.visualStart)/1000;
+    const phase = (Math.sin(t * (2*Math.PI/8)) + 1)/2; // 8s period
+    const maxR = Math.min(w,h)*0.32;
+    const minR = maxR*0.35;
+    const r = minR + (maxR-minR)*phase;
+    const grad = ctx.createRadialGradient(w/2,h/2,r*0.2,w/2,h/2,r);
+    grad.addColorStop(0,'rgba(108,140,255,0.55)');
+    grad.addColorStop(1,'rgba(108,140,255,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(w/2,h/2,r,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(143,108,255,0.8)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(w/2,h/2,r,0,Math.PI*2); ctx.stroke();
+    if(run.active && run.category==='visuals') requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+renderSetup();
+})();
+</script>
+</body>
+</html>

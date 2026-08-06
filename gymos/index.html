@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Gladiator" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1020" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Fortius Gladiator</title>
+    <script>
+      // Pre-paint theme apply so there's no flash of the wrong theme.
+      (function () {
+        try {
+          var m = localStorage.getItem("gymlog.theme.v1");
+          var t = m === "light" || m === "dark" ? m
+            : (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+          document.documentElement.setAttribute("data-theme", t);
+          var l = localStorage.getItem("gymlog.locale.v1");
+          document.documentElement.setAttribute("lang", l === "bg" ? "bg" : "en");
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-_3CiKSNQ.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-hePW80VL.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-D7Gq2U9M.js">
+    <link rel="modulepreload" crossorigin href="./assets/dexie-BaK-GTO_.js">
+    <link rel="modulepreload" crossorigin href="./assets/db-BZ7gIfLw.js">
+    <link rel="modulepreload" crossorigin href="./assets/supabase-DWuhtgaR.js">
+    <link rel="modulepreload" crossorigin href="./assets/supabaseClient-D_ZakV12.js">
+    <link rel="modulepreload" crossorigin href="./assets/timeago-DilL85O9.js">
+    <link rel="modulepreload" crossorigin href="./assets/Gloss-CPzRZeev.js">
+    <link rel="modulepreload" crossorigin href="./assets/src-CvObXF2S.js">
+    <link rel="modulepreload" crossorigin href="./assets/tombstones-XO4RuurR.js">
+    <link rel="modulepreload" crossorigin href="./assets/accounts-CD6JYwzd.js">
+    <link rel="modulepreload" crossorigin href="./assets/ingredients-D6c59q7F.js">
+    <link rel="modulepreload" crossorigin href="./assets/InsightBanner-F5iN3r2I.js">
+    <link rel="modulepreload" crossorigin href="./assets/src-DpCtUpgj.js">
+    <link rel="modulepreload" crossorigin href="./assets/cardio-d3DjxxzV.js">
+    <link rel="modulepreload" crossorigin href="./assets/profile-B4y-jaVY.js">
+    <link rel="modulepreload" crossorigin href="./assets/hrAnalytics-DXofEtGc.js">
+    <link rel="modulepreload" crossorigin href="./assets/theme-DXg0CbwL.js">
+    <link rel="modulepreload" crossorigin href="./assets/workout-DW72EQlH.js">
+    <link rel="modulepreload" crossorigin href="./assets/e1rm-DDRGm9dt.js">
+    <link rel="modulepreload" crossorigin href="./assets/muscles-WeacXYwL.js">
+    <link rel="modulepreload" crossorigin href="./assets/muscleCoefficients-BM2Ant5i.js">
+    <link rel="modulepreload" crossorigin href="./assets/progress-CO0c8y6g.js">
+    <link rel="modulepreload" crossorigin href="./assets/interval-9z3yFHrT.js">
+    <link rel="modulepreload" crossorigin href="./assets/routines-Dh1eDpP6.js">
+    <link rel="modulepreload" crossorigin href="./assets/ConflictConfirm-Behh2-k8.js">
+    <link rel="modulepreload" crossorigin href="./assets/qrcode-BPwPmufs.js">
+    <link rel="modulepreload" crossorigin href="./assets/stack-DFHdRjXu.js">
+    <link rel="modulepreload" crossorigin href="./assets/records-BBIxLDkS.js">
+    <link rel="modulepreload" crossorigin href="./assets/share-BVPktoRB.js">
+    <link rel="modulepreload" crossorigin href="./assets/MuscleMap-9ZCGCUVF.js">
+    <link rel="modulepreload" crossorigin href="./assets/exerciseDrawer-kEiTo6rW.js">
+    <link rel="modulepreload" crossorigin href="./assets/ShareSheet-RcItovym.js">
+    <link rel="modulepreload" crossorigin href="./assets/printCards-DTtTReVd.js">
+    <link rel="modulepreload" crossorigin href="./assets/sessionTracks-DrL98Gai.js">
+    <link rel="stylesheet" crossorigin href="./assets/src-CIdfX0X4.css">
+    <link rel="stylesheet" crossorigin href="./assets/InsightBanner-hw7tK5NU.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-DgOwOARn.css">
+  <link rel="manifest" href="./manifest.webmanifest"></head>
+  <body>
+    <div class="aurora"></div>
+    <div id="root"></div>
+  </body>
+</html>

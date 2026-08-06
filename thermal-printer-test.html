@@ -1,0 +1,1085 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BT Thermal Print</title>
+<style>
+:root{
+  --bg:#f3f1ec; --card:#ffffff; --ink:#1c1b18; --mut:#6f6a60; --line:#e3ded4;
+  --acc:#0f766e; --acc-ink:#ffffff; --ok:#15803d; --bad:#b3261e; --warn:#a16207;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#161512; --card:#201e1a; --ink:#ece7dd; --mut:#a09a8c; --line:#37332b;
+         --acc:#2dd4bf; --acc-ink:#04211d; --ok:#4ade80; --bad:#f87171; --warn:#fbbf24; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px 16px 64px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:20px 0 8px}
+h1{font-size:1.35rem;margin:0;letter-spacing:-0.01em}
+h1 small{color:var(--mut);font-weight:400;font-size:0.85rem;display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}
+.card h2{font-size:1rem;margin:0 0 10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+label{font-size:0.85rem;color:var(--mut)}
+textarea,input[type=text],input[type=number],select{
+  background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;
+  padding:8px;font:inherit}
+textarea{width:100%;min-height:130px;font-family:var(--mono);font-size:0.9rem;resize:vertical}
+input[type=number]{width:5.5em}
+button{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;
+  padding:8px 14px;font:inherit;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--acc)}
+button.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+button:disabled{opacity:0.45;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;
+  padding:4px 12px;font-size:0.85rem;color:var(--mut)}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.pill.on{color:var(--ok)} .pill.on::before{background:var(--ok)}
+.banner{border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:10px 14px;margin:12px 0;display:none}
+table{border-collapse:collapse;width:100%;font-size:0.9rem;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+#log{font-family:var(--mono);font-size:0.78rem;background:var(--bg);border:1px solid var(--line);
+  border-radius:6px;padding:8px;max-height:180px;overflow-y:auto;white-space:pre-wrap}
+#log .ok{color:var(--ok)} #log .bad{color:var(--bad)} #log .warn{color:var(--warn)}
+#imgPreview{max-width:100%;image-rendering:pixelated;border:1px solid var(--line);display:none;background:#fff}
+details summary{cursor:pointer;font-weight:600}
+.hint{font-size:0.82rem;color:var(--mut);margin:6px 0 0}
+ul{margin:6px 0;padding-left:22px}
+li{margin:3px 0}
+code{font-family:var(--mono);font-size:0.85em;background:var(--bg);padding:1px 4px;border-radius:4px}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>BT Thermal Print<small>Web Bluetooth · ESC/POS · pocket &amp; cat printers</small></h1>
+  <span id="status" class="pill">disconnected</span>
+  <span style="flex:1"></span>
+  <button id="btnConnect" class="primary">Connect printer</button>
+  <button id="btnDisconnect" disabled>Disconnect</button>
+</header>
+
+<div id="noBt" class="banner">
+  This browser has no Web Bluetooth. Use Chrome, Edge or Opera over HTTPS (or localhost).
+  See the compatibility section below.
+</div>
+
+<section class="card">
+  <h2>Text</h2>
+  <textarea id="text" placeholder="Type receipt text here… (Ctrl+Enter prints)">Hello from the browser!</textarea>
+  <div class="row">
+    <label>Align <select id="align"><option value="0">left</option><option value="1">center</option><option value="2">right</option></select></label>
+    <label>Size (ESC/POS) <select id="size"><option value="0">normal</option><option value="16">wide</option><option value="1">tall</option><option value="17">big (2×2)</option></select></label>
+    <label>Font (pocket/cat) <input type="number" id="fontPx" min="10" max="96" value="24"> px</label>
+    <label><input type="checkbox" id="bold"> bold</label>
+    <label><input type="checkbox" id="underline"> underline</label>
+  </div>
+  <div class="row">
+    <button id="btnPrint" class="primary needs-conn" disabled>Print text</button>
+    <button id="btnTest" class="needs-conn" disabled>Test page</button>
+    <button id="btnFeed" class="needs-conn" disabled>Feed</button>
+    <button id="btnCut" class="needs-conn" disabled>Cut</button>
+  </div>
+  <p class="hint">ESC/POS mode uses printer fonts (non-ASCII maps to CP437 or “?”). Pocket/cat modes render text as an image, so any characters work.</p>
+</section>
+
+<section class="card">
+  <h2>Image</h2>
+  <div class="row">
+    <input type="file" id="imgFile" accept="image/*">
+    <label><input type="checkbox" id="dither" checked> dither (off = threshold)</label>
+  </div>
+  <canvas id="imgPreview"></canvas>
+  <div class="row"><button id="btnPrintImg" class="primary needs-conn" disabled>Print image</button></div>
+  <p class="hint">Scaled to printer width, converted to 1-bit black/white. Preview above is what prints.</p>
+</section>
+
+<section class="card">
+  <h2>QR code &amp; barcode</h2>
+  <div class="row">
+    <input type="text" id="qrData" placeholder="QR content (URL, text…)" style="flex:1;min-width:200px">
+    <label>Size <select id="qrSize"><option>4</option><option selected>6</option><option>8</option><option>10</option></select></label>
+    <button id="btnQr" class="primary needs-conn" disabled>Print QR</button>
+  </div>
+  <div class="row">
+    <input type="text" id="bcData" placeholder="Barcode content (ASCII)" style="flex:1;min-width:200px" maxlength="60">
+    <button id="btnBc" class="primary needs-conn" disabled>Print CODE128</button>
+  </div>
+  <p class="hint">ESC/POS printers render these in firmware (Size sets the firmware module size). Pocket/cat printers get them generated in the browser and printed as an image — auto-sized to the paper.</p>
+</section>
+
+<section class="card">
+  <h2>Raw bytes (hex)</h2>
+  <div class="row">
+    <input type="text" id="hexData" placeholder="e.g. 1B 40 1B 61 01 48 69 0A" style="flex:1;min-width:200px">
+    <button id="btnHex" class="needs-conn" disabled>Send bytes</button>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Settings</h2>
+  <div class="row">
+    <label>Protocol <select id="proto">
+      <option value="auto">auto</option>
+      <option value="escpos">ESC/POS</option>
+      <option value="tiny">Pocket printer (tiny)</option>
+      <option value="cat">Cat printer</option>
+    </select></label>
+    <label>Darkness (cat) <select id="darkness"><option value="8000">low</option><option value="12000" selected>medium</option><option value="17500">high</option></select></label>
+  </div>
+  <div class="row">
+    <label>Characteristic <select id="charSel" disabled><option>— connect first —</option></select></label>
+    <label>Write mode <select id="writeMode">
+      <option value="auto">auto</option>
+      <option value="noresp">without response</option>
+      <option value="resp">with response</option>
+    </select></label>
+  </div>
+  <div class="row">
+    <label>Paper <select id="dots"><option value="384">58 mm (384 dots)</option><option value="576">80 mm (576 dots)</option></select></label>
+    <label>Chunk <input type="number" id="chunk" min="20" max="512" value="100"> bytes</label>
+    <label>Delay <input type="number" id="delay" min="0" max="200" value="20"> ms</label>
+  </div>
+  <div class="row">
+    <label>Feed after print <input type="number" id="feedAfter" min="0" max="10" value="3"> lines</label>
+    <label><input type="checkbox" id="cutAfter"> cut after print (ESC/POS)</label>
+    <label>Row pacing (pocket/cat) <input type="number" id="rowMs" min="0" max="30" value="6"> ms/row</label>
+  </div>
+  <p class="hint">Protocol “auto” picks from the device name and GATT layout — the log shows what it chose. Prints garbled or stops mid-job? Lower chunk size, raise delay, or try the other write mode. Pocket/cat printers are always 384 dots; the paper setting only affects ESC/POS.</p>
+</section>
+
+<section class="card">
+  <h2>Compatibility</h2>
+
+  <h3 style="font-size:0.95rem">Browsers (Web Bluetooth)</h3>
+  <table>
+    <tr><th>Browser</th><th>Status</th></tr>
+    <tr><td>Chrome — Windows, macOS, ChromeOS, Android</td><td class="ok">✔ works</td></tr>
+    <tr><td>Edge — Windows, macOS</td><td class="ok">✔ works</td></tr>
+    <tr><td>Opera — desktop, Android</td><td class="ok">✔ works</td></tr>
+    <tr><td>Samsung Internet — Android</td><td class="ok">✔ works</td></tr>
+    <tr><td>Chrome — Linux</td><td class="warn">⚠ may need <code>chrome://flags/#enable-experimental-web-platform-features</code></td></tr>
+    <tr><td>Brave</td><td class="warn">⚠ off by default — enable <code>brave://flags/#brave-web-bluetooth-api</code></td></tr>
+    <tr><td>Firefox — all platforms</td><td class="bad">✘ no Web Bluetooth</td></tr>
+    <tr><td>Safari — macOS, iOS, iPadOS</td><td class="bad">✘ no Web Bluetooth</td></tr>
+    <tr><td>iOS / iPadOS (any browser)</td><td class="warn">⚠ use the <em>Bluefy</em> app (WebBLE browser)</td></tr>
+  </table>
+  <p class="hint">Also required: HTTPS or <code>localhost</code>, and a user click to open the device chooser.</p>
+
+  <h3 style="font-size:0.95rem">Printers</h3>
+  <p class="hint" style="margin:0 0 6px">The printer must speak <strong>Bluetooth Low Energy</strong> — Web Bluetooth cannot see Bluetooth Classic (SPP) devices at all. The wire protocol is handled per family below.</p>
+  <table>
+    <tr><th>Printer</th><th>Status</th></tr>
+    <tr><td>Goojprt PT-210, PT-120 (58 mm portable)</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Phomemo M02, M02S, M02 Pro, T02</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Zjiang ZJ-5802, ZJ-5805, ZJ-5809</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Xprinter XP-P300, XP-P323B (BLE mode)</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Rongta RPP02, RPP200, RPP300</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Star Micronics SM-L200, SM-L300 (ESC/POS mode)</td><td class="ok">✔ ESC/POS</td></tr>
+    <tr><td>Generic “MTP-II / MPT-3” 58 mm BLE printers (AliExpress/Amazon)</td><td class="ok">✔ usually ESC/POS</td></tr>
+    <tr><td>Pocket-printer family — KDC-0019B, “Pocket Printer”, X2h/X5h/X6h/X7h, EMX-040256, DL_GE225, ROSSMANN and other <em>Tiny Print</em>-app clones</td><td class="ok">✔ pocket (tiny) mode — text/QR printed as image</td></tr>
+    <tr><td>“Cat printers” — GB01, GB02, GB03, GT01, MX05/MX06, YT01</td><td class="ok">✔ cat mode — text/QR printed as image</td></tr>
+    <tr><td>Epson TM-P20/P60/P80, most Xprinter 58IIH, Bixolon SPP-R</td><td class="bad">✘ Bluetooth Classic only — invisible to Web Bluetooth</td></tr>
+    <tr><td>Paperang P1/P2, Peripage A6/A8</td><td class="bad">✘ proprietary protocol (not implemented)</td></tr>
+    <tr><td>Label printers (Niimbot, Phomemo D30/M110, Brother PT)</td><td class="bad">✘ different protocols</td></tr>
+    <tr><td>Wi-Fi / USB / AirPrint-only printers</td><td class="bad">✘ no Bluetooth path</td></tr>
+  </table>
+
+  <details>
+    <summary>Troubleshooting</summary>
+    <ul>
+      <li><strong>Printer not in the chooser</strong> — it is Classic-only, powered off, or already connected to a phone. Unpair it elsewhere first.</li>
+      <li><strong>Connects, “sent N bytes”, but nothing prints</strong> — wrong protocol for the device. Switch Protocol in Settings (pocket ↔ cat ↔ ESC/POS) and check the auto-detect line in the log.</li>
+      <li><strong>Connects but no writable characteristic</strong> — not a serial-style BLE printer; check the GATT dump in the log.</li>
+      <li><strong>Prints garbage</strong> — protocol mismatch; try the other modes.</li>
+      <li><strong>Starts clean, then slices lines horizontally</strong> — buffer overrun: rows arrive faster than the head prints and get dropped. Raise “Row pacing” (try 8–12 ms), or set write mode to “with response”.</li>
+      <li><strong>Stops mid-print / missing lines</strong> — chunks arrive too fast; lower chunk size, raise delay, or switch write mode to “with response”.</li>
+    </ul>
+  </details>
+</section>
+
+<section class="card">
+  <h2>Log</h2>
+  <div id="log"></div>
+</section>
+</main>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+/* ---------- known BLE serial/printer services (also whitelists them for GATT) ---------- */
+const KNOWN_SERVICES = [
+  '000018f0-0000-1000-8000-00805f9b34fb', // common ESC/POS BLE service (char 2af1)
+  '0000ff00-0000-1000-8000-00805f9b34fb', // Phomemo and friends
+  '0000ffe0-0000-1000-8000-00805f9b34fb', // HM-10 style UART
+  '0000ffe5-0000-1000-8000-00805f9b34fb',
+  '0000ae30-0000-1000-8000-00805f9b34fb', // pocket/cat printer family
+  '0000ae3a-0000-1000-8000-00805f9b34fb',
+  '0000ae00-0000-1000-8000-00805f9b34fb',
+  '0000ae80-0000-1000-8000-00805f9b34fb',
+  '0000ab00-0000-1000-8000-00805f9b34fb',
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC/Microchip transparent UART
+  'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // generic BLE serial
+];
+const PREF_WRITE = ['ae01', 'ae3b', 'ae81', 'ff02', 'ab01', '2af1'];
+const PREF_SVC   = ['ae30', 'ae3a', 'ae00', 'ae80', 'ff00', 'ab00', '18f0'];
+
+let device = null, chr = null, writableChars = [], detectedProto = 'escpos';
+
+function log(msg, cls){
+  const el = $('log');
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = `${new Date().toLocaleTimeString()}  ${msg}`;
+  el.appendChild(line);
+  while (el.childElementCount > 300) el.firstChild.remove();
+  el.scrollTop = el.scrollHeight;
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const short = uuid => uuid.startsWith('0000') && uuid.endsWith('-0000-1000-8000-00805f9b34fb') ? uuid.slice(4, 8) : uuid;
+
+function setConnected(on){
+  $('status').textContent = on ? `connected — ${device.name || 'unnamed'}` : 'disconnected';
+  $('status').classList.toggle('on', on);
+  $('btnConnect').disabled = on;
+  $('btnDisconnect').disabled = !on;
+  $('charSel').disabled = !on;
+  document.querySelectorAll('.needs-conn').forEach(b => b.disabled = !on);
+}
+
+/* ---------- protocol auto-detection ---------- */
+// name prefixes from TiMini-Print's catalog (pocket_printer detections + cat family)
+const TINY_NAMES = ['0019B', 'KDC', 'Pocket Printer', 'EMX-', 'Luxorp', 'SeznikEcho', 'TCM', 'UXPORTMIP',
+  'DL_GE', 'ML-MP-01', 'ROSSMANN', 'DTR-R0', 'GB03PL', 'HT0125', 'RT034h', 'DT1-0', 'SC03h', 'SC04h',
+  'X103h', 'DY03', 'X100', 'X2h', 'X5h', 'X6h', 'X7h'];
+const CAT_NAMES = ['GB01', 'GB02', 'GB03', 'GB04', 'GT01', 'MX05', 'MX06', 'MX08', 'MX09', 'MX10', 'MX11', 'YT01'];
+
+function guessProtocol(name, charUuid){
+  const n = (name || '').trim();
+  if (TINY_NAMES.some(p => n.startsWith(p))) return 'tiny'; // checked first: GB03PL (tiny) beats GB03 (cat)
+  if (CAT_NAMES.some(p => n.startsWith(p))) return 'cat';
+  // ponytail: ae01-family char without a known name — tiny is the most common clone protocol; user can flip in Settings
+  if (['ae01', 'ae3b', 'ae81', 'ab01'].includes(short(charUuid))) return 'tiny';
+  return 'escpos';
+}
+const activeProto = () => $('proto').value === 'auto' ? detectedProto : $('proto').value;
+const isRasterProto = () => activeProto() !== 'escpos';
+
+/* ---------- connection ---------- */
+async function connect(){
+  try {
+    device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: KNOWN_SERVICES });
+    log(`chosen: ${device.name || device.id}`);
+    device.addEventListener('gattserverdisconnected', () => { log('printer disconnected', 'bad'); setConnected(false); });
+    const server = await device.gatt.connect();
+    const services = await server.getPrimaryServices();
+    writableChars = [];
+    for (const s of services){
+      for (const c of await s.getCharacteristics()){
+        const p = c.properties;
+        const props = ['read', 'write', 'writeWithoutResponse', 'notify', 'indicate'].filter(k => p[k]).join(',');
+        log(`gatt: svc ${short(s.uuid)} chr ${short(c.uuid)} [${props || 'none'}]`);
+        if (p.write || p.writeWithoutResponse){
+          const score = (PREF_WRITE.includes(short(c.uuid)) ? 100 : 0)
+                      + (PREF_SVC.includes(short(s.uuid)) ? 50 : 0)
+                      + (p.writeWithoutResponse ? 10 : 5);
+          writableChars.push({ c, s, score });
+        }
+      }
+    }
+    if (!writableChars.length) throw new Error('no writable characteristic found — see GATT dump above');
+    writableChars.sort((a, b) => b.score - a.score);
+    const sel = $('charSel');
+    sel.innerHTML = '';
+    writableChars.forEach((w, i) => {
+      const o = document.createElement('option');
+      o.value = i;
+      o.textContent = `${short(w.s.uuid)} / ${short(w.c.uuid)}`;
+      sel.appendChild(o);
+    });
+    chr = writableChars[0].c;
+    detectedProto = guessProtocol(device.name, chr.uuid);
+    document.querySelector('#proto option[value=auto]').textContent = `auto (${detectedProto})`;
+    setConnected(true);
+    log(`using chr ${short(chr.uuid)}, protocol: ${detectedProto}${$('proto').value === 'auto' ? ' (auto)' : ` (manual: ${$('proto').value})`}`, 'ok');
+    log('ready', 'ok');
+  } catch (e){
+    log(`connect failed: ${e.message}`, 'bad');
+    try { device?.gatt?.disconnect(); } catch {}
+  }
+}
+
+async function send(bytes, quiet){
+  if (!chr) throw new Error('not connected');
+  const chunk = Math.min(512, Math.max(20, +$('chunk').value || 100));
+  const delay = Math.max(0, +$('delay').value || 0);
+  const mode = $('writeMode').value;
+  const useWNR = chr.properties.writeWithoutResponse && chr.writeValueWithoutResponse
+              && (mode === 'noresp' || (mode === 'auto' && true));
+  const data = bytes instanceof Uint8Array ? bytes : Uint8Array.from(bytes);
+  for (let i = 0; i < data.length; i += chunk){
+    const slice = data.subarray(i, i + chunk);
+    if (useWNR && mode !== 'resp') await chr.writeValueWithoutResponse(slice);
+    else await chr.writeValue(slice);
+    if (delay) await sleep(delay);
+  }
+  if (!quiet) log(`sent ${data.length} bytes (${activeProto()})`);
+}
+
+/* ---------- ESC/POS ---------- */
+const ESC = 0x1b, GS = 0x1d;
+const INIT = [ESC, 0x40];
+
+// minimal CP437 map for common accented chars; everything else prints "?"
+const CP437 = {'ä':132,'à':133,'á':160,'â':131,'Ä':142,'é':130,'è':138,'ê':136,'É':144,'í':161,'ì':141,'î':140,
+  'ó':162,'ò':149,'ô':147,'ö':148,'Ö':153,'ú':163,'ù':151,'û':150,'ü':129,'Ü':154,'ñ':164,'Ñ':165,'ç':135,
+  'ß':225,'£':156,'°':248,'¿':168,'¡':173,'·':250};
+function enc(str){
+  const out = [];
+  for (const ch of str.replace(/\r\n/g, '\n')){
+    const cc = ch.codePointAt(0);
+    out.push(cc === 10 ? 10 : cc < 128 ? cc : (CP437[ch] ?? 63));
+  }
+  return out;
+}
+
+function escposTail(){
+  const out = [ESC, 0x64, Math.max(0, +$('feedAfter').value || 0)]; // feed n
+  if ($('cutAfter').checked) out.push(GS, 0x56, 0x42, 0x00);        // partial cut
+  return out;
+}
+
+function escposText(t){
+  return [
+    ...INIT,
+    ESC, 0x61, +$('align').value,            // align
+    GS, 0x21, +$('size').value,              // size
+    ESC, 0x45, $('bold').checked ? 1 : 0,    // bold
+    ESC, 0x2d, $('underline').checked ? 1 : 0,
+    ...enc(t.endsWith('\n') ? t : t + '\n'),
+    GS, 0x21, 0, ESC, 0x45, 0, ESC, 0x2d, 0, ESC, 0x61, 0,
+    ...escposTail(),
+  ];
+}
+
+function escposRaster(canvas){
+  const { width, height } = canvas;
+  const px = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+  const rowBytes = width / 8;
+  const BAND = 96; // rows per GS v 0 command — safer on small buffers
+  const out = [...INIT, ESC, 0x61, 1];
+  for (let y0 = 0; y0 < height; y0 += BAND){
+    const rows = Math.min(BAND, height - y0);
+    out.push(GS, 0x76, 0x30, 0x00, rowBytes & 255, rowBytes >> 8, rows & 255, rows >> 8);
+    for (let y = y0; y < y0 + rows; y++){
+      for (let bx = 0; bx < rowBytes; bx++){
+        let byte = 0;
+        for (let bit = 0; bit < 8; bit++)
+          if (px[(y * width + bx * 8 + bit) * 4] === 0) byte |= 0x80 >> bit; // black = 1, MSB first
+        out.push(byte);
+      }
+    }
+  }
+  out.push(ESC, 0x61, 0, ...escposTail());
+  return out;
+}
+
+/* ---------- 51 78 packet protocols: pocket "tiny" (KDC-0019B etc.) and cat printers ----------
+   frame: 51 78 cmd 00 lenLo lenHi payload crc8(payload) FF — CRC-8 poly 0x07 init 0.
+   Wire format cross-checked against TiMini-Print (tiny family) and catprinter projects. */
+function crc8(bytes){
+  let c = 0;
+  for (const b of bytes){
+    c ^= b;
+    for (let i = 0; i < 8; i++) c = c & 0x80 ? ((c << 1) ^ 0x07) & 0xff : (c << 1) & 0xff;
+  }
+  return c;
+}
+const frame = (cmd, payload) =>
+  [0x51, 0x78, cmd, 0x00, payload.length & 255, payload.length >> 8, ...payload, crc8(payload), 0xFF];
+
+function packRowLSB(px, width, y){ // black = 1, LSB first (opposite of ESC/POS)
+  const row = new Array(width >> 3).fill(0);
+  for (let x = 0; x < width; x++)
+    if (px[(y * width + x) * 4] === 0) row[x >> 3] |= 1 << (x & 7);
+  return row;
+}
+
+function rleRow(px, width, y){ // tiny_rle runs: (color<<7)|count, count ≤ 127
+  const runs = [];
+  const put = (color, n) => {
+    while (n > 127){ runs.push(color << 7 | 127); n -= 127; }
+    if (n > 0) runs.push(color << 7 | n);
+  };
+  let prev = px[y * width * 4] === 0 ? 1 : 0, count = 1;
+  for (let x = 1; x < width; x++){
+    const p = px[(y * width + x) * 4] === 0 ? 1 : 0;
+    if (p === prev){ count++; continue; }
+    put(prev, count);
+    prev = p; count = 1;
+  }
+  put(prev, count);
+  return runs;
+}
+
+function buildRow(px, width, y, allowRle){ // BF (RLE) when smaller, else raw A2 — same rule as TiMini
+  const rle = rleRow(px, width, y);
+  let black = 0;
+  for (const r of rle) if (r & 0x80) black += r & 0x7f;
+  const bytes = allowRle && rle.length <= width >> 3 ? frame(0xBF, rle) : frame(0xA2, packRowLSB(px, width, y));
+  // darker rows need more head-heating time — weight the pacing budget by ink coverage
+  return { bytes, weight: 1 + 2 * black / width };
+}
+
+function tinyJob(canvas, isText){
+  // mirrors TiMini's tiny-family job for the pocket_printer/d1 profile:
+  // energy, print mode, speed, one row packet per line (speed re-sent every 200), feed, dev-state
+  const { width, height } = canvas;
+  const px = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+  const energy = isText ? 8000 : 5000, speed = 10;
+  const pre = [
+    ...frame(0xAF, [energy & 255, energy >> 8]),
+    ...frame(0xBE, [isText ? 1 : 0]),
+    ...frame(0xBD, [speed]),
+  ];
+  const rows = [];
+  for (let y = 0; y < height; y++){
+    rows.push(buildRow(px, width, y, true));
+    if ((y + 1) % 200 === 0) rows.push({ bytes: frame(0xBD, [speed]), weight: 0 });
+  }
+  const post = [];
+  const feeds = Math.max(1, +$('feedAfter').value || 0);
+  for (let i = 0; i < feeds; i++) post.push(...frame(0xA1, [0x30, 0x00])); // 48 dots each at 200 dpi
+  post.push(...frame(0xA3, [0x00]));
+  return { pre, rows, post };
+}
+
+const LATTICE_START = [0xAA, 0x55, 0x17, 0x38, 0x44, 0x5F, 0x5F, 0x5F, 0x44, 0x38, 0x2C];
+const LATTICE_END   = [0xAA, 0x55, 0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x17];
+function catJob(canvas){
+  const { width, height } = canvas;
+  const px = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+  const energy = +$('darkness').value;
+  const pre = [
+    ...frame(0xA3, [0x00]),
+    ...frame(0xA4, [0x32]),                       // quality / 200 dpi
+    ...frame(0xAF, [energy & 255, energy >> 8]),
+    ...frame(0xBE, [0x01]),                       // apply energy
+    ...frame(0xBD, [0x23]),
+    ...frame(0xA6, LATTICE_START),
+  ];
+  const rows = [];
+  // ponytail: raw A2 only for cat — old cat firmware lacks BF/RLE; add if a cat user complains about speed
+  for (let y = 0; y < height; y++) rows.push(buildRow(px, width, y, false));
+  const feedDots = Math.max(1, +$('feedAfter').value || 0) * 48;
+  const post = [
+    ...frame(0xBD, [0x19]),
+    ...frame(0xA1, [feedDots & 255, feedDots >> 8]),
+    ...frame(0xA6, LATTICE_END),
+    ...frame(0xA3, [0x00]),
+  ];
+  return { pre, rows, post };
+}
+
+async function printCanvas(canvas, isText){
+  const p = activeProto();
+  if (p === 'escpos')
+    return send(escposRaster(canvas)).catch(e => log(`print failed: ${e.message}`, 'bad'));
+  const { pre, rows, post } = p === 'tiny' ? tinyJob(canvas, isText) : catJob(canvas);
+  // pace rows to the print head's real speed — BLE write-without-response has no
+  // flow control, so blasting a long job overruns the printer's buffer and rows
+  // get dropped (prints fine at first, then slices horizontally)
+  const rowMs = Math.max(0, +$('rowMs').value || 0);
+  const BATCH = 32;
+  try {
+    await send(pre, true);
+    let total = pre.length + post.length;
+    for (let i = 0; i < rows.length; i += BATCH){
+      const batch = rows.slice(i, i + BATCH);
+      const bytes = batch.flatMap(r => r.bytes);
+      total += bytes.length;
+      const t0 = performance.now();
+      await send(bytes, true);
+      const budget = batch.reduce((s, r) => s + r.weight, 0) * rowMs - (performance.now() - t0);
+      if (budget > 0) await sleep(budget);
+    }
+    // let the head drain buffered rows before feed/status, so the tail can't be cut off
+    await sleep(Math.min(1500, 300 + BATCH * rowMs));
+    await send(post, true);
+    log(`sent ${total} bytes, ${rows.length} rows (${p}, ${rowMs} ms/row weighted pacing)`);
+  } catch (e){
+    log(`print failed: ${e.message}`, 'bad');
+  }
+}
+
+/* ---------- text rendered to canvas (pocket/cat printers have no text mode) ---------- */
+function textToCanvas(text){
+  const width = 384, pad = 8;
+  const fs = Math.max(10, Math.min(96, +$('fontPx').value || 24));
+  const lh = Math.round(fs * 1.3);
+  const font = `${$('bold').checked ? '700' : '400'} ${fs}px Menlo, Consolas, "Courier New", monospace`;
+  const cv = document.createElement('canvas');
+  let ctx = cv.getContext('2d');
+  ctx.font = font;
+  const maxW = width - 2 * pad;
+  const lines = [];
+  for (const raw of text.replace(/\r\n/g, '\n').split('\n')){
+    let line = '';
+    for (const word of raw.split(' ')){
+      const cand = line ? line + ' ' + word : word;
+      if (ctx.measureText(cand).width <= maxW){ line = cand; continue; }
+      if (line) lines.push(line);
+      let w = word;
+      while (ctx.measureText(w).width > maxW){ // hard-split overlong words
+        let cut = 1;
+        while (cut < w.length && ctx.measureText(w.slice(0, cut + 1)).width <= maxW) cut++;
+        lines.push(w.slice(0, cut));
+        w = w.slice(cut);
+      }
+      line = w;
+    }
+    lines.push(line);
+  }
+  cv.width = width;
+  cv.height = lines.length * lh + 2 * pad;
+  ctx = cv.getContext('2d'); // resize reset state
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.font = font; ctx.textBaseline = 'top'; ctx.fillStyle = '#000';
+  const align = +$('align').value;
+  ctx.textAlign = ['left', 'center', 'right'][align];
+  const x = [pad, width / 2, width - pad][align];
+  lines.forEach((l, i) => {
+    const y = pad + i * lh;
+    ctx.fillText(l, x, y);
+    if ($('underline').checked && l){
+      const tw = ctx.measureText(l).width;
+      const lx = align === 0 ? x : align === 1 ? x - tw / 2 : x - tw;
+      ctx.fillRect(lx, y + fs + 1, tw, 2);
+    }
+  });
+  thresholdCanvas(ctx, cv.width, cv.height);
+  return cv;
+}
+
+function thresholdCanvas(ctx, w, h){ // antialiased grays → pure 1-bit
+  const im = ctx.getImageData(0, 0, w, h), d = im.data;
+  for (let i = 0; i < d.length; i += 4){
+    const v = (0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2]) < 128 ? 0 : 255;
+    d[i] = d[i+1] = d[i+2] = v; d[i+3] = 255;
+  }
+  ctx.putImageData(im, 0, 0);
+}
+
+function showPreview(cv){
+  const prev = $('imgPreview');
+  prev.width = cv.width; prev.height = cv.height;
+  prev.getContext('2d').drawImage(cv, 0, 0);
+  prev.style.display = 'block';
+}
+
+/* ---------- QR encoder — byte mode, EC level M, versions 1–20 ----------
+   Compact port of the qrcodegen (Project Nayuki) algorithm; ECC tables from ISO 18004. */
+const QR_EC     = [10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26]; // ECC codewords per block (M)
+const QR_BLOCKS = [ 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9,10,10,11,13,14,16]; // EC blocks (M)
+
+const GF_EXP = new Array(512), GF_LOG = new Array(256);
+{
+  let x = 1;
+  for (let i = 0; i < 255; i++){ GF_EXP[i] = x; GF_LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11d; }
+  for (let i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255];
+}
+const gfMul = (a, b) => a && b ? GF_EXP[GF_LOG[a] + GF_LOG[b]] : 0;
+
+function rsDivisor(degree){
+  const result = new Array(degree - 1).fill(0); result.push(1);
+  let root = 1;
+  for (let i = 0; i < degree; i++){
+    for (let j = 0; j < result.length; j++){
+      result[j] = gfMul(result[j], root);
+      if (j + 1 < result.length) result[j] ^= result[j + 1];
+    }
+    root = gfMul(root, 2);
+  }
+  return result;
+}
+function rsRemainder(data, divisor){
+  const result = divisor.map(() => 0);
+  for (const b of data){
+    const factor = b ^ result.shift();
+    result.push(0);
+    for (let i = 0; i < divisor.length; i++) result[i] ^= gfMul(divisor[i], factor);
+  }
+  return result;
+}
+
+function qrRawModules(v){
+  let r = (16 * v + 128) * v + 64;
+  if (v >= 2){
+    const na = Math.floor(v / 7) + 2;
+    r -= (25 * na - 10) * na - 55;
+    if (v >= 7) r -= 36;
+  }
+  return r;
+}
+
+function qrEncode(text){
+  const data = [...new TextEncoder().encode(text)];
+  let ver = 0, dataCw = 0;
+  for (let v = 1; v <= 20; v++){
+    const cw = (qrRawModules(v) >> 3) - QR_EC[v-1] * QR_BLOCKS[v-1];
+    if (4 + (v < 10 ? 8 : 16) + 8 * data.length <= cw * 8){ ver = v; dataCw = cw; break; }
+  }
+  if (!ver) throw new Error(`QR content too long (${data.length} bytes, max 666)`);
+
+  const bits = [];
+  const push = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+  push(4, 4);                                  // byte mode
+  push(data.length, ver < 10 ? 8 : 16);        // length
+  for (const b of data) push(b, 8);
+  const cap = dataCw * 8;
+  push(0, Math.min(4, cap - bits.length));     // terminator
+  if (bits.length % 8) push(0, 8 - bits.length % 8);
+  for (let pad = 0xEC; bits.length < cap; pad ^= 0xFD) push(pad, 8);
+  const cws = [];
+  for (let i = 0; i < bits.length; i += 8)
+    cws.push(bits.slice(i, i + 8).reduce((a, b) => a << 1 | b, 0));
+
+  // split into EC blocks (short blocks first), append RS, interleave
+  const nb = QR_BLOCKS[ver-1], ec = QR_EC[ver-1];
+  const shortLen = Math.floor(dataCw / nb), numLong = dataCw % nb;
+  const gen = rsDivisor(ec), blocks = [];
+  let off = 0;
+  for (let i = 0; i < nb; i++){
+    const len = shortLen + (i < nb - numLong ? 0 : 1);
+    const d = cws.slice(off, off + len); off += len;
+    blocks.push({ d, e: rsRemainder(d, gen) });
+  }
+  const seq = [];
+  for (let i = 0; i <= shortLen; i++) for (const b of blocks) if (i < b.d.length) seq.push(b.d[i]);
+  for (let i = 0; i < ec; i++) for (const b of blocks) seq.push(b.e[i]);
+  return qrMatrix(ver, seq);
+}
+
+function qrMatrix(ver, codewords){
+  const size = ver * 4 + 17;
+  const M = Array.from({ length: size }, () => new Array(size).fill(false));
+  const F = Array.from({ length: size }, () => new Array(size).fill(false));
+  const set = (x, y, dark) => { M[y][x] = dark; F[y][x] = true; };
+
+  for (let i = 0; i < size; i++){ set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); } // timing
+
+  const finder = (cx, cy) => {
+    for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++){
+      const x = cx + dx, y = cy + dy;
+      if (x < 0 || x >= size || y < 0 || y >= size) continue;
+      const d = Math.max(Math.abs(dx), Math.abs(dy));
+      set(x, y, d !== 2 && d !== 4);
+    }
+  };
+  finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+
+  const align = [];
+  if (ver > 1){
+    const na = Math.floor(ver / 7) + 2;
+    const step = Math.ceil((ver * 4 + 4) / (na * 2 - 2)) * 2;
+    align.push(6);
+    for (let pos = size - 7; align.length < na; pos -= step) align.splice(1, 0, pos);
+  }
+  for (const cy of align) for (const cx of align){
+    if ((cx === 6 && cy === 6) || (cx === 6 && cy === size - 7) || (cx === size - 7 && cy === 6)) continue;
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++)
+      set(cx + dx, cy + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+  }
+
+  const drawFormat = mask => {
+    const data = 0b00 << 3 | mask; // EC level M = bits 00
+    let rem = data;
+    for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+    const fb = (data << 10 | rem) ^ 0x5412;
+    const bit = i => (fb >>> i & 1) === 1;
+    for (let i = 0; i <= 5; i++) set(8, i, bit(i));
+    set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+    for (let i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+    for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(i));
+    for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(i));
+    set(8, size - 8, true); // fixed dark module
+  };
+  drawFormat(0); // reserve the area before data placement
+
+  if (ver >= 7){ // version info blocks
+    let rem = ver;
+    for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1f25);
+    const vb = ver << 12 | rem;
+    for (let i = 0; i < 18; i++){
+      const dark = (vb >>> i & 1) === 1;
+      const a = size - 11 + i % 3, b = Math.floor(i / 3);
+      set(a, b, dark); set(b, a, dark);
+    }
+  }
+
+  let bi = 0;
+  const total = codewords.length * 8;
+  for (let right = size - 1; right >= 1; right -= 2){ // zigzag placement
+    if (right === 6) right = 5;
+    for (let vert = 0; vert < size; vert++){
+      for (let j = 0; j < 2; j++){
+        const x = right - j;
+        const upward = ((right + 1) & 2) === 0;
+        const y = upward ? size - 1 - vert : vert;
+        if (!F[y][x] && bi < total){
+          M[y][x] = (codewords[bi >> 3] >>> (7 - (bi & 7)) & 1) === 1;
+          bi++;
+        }
+      }
+    }
+  }
+
+  const MASKS = [
+    (x, y) => (x + y) % 2 === 0,
+    (x, y) => y % 2 === 0,
+    (x, y) => x % 3 === 0,
+    (x, y) => (x + y) % 3 === 0,
+    (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0,
+    (x, y) => x * y % 2 + x * y % 3 === 0,
+    (x, y) => (x * y % 2 + x * y % 3) % 2 === 0,
+    (x, y) => ((x + y) % 2 + x * y % 3) % 2 === 0,
+  ];
+  const apply = m => {
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++)
+      if (!F[y][x] && MASKS[m](x, y)) M[y][x] = !M[y][x];
+  };
+  let best = 0, bestScore = Infinity;
+  for (let m = 0; m < 8; m++){
+    apply(m); drawFormat(m);
+    const s = qrPenalty(M);
+    if (s < bestScore){ bestScore = s; best = m; }
+    apply(m); // XOR undo
+  }
+  apply(best); drawFormat(best);
+  return M;
+}
+
+function qrPenalty(M){
+  const n = M.length;
+  let score = 0;
+  const countPat = (s, p) => { let c = 0, i = s.indexOf(p); while (i !== -1){ c++; i = s.indexOf(p, i + 1); } return c; };
+  const line = cells => {
+    let run = 1;
+    for (let i = 1; i <= cells.length; i++){
+      if (i < cells.length && cells[i] === cells[i-1]) run++;
+      else { if (run >= 5) score += run - 2; run = 1; }
+    }
+    const s = cells.map(c => c ? 1 : 0).join('');
+    score += 40 * (countPat(s, '10111010000') + countPat(s, '00001011101'));
+  };
+  for (let y = 0; y < n; y++) line(M[y]);
+  for (let x = 0; x < n; x++) line(M.map(row => row[x]));
+  for (let y = 0; y < n - 1; y++) for (let x = 0; x < n - 1; x++)
+    if (M[y][x] === M[y][x+1] && M[y][x] === M[y+1][x] && M[y][x] === M[y+1][x+1]) score += 3;
+  let dark = 0;
+  for (const row of M) for (const c of row) if (c) dark++;
+  score += (Math.ceil(Math.abs(dark * 20 - n * n * 10) / (n * n)) - 1) * 10;
+  return score;
+}
+
+function qrToCanvas(text){
+  const M = qrEncode(text);
+  const n = M.length, quiet = 4;
+  const scale = Math.max(2, Math.min(10, Math.floor(368 / (n + quiet * 2))));
+  const cv = document.createElement('canvas');
+  cv.width = 384; cv.height = (n + quiet * 2) * scale;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.fillStyle = '#000';
+  const x0 = Math.floor((384 - n * scale) / 2), y0 = quiet * scale;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++)
+    if (M[y][x]) ctx.fillRect(x0 + x * scale, y0 + y * scale, scale, scale);
+  if (scale === 2) log('QR is dense at this length — test-scan before relying on it', 'warn');
+  return cv;
+}
+
+/* ---------- CODE128 (code set B) — bar table from the CODE128 spec ---------- */
+const C128_BARS = ['11011001100','11001101100','11001100110','10010011000','10010001100',
+'10001001100','10011001000','10011000100','10001100100','11001001000','11001000100','11000100100',
+'10110011100','10011011100','10011001110','10111001100','10011101100','10011100110','11001110010',
+'11001011100','11001001110','11011100100','11001110100','11101101110','11101001100','11100101100',
+'11100100110','11101100100','11100110100','11100110010','11011011000','11011000110','11000110110',
+'10100011000','10001011000','10001000110','10110001000','10001101000','10001100010','11010001000',
+'11000101000','11000100010','10110111000','10110001110','10001101110','10111011000','10111000110',
+'10001110110','11101110110','11010001110','11000101110','11011101000','11011100010','11011101110',
+'11101011000','11101000110','11100010110','11101101000','11101100010','11100011010','11101111010',
+'11001000010','11110001010','10100110000','10100001100','10010110000','10010000110','10000101100',
+'10000100110','10110010000','10110000100','10011010000','10011000010','10000110100','10000110010',
+'11000010010','11001010000','11110111010','11000010100','10001111010','10100111100','10010111100',
+'10010011110','10111100100','10011110100','10011110010','11110100100','11110010100','11110010010',
+'11011011110','11011110110','11110110110','10101111000','10100011110','10001011110','10111101000',
+'10111100010','11110101000','11110100010','10111011110','10111101110','11101011110','11110101110',
+'11010000100','11010010000','11010011100','1100011101011'];
+
+function c128Syms(text){
+  const syms = [104, ...[...text].map(c => c.charCodeAt(0) - 32)]; // start B
+  let sum = 104;
+  for (let i = 1; i < syms.length; i++) sum += syms[i] * i;
+  syms.push(sum % 103, 106); // checksum, stop
+  return syms;
+}
+
+function code128Canvas(text){
+  if (!/^[\x20-\x7e]{1,40}$/.test(text)) throw new Error('CODE128: 1–40 printable ASCII chars');
+  const modules = c128Syms(text).map(s => C128_BARS[s]).join('');
+  const quiet = 8;
+  const scale = Math.floor((384 - quiet * 2) / modules.length);
+  if (scale < 1) throw new Error(`barcode too wide for 384 dots (${modules.length} modules) — shorten the text`);
+  if (scale === 1) log('barcode at 1 dot/module — may scan poorly; shorter content scans better', 'warn');
+  const barH = 110, textH = 28;
+  const cv = document.createElement('canvas');
+  cv.width = 384; cv.height = barH + textH;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.fillStyle = '#000';
+  const x0 = Math.floor((384 - modules.length * scale) / 2);
+  for (let i = 0; i < modules.length; i++)
+    if (modules[i] === '1') ctx.fillRect(x0 + i * scale, 0, scale, barH);
+  ctx.font = '400 20px Menlo, Consolas, "Courier New", monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(text, 192, barH + 4);
+  thresholdCanvas(ctx, cv.width, cv.height);
+  return cv;
+}
+
+/* ---------- actions ---------- */
+async function printText(){
+  const t = $('text').value;
+  if (!t.trim()) return log('nothing to print', 'warn');
+  if (activeProto() === 'escpos')
+    return send(escposText(t)).catch(e => log(`print failed: ${e.message}`, 'bad'));
+  await printCanvas(textToCanvas(t), true);
+}
+
+async function printTest(){
+  const stamp = new Date().toLocaleString();
+  if (activeProto() !== 'escpos')
+    return printCanvas(textToCanvas(`TEST PAGE\n${stamp}\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789 !"#$%&'()*+,-./\näöü ßñç 你好 →`), true);
+  const b = [...INIT,
+    ESC, 0x61, 1, GS, 0x21, 0x11, ...enc('TEST PAGE\n'), GS, 0x21, 0,
+    ...enc(stamp + '\n\n'),
+    ESC, 0x61, 0, ...enc('left  '), ESC, 0x61, 1, ...enc('center  '), ESC, 0x61, 2, ...enc('right\n'), ESC, 0x61, 0,
+    ESC, 0x45, 1, ...enc('bold\n'), ESC, 0x45, 0,
+    ESC, 0x2d, 1, ...enc('underline\n'), ESC, 0x2d, 0,
+    GS, 0x42, 1, ...enc('inverted\n'), GS, 0x42, 0,
+    GS, 0x21, 0x10, ...enc('wide '), GS, 0x21, 0x01, ...enc('tall\n'), GS, 0x21, 0,
+    ...enc('!"#$%&\'()*+,-./0123456789\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n'),
+    ...escposTail()];
+  await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+async function feed(){
+  const p = activeProto();
+  const b = p === 'escpos' ? [ESC, 0x64, 3]
+    : [...frame(0xA1, [0x30, 0x00]), ...frame(0xA1, [0x30, 0x00]), ...frame(0xA1, [0x30, 0x00])];
+  await send(b).catch(e => log(e.message, 'bad'));
+}
+
+async function cut(){
+  if (activeProto() !== 'escpos') return log('pocket/cat printers have no cutter', 'warn');
+  await send([GS, 0x56, 0x42, 0x00]).catch(e => log(e.message, 'bad'));
+}
+
+async function printQr(){
+  const content = $('qrData').value;
+  if (!content) return log('QR content empty', 'warn');
+  if (activeProto() !== 'escpos'){
+    try {
+      const cv = qrToCanvas(content);
+      showPreview(cv);
+      await printCanvas(cv, false);
+    } catch (e){ log(e.message, 'warn'); }
+    return;
+  }
+  const data = enc(content);
+  if (data.length > 700) return log('QR content too long', 'warn');
+  const len = data.length + 3;
+  const b = [...INIT, ESC, 0x61, 1,
+    GS, 0x28, 0x6b, 4, 0, 0x31, 0x41, 0x32, 0x00,             // model 2
+    GS, 0x28, 0x6b, 3, 0, 0x31, 0x43, +$('qrSize').value,     // module size
+    GS, 0x28, 0x6b, 3, 0, 0x31, 0x45, 0x31,                   // EC level M
+    GS, 0x28, 0x6b, len & 255, len >> 8, 0x31, 0x50, 0x30, ...data,
+    GS, 0x28, 0x6b, 3, 0, 0x31, 0x51, 0x30,                   // print
+    ESC, 0x61, 0, ...escposTail()];
+  await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+async function printBarcode(){
+  const s = $('bcData').value;
+  if (!s) return log('barcode content empty', 'warn');
+  if (!/^[\x20-\x7e]+$/.test(s)) return log('CODE128 here supports printable ASCII only', 'warn');
+  if (activeProto() !== 'escpos'){
+    try {
+      const cv = code128Canvas(s);
+      showPreview(cv);
+      await printCanvas(cv, false);
+    } catch (e){ log(e.message, 'warn'); }
+    return;
+  }
+  const data = [...s].map(c => c.charCodeAt(0));
+  const b = [...INIT, ESC, 0x61, 1,
+    GS, 0x68, 80,        // height
+    GS, 0x77, 2,         // module width
+    GS, 0x48, 2,         // HRI below
+    GS, 0x6b, 73, data.length + 2, 0x7b, 0x42, ...data, // CODE128, code set B
+    ESC, 0x61, 0, ...escposTail()];
+  await send(b).catch(e => log(`print failed: ${e.message}`, 'bad'));
+}
+
+async function sendHex(){
+  const m = $('hexData').value.replace(/0x/gi, ' ').match(/[0-9a-f]{2}/gi);
+  if (!m) return log('no hex bytes found', 'warn');
+  await send(m.map(h => parseInt(h, 16))).catch(e => log(`send failed: ${e.message}`, 'bad'));
+}
+
+/* ---------- image ---------- */
+let rasterCanvas = null, lastImg = null; // 1-bit preview, source of truth for printing
+
+function processImage(img){
+  const width = isRasterProto() ? 384 : +$('dots').value; // pocket/cat hardware is always 384 dots
+  const height = Math.max(1, Math.round(img.naturalHeight * width / img.naturalWidth));
+  const cv = document.createElement('canvas');
+  cv.width = width; cv.height = height;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height); // composite alpha on white
+  ctx.drawImage(img, 0, 0, width, height);
+  const im = ctx.getImageData(0, 0, width, height);
+  const px = im.data;
+  const gray = new Float32Array(width * height);
+  for (let i = 0; i < gray.length; i++)
+    gray[i] = 0.299 * px[i*4] + 0.587 * px[i*4+1] + 0.114 * px[i*4+2];
+  const useDither = $('dither').checked;
+  for (let y = 0; y < height; y++){
+    for (let x = 0; x < width; x++){
+      const i = y * width + x;
+      const black = gray[i] < 128;
+      if (useDither){ // Floyd–Steinberg
+        const err = gray[i] - (black ? 0 : 255);
+        if (x + 1 < width)                gray[i + 1]         += err * 7 / 16;
+        if (y + 1 < height){
+          if (x > 0)                      gray[i + width - 1] += err * 3 / 16;
+                                          gray[i + width]     += err * 5 / 16;
+          if (x + 1 < width)              gray[i + width + 1] += err * 1 / 16;
+        }
+      }
+      const v = black ? 0 : 255;
+      px[i*4] = px[i*4+1] = px[i*4+2] = v; px[i*4+3] = 255;
+    }
+  }
+  ctx.putImageData(im, 0, 0);
+  rasterCanvas = cv;
+  showPreview(cv);
+  log(`image ready: ${width}×${height}px`);
+}
+
+async function printImage(){
+  if (!rasterCanvas) return log('no image loaded', 'warn');
+  const wanted = isRasterProto() ? 384 : +$('dots').value;
+  if (rasterCanvas.width !== wanted && lastImg) processImage(lastImg); // protocol changed since load
+  await printCanvas(rasterCanvas, false);
+}
+
+$('imgFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const img = new Image();
+  img.onload = () => { lastImg = img; processImage(img); URL.revokeObjectURL(img.src); };
+  img.onerror = () => log('could not load image', 'bad');
+  img.src = URL.createObjectURL(f);
+});
+$('dither').addEventListener('change', () => lastImg && processImage(lastImg));
+$('dots').addEventListener('change', () => lastImg && processImage(lastImg));
+$('proto').addEventListener('change', () => lastImg && processImage(lastImg));
+
+/* ---------- wiring ---------- */
+$('btnConnect').onclick = connect;
+$('btnDisconnect').onclick = () => device?.gatt?.disconnect();
+$('btnPrint').onclick = printText;
+$('btnTest').onclick = printTest;
+$('btnFeed').onclick = feed;
+$('btnCut').onclick = cut;
+$('btnPrintImg').onclick = printImage;
+$('btnQr').onclick = printQr;
+$('btnBc').onclick = printBarcode;
+$('btnHex').onclick = sendHex;
+$('charSel').addEventListener('change', e => {
+  const w = writableChars[+e.target.value];
+  if (!w) return;
+  chr = w.c;
+  detectedProto = guessProtocol(device?.name, chr.uuid);
+  document.querySelector('#proto option[value=auto]').textContent = `auto (${detectedProto})`;
+  log(`switched to chr ${short(chr.uuid)} (svc ${short(w.s.uuid)})`);
+});
+$('text').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !$('btnPrint').disabled) printText();
+});
+
+/* settings persistence */
+const SETTINGS = ['dots', 'chunk', 'delay', 'feedAfter', 'cutAfter', 'dither', 'proto', 'darkness', 'writeMode', 'fontPx', 'rowMs'];
+try {
+  const saved = JSON.parse(localStorage.getItem('btprint') || '{}');
+  for (const id of SETTINGS){
+    if (!(id in saved)) continue;
+    const el = $(id);
+    if (el.type === 'checkbox') el.checked = saved[id]; else el.value = saved[id];
+  }
+} catch {}
+for (const id of SETTINGS)
+  $(id).addEventListener('change', () => {
+    const o = {};
+    for (const k of SETTINGS) o[k] = $(k).type === 'checkbox' ? $(k).checked : $(k).value;
+    localStorage.setItem('btprint', JSON.stringify(o));
+  });
+
+if (!navigator.bluetooth){
+  $('noBt').style.display = 'block';
+  $('btnConnect').disabled = true;
+  log('Web Bluetooth unavailable in this browser', 'bad');
+} else {
+  log('ready — click “Connect printer”');
+}
+
+/* ponytail: one runnable self-check for the byte builders */
+(function selfTest(){
+  console.assert(enc('Aü€\n').join() === [65, 129, 63, 10].join(), 'enc: CP437 map + fallback');
+  const data = enc('HELLO'), len = data.length + 3;
+  console.assert(len === 8 && (len & 255) === 8 && (len >> 8) === 0, 'qr: pL/pH math');
+  console.assert((384 / 8) === 48, 'raster: bytes per row');
+  // 51 78 protocol vectors (known-good constants from TiMini/catprinter captures)
+  console.assert(crc8([0x32]) === 0x9E, 'crc8: quality cmd vector');
+  console.assert(crc8(LATTICE_START) === 0xA1, 'crc8: lattice start vector');
+  console.assert(crc8(LATTICE_END) === 0x11, 'crc8: lattice end vector');
+  const f = frame(0xA3, [0x00]);
+  console.assert(f.join() === [0x51, 0x78, 0xA3, 0x00, 0x01, 0x00, 0x00, 0x00, 0xFF].join(), 'frame: dev-state packet');
+  // RLE vector: 10 black px then 374 white → [0x8A, 0x7F, 0x7F, 0x78]
+  const px = new Uint8ClampedArray(384 * 4).fill(255);
+  for (let x = 0; x < 10; x++) px[x * 4] = 0;
+  console.assert(rleRow(px, 384, 0).join() === [0x8A, 0x7F, 0x7F, 0x78].join(), 'rle: run encoding');
+  const row = buildRow(px, 384, 0, true);
+  console.assert(row.bytes[2] === 0xBF, 'rle: BF chosen for sparse row');
+  console.assert(Math.abs(row.weight - (1 + 20 / 384)) < 1e-9, 'pacing: darkness weight');
+  // QR: v1 structure — finder corner, separator, timing, fixed dark module
+  const qm = qrEncode('HELLO');
+  console.assert(qm.length === 21, 'qr: v1 size for short text');
+  console.assert(qm[0][0] && !qm[0][7] && qm[6][8] && !qm[6][9], 'qr: finder/separator/timing');
+  console.assert(qm[13][8] === true, 'qr: fixed dark module');
+  console.assert(qrEncode('x'.repeat(200)).length === 57, 'qr: v10 + 16-bit length for 200 bytes');
+  // CODE128: known checksum vector
+  console.assert(c128Syms('ABC').join() === [104, 33, 34, 35, 1, 106].join(), 'code128: ABC symbols');
+  console.assert(C128_BARS.length === 107 && C128_BARS[106] === '1100011101011', 'code128: bar table');
+  console.log('self-test ok');
+})();
+</script>
+</body>
+</html>

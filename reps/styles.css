@@ -1,0 +1,299 @@
+/* ---------------------------------------------------------------- tokens */
+/* Light theme (default) */
+:root {
+  --bg-a: #dff3ff;
+  --bg-b: #e9e4ff;
+  --blob-1: rgba(52, 211, 153, 0.55);
+  --blob-2: rgba(96, 165, 250, 0.5);
+  --blob-3: rgba(244, 114, 182, 0.35);
+
+  --glass: rgba(255, 255, 255, 0.42);
+  --glass-strong: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --shadow: 0 8px 32px rgba(31, 38, 90, 0.14);
+
+  --text: #14202c;
+  --muted: #45586b;
+  --accent: #0c8a5f;
+  --accent-strong: #10b981;
+  --on-accent: #04110b;
+  --danger: #dc2626;
+  --on-danger: #ffffff;
+  --hit: #b45309;
+  --wave-line: #0c8a5f;
+  --wave-idle: #7a8ea1;
+  --wave-guide: rgba(20, 32, 44, 0.22);
+  --wave-bg: rgba(255, 255, 255, 0.3);
+  --control: rgba(255, 255, 255, 0.5);
+  --control-border: rgba(20, 32, 44, 0.14);
+
+  --radius: 20px;
+  --radius-sm: 12px;
+  --blur: 16px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark theme tokens (shared by media query and manual override) */
+[data-theme="dark"] {
+  --bg-a: #0b1220;
+  --bg-b: #141024;
+  --blob-1: rgba(16, 185, 129, 0.28);
+  --blob-2: rgba(59, 130, 246, 0.24);
+  --blob-3: rgba(168, 85, 247, 0.18);
+
+  /* Dark glass = translucent DARK tint, not white. Layering white over a
+     blurred vibrant backdrop produces a milky/hazy pane; a dark tint keeps
+     the panel clean and readable, with the border + faint highlight giving
+     the glass edge. */
+  --glass: rgba(17, 24, 38, 0.62);
+  --glass-strong: rgba(17, 24, 38, 0.76);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.1);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+  --text: #ecf2f8;
+  --muted: #9fb1c3;
+  --accent: #34d399;
+  --accent-strong: #10b981;
+  --on-accent: #04110b;
+  --danger: #ef4444;
+  --on-danger: #ffffff;
+  --hit: #fbbf24;
+  --wave-line: #34d399;
+  --wave-idle: #566b7d;
+  --wave-guide: rgba(236, 242, 248, 0.18);
+  --wave-bg: rgba(0, 0, 0, 0.25);
+  --control: rgba(255, 255, 255, 0.08);
+  --control-border: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------------------------------------------------------------- base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Vibrant layered background the glass blurs against.
+   The colored blobs are painted directly on `body` as soft radial-gradients
+   (no `filter: blur`, no animated/composited layer). Two iOS Safari traps this
+   avoids: (1) a `filter`ed layer behind a `backdrop-filter` element paints the
+   whole page as a milky white wash; (2) a transform-animated / will-change
+   pseudo-element gets promoted to a cached GPU layer that WebKit does NOT
+   re-rasterize when a theme swap only changes the CSS variables it paints with
+   — freezing the background in the old theme's colors. `body`'s own background
+   is painted into the page canvas and always repaints on a theme change. */
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(38% 42% at 20% 12%, var(--blob-1), transparent 72%),
+    radial-gradient(46% 46% at 84% 30%, var(--blob-2), transparent 72%),
+    radial-gradient(50% 50% at 40% 96%, var(--blob-3), transparent 72%),
+    linear-gradient(160deg, var(--bg-a), var(--bg-b));
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; }
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(12px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 2px;
+}
+
+.header-actions { display: flex; gap: 8px; }
+
+h1 { font-size: 1.3rem; letter-spacing: 0.02em; }
+h2 {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ---------------------------------------------------------------- glass */
+.card, .chip {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(var(--blur));
+  backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow), inset 0 1px 0 var(--glass-highlight);
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.card { border-radius: var(--radius); padding: 18px; }
+
+.chip {
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.chip:active { transform: scale(0.96); }
+.chip svg { width: 18px; height: 18px; stroke: currentColor; display: none; }
+.chip svg.active { display: block; }
+
+button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- counter */
+#counterCard { text-align: center; }
+
+#repDisplay {
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  padding: 8px 0 4px;
+}
+
+#repCount {
+  font-size: clamp(72px, 28vw, 130px);
+  font-weight: 800;
+  color: var(--accent);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--accent-strong) 35%, transparent);
+  transition: color 0.2s;
+}
+
+#repCount.hit { color: var(--hit); }
+
+.target {
+  font-size: clamp(24px, 8vw, 36px);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+#stateLine {
+  color: var(--muted);
+  font-size: 0.9rem;
+  min-height: 1.4em;
+  margin: 6px 0 12px;
+}
+
+#stateLine.active { color: var(--accent); }
+
+#wave {
+  width: 100%;
+  height: 60px;
+  background: var(--wave-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------------------------------------------------------------- controls */
+.controls { display: flex; gap: 10px; padding: 12px; }
+
+.controls button {
+  flex: 1;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-sm);
+  padding: 16px 12px;
+  min-height: 52px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: var(--control);
+  -webkit-backdrop-filter: blur(var(--blur));
+  backdrop-filter: blur(var(--blur));
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), background 0.2s var(--ease);
+}
+
+.controls button:active { transform: scale(0.97); }
+
+.controls button.primary {
+  flex: 2;
+  background: var(--accent-strong);
+  border-color: transparent;
+  color: var(--on-accent);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--accent-strong) 45%, transparent);
+}
+
+.controls button.primary.running {
+  background: var(--danger);
+  color: var(--on-danger);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+/* ---------------------------------------------------------------- settings */
+.settings .row, .help li { font-size: 0.95rem; }
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--control-border);
+}
+
+.row:last-child { border-bottom: none; }
+
+.stepper { display: flex; align-items: center; gap: 6px; }
+
+.stepper button {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--control-border);
+  background: var(--control);
+  color: var(--text);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.stepper button:active { transform: scale(0.94); }
+
+.stepper input {
+  width: 62px;
+  text-align: center;
+  background: var(--control);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1.05rem;
+  padding: 10px 4px;
+}
+
+input[type="range"] { width: 46%; accent-color: var(--accent-strong); min-height: 44px; }
+
+.toggle input[type="checkbox"] {
+  width: 26px; height: 26px;
+  accent-color: var(--accent-strong);
+  cursor: pointer;
+}
+
+.help ol {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--muted);
+}
