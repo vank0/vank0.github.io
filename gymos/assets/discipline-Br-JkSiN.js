@@ -1,1 +1,0 @@
-function e(e){return e===`cardio`?`cardio`:e===`stretch`?`stretch`:`dumbbell`}export{e as t};
