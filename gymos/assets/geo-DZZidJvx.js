@@ -1,0 +1,1 @@
+var e=e=>e*Math.PI/180;function t(t,n){let r=e(n.lat-t.lat),i=e(n.lon-t.lon),a=Math.sin(r/2)**2+Math.cos(e(t.lat))*Math.cos(e(n.lat))*Math.sin(i/2)**2;return 12742017.6*Math.asin(Math.min(1,Math.sqrt(a)))}export{t};

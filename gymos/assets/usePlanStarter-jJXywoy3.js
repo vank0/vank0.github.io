@@ -1,1 +1,0 @@
-import{Jn as e,Or as t}from"./gymos-Bzih3Qkc.js";import{V as n,ut as r}from"./index-rMl6Aqa5.js";function i(){let i=t(),a=n();return{start:t=>a(async()=>{let n=await r(t);return n.ok?n.sessionId:(e({variant:`error`,message:i(`sched.routineGone`,`That routine was deleted.`)}),null)})}}export{i as t};
