@@ -1,0 +1,1 @@
+var e=[/bulgarian/i,/split squat/i,/\blunge/i,/pistol squat/i,/single[-\s]?(leg|arm|side)/i,/one[-\s]?(leg|arm)/i,/\b(1|single)[-\s]?arm/i,/step[-\s]?up/i,/shrimp squat/i,/skater squat/i,/suitcase (carry|deadlift)/i,/b[-\s]?stance/i,/staggered stance/i,/(^|\s)(per|each) (side|leg|arm)/i];function t(t){return e.some(e=>e.test(t))}function n(e,n){return n??t(e)?2:1}export{n,t};
