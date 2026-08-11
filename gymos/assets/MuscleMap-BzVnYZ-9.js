@@ -1,0 +1,1 @@
+import{m as e}from"./react-D7Gq2U9M.js";import{t}from"./dexie-BaK-GTO_.js";import{vt as n}from"./gymos-Bzb688mL.js";import{t as r}from"./db-C6qq4bNK.js";import{s as i}from"./accounts-CePln6cf.js";var a=e();function o(e){let o=i(),s=t(()=>o?r.accounts.get(o):void 0,[o]);return(0,a.jsx)(n,{...e,gender:e.gender??(s?.sex===`female`?`female`:`male`)})}export{o as t};
