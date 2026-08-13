@@ -1,0 +1,1 @@
+import{Li as e,Ri as t}from"./gymos-Df3vEepa.js";import{t as n}from"./db-DoiixoTu.js";async function r(e){let r=await n.sessions.where(`accountId`).equals(e).filter(e=>e.endedAt!=null).sortBy(`startedAt`);return t(r)}async function i(t){return e(await r(t))}export{i as n,r as t};
