@@ -1,1 +1,0 @@
-function e(e){let t=location.pathname.replace(/gymos-gym\/?$/,`gymos/`);return`${location.origin}${t}#${e}`}export{e as t};
