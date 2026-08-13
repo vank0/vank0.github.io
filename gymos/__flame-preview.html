@@ -1,0 +1,539 @@
+<title>Flame ring — interval counter preview</title>
+<style>
+  :root {
+    --bg-0: #0b1020;
+    --bg-1: #131a35;
+    --text: #eef2ff;
+    --text-dim: #a8b2d1;
+    --text-faint: #8f99bd;
+    --glass-bg: #ffffff12;
+    --glass-border: #ffffff29;
+    --accent: #7c5cff;
+    --accent-2: #22d3ee;
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px clamp(14px, 4vw, 48px) 80px;
+    background: radial-gradient(120% 80% at 50% -10%, #1b2447, var(--bg-0) 60%);
+    color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 26px; letter-spacing: -0.02em; margin: 0 0 4px; }
+  .lede { color: var(--text-dim); max-width: 70ch; margin: 0 0 26px; font-size: 14.5px; }
+  .lede b { color: var(--text); font-weight: 600; }
+
+  .panel {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    background: var(--glass-bg);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .panel h2 { font-size: 14px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .panel p.hint { margin: 0 0 14px; font-size: 12.5px; color: var(--text-faint); line-height: 1.5; }
+
+  /* ---- controls ---- */
+  .ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 18px; }
+  .seg { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--glass-border); border-radius: 999px; background: #ffffff0d; }
+  .seg button {
+    min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: none;
+    color: var(--text-dim); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--seg, var(--accent)); color: #0b1020; }
+  label.tog { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-dim); margin-left: 6px; }
+  .bpmline { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-dim); flex: 1 1 260px; min-width: 220px; }
+  .bpmline input[type=range] { flex: 1; accent-color: var(--zone, var(--accent)); }
+  .bpmval { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text); min-width: 62px; }
+
+  /* ---- the stage: a faithful copy of the interval view's core ---- */
+  .stage {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 18px;
+  }
+  .cell {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 16px 22px;
+    border: 1px solid var(--glass-border); border-radius: var(--radius);
+    background: linear-gradient(180deg, #0f1530, #0b1020);
+    overflow: hidden;
+  }
+  .cellTag {
+    position: absolute; top: 10px; left: 12px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint);
+  }
+  .headline { position: relative; z-index: 3; font-size: 19px; font-weight: 700; letter-spacing: -0.01em;
+    margin-bottom: 14px; text-shadow: 0 2px 12px #0b1020, 0 0 3px #0b1020; }
+
+  /* ring box — 200px, same geometry as .sw-ring (viewBox 200, r 88) */
+  .ringbox { position: relative; width: 220px; height: 220px; display: grid; place-items: center; }
+  .flame { position: absolute; inset: -70px -46px -30px; z-index: 0; pointer-events: none; }
+  .flame canvas { width: 100%; height: 100%; display: block; }
+  .ring { position: relative; z-index: 2; width: 200px; height: 200px; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .track { fill: none; stroke: #ffffff1a; stroke-width: 10; }
+  .prog { fill: none; stroke: var(--zone, var(--accent-2)); stroke-width: 10; stroke-linecap: round; }
+  .digits {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-size: 46px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+  }
+  .hrchip {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
+    padding: 4px 10px; border-radius: 999px; background: #ffffff12; border: 1px solid var(--glass-border);
+    font-size: 12.5px; font-variant-numeric: tabular-nums;
+  }
+  .heart { width: 12px; height: 12px; border-radius: 50%; background: var(--zone, #f43f5e); animation: beat var(--beat, 1s) infinite; }
+  @keyframes beat { 0%, 60%, 100% { transform: scale(1); } 12% { transform: scale(1.45); } }
+  .zbadge { padding: 1px 7px; border-radius: 999px; background: var(--zone, #555); color: #0b1020; font-weight: 800; font-size: 11px; }
+  .nosensor { margin-top: 14px; font-size: 12.5px; color: var(--text-faint); }
+
+  /* ---- notes ---- */
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .note { border: 1px solid var(--glass-border); border-radius: 14px; background: #ffffff0a; padding: 13px 15px; }
+  .note h3 { margin: 0 0 5px; font-size: 12.5px; }
+  .note p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-dim); }
+  .warn { border-color: #fbbf2455; background: #fbbf2412; }
+  .warn h3 { color: #fbbf24; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: #ffffff14; padding: 1px 5px; border-radius: 5px; }
+  .support { font-size: 12.5px; color: var(--text-dim); margin-top: 12px; }
+  .support b { color: var(--text); }
+</style>
+
+<div class="wrap">
+  <h1>Flame ring — interval counter</h1>
+  <p class="lede">
+    The counter circle from the interval view, wrapped in fire. The flame appears <b>only when a heart-rate
+    sensor is streaming</b>, and its size, speed, spark count and colour all follow the live zone — so the
+    effect carries the same information the zone badge does, rather than being decoration that happens to
+    be on fire, and it <b>eases</b> between zones rather than snapping — 148 bpm and 152 bpm are the same
+    effort, so a 4-beat drift should not look like an event. Pick a zone or drag the bpm slider; “No sensor”
+    is the real off state, and the fire fades out rather than vanishing, because a dropped sensor is not a
+    button press. While a zone change is in flight the <b>flicker holds still</b> and resumes once it
+    settles — two motions at once in the same object and the eye reads neither. <b>Trim</b> sets how
+    loud the whole effect is — the zones keep their relative shape, so agreeing one number settles all five.
+  </p>
+
+  <div class="panel">
+    <div class="ctl">
+      <div class="seg" id="zones"></div>
+      <label class="tog"><input type="checkbox" id="rm"> simulate reduced motion</label>
+      <label class="tog" style="opacity:.75"><input type="checkbox" id="nofreeze"> don’t pause while changing zone</label>
+      <div class="bpmline" style="flex:0 1 220px">
+        <span>trim</span>
+        <input type="range" id="trim" min="20" max="130" value="55">
+        <span class="bpmval" id="trimval">0.55</span>
+      </div>
+      <div class="bpmline">
+        <span>bpm</span>
+        <input type="range" id="bpm" min="50" max="195" value="0">
+        <span class="bpmval" id="bpmval">—</span>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="cell">
+        <span class="cellTag">A · Halo</span>
+        <div class="headline">Work</div>
+        <div class="ringbox">
+          <div class="flame"><canvas id="cvA"></canvas></div>
+          <div class="ring">
+            <svg viewBox="0 0 200 200" aria-hidden="true">
+              <circle class="track" cx="100" cy="100" r="88"></circle>
+              <circle class="prog" id="progA" cx="100" cy="100" r="88" stroke-dasharray="552.9" stroke-dashoffset="180"></circle>
+            </svg>
+            <div class="digits">0:24</div>
+          </div>
+        </div>
+        <div id="chipA"></div>
+      </div>
+
+      <div class="cell">
+        <span class="cellTag">B · Updraft</span>
+        <div class="headline">Work</div>
+        <div class="ringbox">
+          <div class="flame"><canvas id="cvB"></canvas></div>
+          <div class="ring">
+            <svg viewBox="0 0 200 200" aria-hidden="true">
+              <circle class="track" cx="100" cy="100" r="88"></circle>
+              <circle class="prog" id="progB" cx="100" cy="100" r="88" stroke-dasharray="552.9" stroke-dashoffset="180"></circle>
+            </svg>
+            <div class="digits">0:24</div>
+          </div>
+        </div>
+        <div id="chipB"></div>
+      </div>
+    </div>
+
+    <p class="support" id="support"></p>
+  </div>
+
+  <div class="panel">
+    <h2>Two variants — pick one</h2>
+    <p class="hint">Same shader, different bias. Everything else is identical.</p>
+    <div class="notes">
+      <div class="note">
+        <h3>A · Halo</h3>
+        <p>Fire hugs the ring the whole way round, evenly. Reads as “the circle itself is burning”. Calmer, symmetrical, and it never crowds the label above the ring.</p>
+      </div>
+      <div class="note">
+        <h3>B · Updraft</h3>
+        <p>Flames rise upward off the ring the way real fire does — closest to the library’s own look. More dramatic and more alive; it does eat vertical space above the circle.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>What I changed from the library, and why</h2>
+    <div class="notes">
+      <div class="note warn">
+        <h3>It needs an API iPhones don’t have</h3>
+        <p><code>flame-wrap</code> draws your DOM <em>inside</em> the canvas via the experimental HTML‑in‑Canvas API (<code>drawElement</code>). That is Chrome‑only and behind a flag. On iOS Safari — a phone propped against a bench, which is where intervals actually happen — it would render nothing at all. This preview keeps the look and puts the flame on a canvas <em>behind</em> the ring instead, so the digits stay ordinary DOM.</p>
+      </div>
+      <div class="note">
+        <h3>No heat shimmer on the numbers</h3>
+        <p>Distorting the content is the library’s signature trick. Here the content is a countdown you read while gasping, so the shimmer stays on the ring and never touches the digits. The clock is the one thing on screen that must never be hard to read.</p>
+      </div>
+      <div class="note">
+        <h3>The flame is the zone</h3>
+        <p>Colour follows the existing Karvonen ramp — Z1 blue, Z2 green, Z3 yellow, Z4 orange, Z5 red — the same colours the badge and the charts already use. Height, speed and sparks ramp with it, so “more fire” and “higher zone” are the same sentence.</p>
+      </div>
+      <div class="note">
+        <h3>It stops when nothing is watching</h3>
+        <p>The loop runs only with a live bpm, pauses on a hidden tab, and drops to a still glow under <code>prefers-reduced-motion</code>. A WebGL loop during a screen‑locked workout is a battery decision as much as a visual one.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ZONES = [
+  { z: 0, label: "No sensor", color: "#8f99bd", bpm: 0 },
+  { z: 1, label: "Z1", color: "#3b82f6", bpm: 108 },
+  { z: 2, label: "Z2", color: "#22c55e", bpm: 128 },
+  { z: 3, label: "Z3", color: "#eab308", bpm: 148 },
+  { z: 4, label: "Z4", color: "#f97316", bpm: 168 },
+  { z: 5, label: "Z5", color: "#ef4444", bpm: 186 },
+];
+
+const hex2rgb = (h) => [parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255];
+
+const VERT = `#version 300 es
+in vec2 p; out vec2 uv;
+void main(){ uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
+
+/* Procedural fire: fbm-warped noise in a polar field around the ring.
+   `uUpdraft` is the only difference between the two variants — 0 keeps the
+   tongues normal to the circle (halo), 1 bends them toward vertical (updraft). */
+const FRAG = `#version 300 es
+precision highp float;
+in vec2 uv; out vec4 outColor;
+uniform vec2  uRes;
+uniform float uTime;
+uniform float uIntensity;   // 0..1, from the HR zone
+uniform vec3  uColor;
+uniform float uUpdraft;     // 0 halo, 1 updraft
+uniform vec2  uCentre;      // ring centre in uv space
+uniform float uRadius;      // ring radius in uv-y units
+uniform float uStill;       // 1 = reduced motion: freeze the field
+
+vec3 hash3(vec3 p){
+  p = vec3(dot(p, vec3(127.1,311.7,74.7)), dot(p, vec3(269.5,183.3,246.1)), dot(p, vec3(113.5,271.9,124.6)));
+  return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+}
+float noise(vec3 p){
+  vec3 i = floor(p), f = fract(p);
+  vec3 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(dot(hash3(i+vec3(0,0,0)), f-vec3(0,0,0)), dot(hash3(i+vec3(1,0,0)), f-vec3(1,0,0)), u.x),
+                 mix(dot(hash3(i+vec3(0,1,0)), f-vec3(0,1,0)), dot(hash3(i+vec3(1,1,0)), f-vec3(1,1,0)), u.x), u.y),
+             mix(mix(dot(hash3(i+vec3(0,0,1)), f-vec3(0,0,1)), dot(hash3(i+vec3(1,0,1)), f-vec3(1,0,1)), u.x),
+                 mix(dot(hash3(i+vec3(0,1,1)), f-vec3(0,1,1)), dot(hash3(i+vec3(1,1,1)), f-vec3(1,1,1)), u.x), u.y), u.z);
+}
+float fbm(vec3 p){
+  float a = 0.5, s = 0.0;
+  for (int i = 0; i < 5; i++){ s += a * noise(p); p *= 2.02; a *= 0.5; }
+  return s;
+}
+
+void main(){
+  float aspect = uRes.x / uRes.y;
+  vec2 q = vec2((uv.x - uCentre.x) * aspect, uv.y - uCentre.y);
+  float r = length(q);
+  float ang = atan(q.y, q.x);
+
+  // Already scaled and already paused by the caller. The shader must not apply
+  // its own speed: changing a multiplier on a clock that keeps advancing makes
+  // the noise field JUMP at the moment the rate changes. An accumulator on the
+  // JS side can be stopped and restarted with no discontinuity at all.
+  float t = uTime;
+
+  // Flames climb outward from the ring; the updraft variant biases that
+  // outward direction toward +y so the tongues lean up like real fire.
+  vec2 dir = normalize(q + 1e-5);
+  vec2 flow = mix(dir, normalize(mix(dir, vec2(0.0, 1.0), 0.85)), uUpdraft);
+  float along = dot(q - dir * uRadius, flow);
+
+  // Field coordinates: angle keeps the noise continuous round the circle.
+  vec3 fp = vec3(cos(ang) * 2.2, sin(ang) * 2.2, 0.0) * 1.6
+          + vec3(0.0, 0.0, t * 1.6)
+          - vec3(flow * along * 6.0, 0.0);
+
+  float n = fbm(fp * 1.9);
+  float wisp = fbm(fp * 4.5 + vec3(0.0, 0.0, t * 2.4));
+
+  // Halo burns evenly all the way round; updraft concentrates the reach at the
+  // top so the tongues climb, the way fire actually behaves. Without this the
+  // two variants differ only in the noise flow and read as the same picture.
+  float upness = clamp(dir.y * 0.5 + 0.5, 0.0, 1.0);
+  float bias = mix(1.0, mix(0.22, 2.15, pow(upness, 1.4)), uUpdraft);
+  float reach = mix(0.032, 0.15, uIntensity) * bias;  // how far the fire licks out
+  float d = (r - uRadius) - n * reach * 0.55;          // noise pushes the edge outward
+  float body = 1.0 - smoothstep(0.0, reach, max(d, 0.0));
+  float inner = smoothstep(-0.035, 0.004, r - uRadius); // never paint inside the ring
+  float flame = pow(body, 1.7) * inner;
+
+  // Cooler tips: hot core near the ring, colour toward white where it burns hardest.
+  float heat = clamp(flame * (0.42 + 0.6 * uIntensity) + wisp * 0.08, 0.0, 1.0);
+  // Gain kept near 1.0: the flame should read as lit, not as a light source.
+  // Above that the ring blooms and the digits lose their contrast against it.
+  vec3 col = uColor * (0.38 + 0.62 * heat);
+  col = mix(col, vec3(1.0, 0.96, 0.86), pow(heat, 5.0) * (0.08 + 0.16 * uIntensity));
+
+  // Sparks: sparse bright motes drifting out, more of them the higher the zone.
+  float sparks = 0.0;
+  if (uIntensity > 0.28 && uStill < 0.5) {   // uStill = frozen, so no new sparks
+    float sp = fbm(fp * 9.0 + vec3(0.0, 0.0, t * 3.2));
+    sparks = smoothstep(0.46, 0.54, sp) * body * (uIntensity - 0.25) * 1.1;
+  }
+
+  float alpha = clamp(flame * (0.14 + 0.3 * uIntensity) + sparks * 0.34, 0.0, 1.0);
+  // Ember seat: a steady glow right at the ring so the fire looks attached to it.
+  alpha += smoothstep(reach * 0.55, 0.0, max(d, 0.0)) * inner * 0.11 * uIntensity;
+
+  outColor = vec4(col * alpha, alpha);
+}`;
+
+function makeFlame(canvas, ring, updraft) {
+  const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false });
+  if (!gl) return null;
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s)); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, "p");
+  gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  const U = (n) => gl.getUniformLocation(prog, n);
+  const u = { res: U("uRes"), time: U("uTime"), intensity: U("uIntensity"), color: U("uColor"),
+              updraft: U("uUpdraft"), centre: U("uCentre"), radius: U("uRadius"), still: U("uStill") };
+
+  const resize = () => {
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  };
+  new ResizeObserver(resize).observe(canvas);
+  resize();
+
+  return {
+    draw(state) {
+      if (state.intensity <= 0) { gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT); return; }
+      gl.useProgram(prog);
+      gl.uniform2f(u.res, canvas.width, canvas.height);
+      gl.uniform1f(u.time, state.time);
+      gl.uniform1f(u.intensity, state.intensity);
+      gl.uniform3f(u.color, state.color[0], state.color[1], state.color[2]);
+      gl.uniform1f(u.updraft, updraft);
+      // MEASURE the ring, never assume it. The canvas is inset past the ring box
+      // on all four sides by different amounts, so the circle is not at the
+      // canvas centre — and uv.y runs UP while CSS runs down, which is what put
+      // the fire above the ring in the first version. Both are handled here, in
+      // one place, from the live geometry.
+      const cb = canvas.getBoundingClientRect();
+      const rb = ring.getBoundingClientRect();
+      const cx = rb.left + rb.width / 2 - cb.left;
+      const cy = rb.top + rb.height / 2 - cb.top;
+      gl.uniform2f(u.centre, cx / cb.width, 1 - cy / cb.height);
+      // The stroke's CENTRELINE is the thing fire should cling to: r=88 in a
+      // 200-unit viewBox, scaled to however wide the ring actually rendered.
+      // Expressed in uv-Y units, because the shader corrects x by the aspect.
+      const radiusPx = 88 * (rb.width / 200);
+      gl.uniform1f(u.radius, radiusPx / cb.height);
+      gl.uniform1f(u.still, state.still ? 1 : 0);
+      gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    },
+  };
+}
+
+const A = makeFlame(document.getElementById("cvA"), document.querySelector("#cvA").closest(".ringbox").querySelector(".ring"), 0.0);
+const B = makeFlame(document.getElementById("cvB"), document.querySelector("#cvB").closest(".ringbox").querySelector(".ring"), 1.0);
+
+let zone = 3, bpm = ZONES[3].bpm, still = false;
+// Master trim. The zone sets the SHAPE of the ramp; this sets how loud the whole
+// thing is, so the level can be agreed as one number instead of five.
+let trim = 0.55;
+// On by default; the checkbox is only here so the two can be compared.
+let pauseOnChange = true;
+
+const segEl = document.getElementById("zones");
+ZONES.forEach((z, i) => {
+  const b = document.createElement("button");
+  b.textContent = z.label;
+  b.setAttribute("aria-pressed", String(i === zone));
+  b.style.setProperty("--seg", z.color);
+  b.onclick = () => { zone = i; bpm = z.bpm; sync(); };
+  segEl.appendChild(b);
+});
+
+const bpmEl = document.getElementById("bpm");
+bpmEl.oninput = () => {
+  bpm = +bpmEl.value;
+  // Karvonen-ish banding for the demo: hrMax 190, hrRest 60.
+  const pct = ((bpm - 60) / (190 - 60)) * 100;
+  zone = bpm < 60 ? 0 : pct < 50 ? 0 : pct < 60 ? 1 : pct < 70 ? 2 : pct < 80 ? 3 : pct < 90 ? 4 : 5;
+  sync();
+};
+document.getElementById("rm").onchange = (e) => { still = e.target.checked; };
+document.getElementById("nofreeze").onchange = (e) => { pauseOnChange = !e.target.checked; };
+document.getElementById("trim").oninput = (e) => {
+  trim = +e.target.value / 100;
+  document.getElementById("trimval").textContent = trim.toFixed(2);
+};
+
+function chip(el, z) {
+  if (z.z === 0) { el.className = "nosensor"; el.textContent = "No sensor — no flame"; return; }
+  el.className = "";
+  el.innerHTML = `<span class="hrchip" style="--beat:${(60 / bpm).toFixed(2)}s">
+      <span class="heart"></span><b>${bpm}</b><span class="zbadge">Z${z.z}</span></span>`;
+}
+
+function sync() {
+  const z = ZONES[zone];
+  // No colour write here: the frame loop owns `--zone` so the tween is the only
+  // thing that ever sets it.
+  [...segEl.children].forEach((b, i) => b.setAttribute("aria-pressed", String(i === zone)));
+  bpmEl.value = String(z.bpm || 50);
+  document.getElementById("bpmval").textContent = z.z === 0 ? "—" : `${bpm} bpm`;
+  chip(document.getElementById("chipA"), z);
+  chip(document.getElementById("chipB"), z);
+}
+sync();
+
+/* ---- the tween -------------------------------------------------------------
+   Zones are discrete but the body is not: 148 bpm and 152 bpm are the same
+   effort, and snapping the whole ring from yellow to orange makes a 4-beat
+   drift look like an event. So the ZONE is what changes instantly and the
+   PICTURE eases toward it — the same rule the charts in this app follow, where
+   the data is interpolated and the render is left pure.
+
+   Exponential easing on real elapsed time rather than a fixed step per frame:
+   the result is identical at 60Hz, 120Hz and on a throttled background tab, and
+   there is no "animation" to interrupt — a second zone change mid-move just
+   moves the target and the value keeps chasing it. */
+const TAU = 0.42; // seconds to cover ~63% of the remaining distance
+
+// sRGB is not linear light, so a straight lerp from blue to green sags through
+// a muddy teal. Squaring in and square-rooting out is the cheap approximation
+// that keeps the ramp saturated the whole way across.
+const toLin = (c) => c * c;
+const toSrgb = (c) => Math.sqrt(Math.max(0, c));
+
+/* One tweened number drives everything: a continuous position along the zone
+   ramp. Interpolating the two ENDPOINT colours instead would cut the corner —
+   Z1 straight to Z5 crossed through magenta, a colour the ramp does not contain
+   and no zone means. Travelling along the ramp makes the same move sweep blue →
+   green → yellow → orange → red, which is what the badge and the charts have
+   always implied that gradient means. */
+const RAMP = ZONES.slice(1).map((z) => hex2rgb(z.color).map(toLin)); // Z1..Z5
+const CURVE = [0.16, 0.3, 0.44, 0.6, 0.78];                           // per zone
+
+const sampleAt = (pos, table) => {
+  const p = Math.max(1, Math.min(5, pos)) - 1;      // 0..4 across five stops
+  const i = Math.min(3, Math.floor(p));
+  const f = p - i;
+  return Array.isArray(table[0])
+    ? table[i].map((c, j) => c + (table[i + 1][j] - c) * f)
+    : table[i] + (table[i + 1] - table[i]) * f;
+};
+
+let pos = Math.max(1, zone);   // where on the ramp the picture currently sits
+let lit = zone > 0 ? 1 : 0;    // how much of it is showing at all
+
+/* The flicker HOLDS STILL while the colour is moving (owner) — two motions in
+   the same object at once and the eye reads neither, and the zone change is the
+   one that carries meaning. It resumes once the ramp settles.
+
+   `flameTime` is an accumulator rather than elapsed-time-times-speed for a
+   reason: multiplying a running clock by a changing rate teleports the noise
+   field the instant the rate changes. Integrating dt lets the fire decelerate
+   to a stop and spin back up without a single frame of discontinuity. */
+let flameTime = 0;
+let speed = 1;                 // eased 0..1
+const SPEED_TAU = 0.18;        // quicker than the colour: stop first, then move
+const prefersStill = matchMedia("(prefers-reduced-motion: reduce)");
+
+const t0 = performance.now();
+let last = t0;
+
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000);
+  last = now;
+  const k = 1 - Math.exp(-dt / TAU);
+
+  // With no sensor the position HOLDS and only the presence fades: a dropped
+  // strap should not slide the colour back to Z1 on its way out, because
+  // nothing about the lifter changed — the reading did.
+  if (zone > 0) pos += (zone - pos) * k;
+  lit += ((zone > 0 ? 1 : 0) - lit) * k;
+
+  // "Mid-transition" is measured on the tweened values themselves, so it is
+  // true exactly while something is visibly moving — no timers to keep in sync
+  // with the easing, and a second zone change during the first just keeps it
+  // true for longer.
+  const moving = Math.abs((zone > 0 ? zone : pos) - pos) > 0.01 || Math.abs((zone > 0 ? 1 : 0) - lit) > 0.01;
+  const frozen = still || prefersStill.matches || (moving && pauseOnChange);
+  speed += ((frozen ? 0 : 1) - speed) * (1 - Math.exp(-dt / SPEED_TAU));
+  // Intensity sets the flicker rate; speed gates it. Both live here so the
+  // shader's clock is simply told what time it is.
+  flameTime += dt * (0.35 + 0.8 * Math.min(1, sampleAt(pos, CURVE))) * speed;
+
+  const rgb = sampleAt(pos, RAMP);
+  const srgb = rgb.map(toSrgb);
+  // One colour for the flame, the ring, the heart and the badge, so nothing on
+  // screen is ever a zone ahead of anything else.
+  document.documentElement.style.setProperty(
+    "--zone",
+    `rgb(${srgb.map((c) => Math.round(c * 255)).join(",")})`,
+  );
+
+  const state = {
+    time: flameTime,
+    intensity: sampleAt(pos, CURVE) * trim * lit,
+    color: srgb,
+    // Below this the fire is effectively stopped, so sparks stop being born —
+    // a frozen field with sparks still popping reads as a rendering fault.
+    still: speed < 0.08,
+  };
+  A && A.draw(state);
+  B && B.draw(state);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// One canvas can only ever hold one context type, so each probe gets its own.
+const has2d = typeof document.createElement("canvas").getContext("2d").drawElement === "function";
+const hasGl = !!document.createElement("canvas").getContext("webgl2");
+document.getElementById("support").innerHTML =
+  `This browser: WebGL2 <b>${hasGl ? "yes" : "no"}</b> · HTML-in-Canvas (<code>drawElement</code>, what the library needs) <b>${has2d ? "yes" : "no"}</b>.`;
+</script>
