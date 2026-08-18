@@ -2,9 +2,12 @@
    инжектират от Vite плъгина на build (public/ се копира дословно).
    Големите файлове (ръководството, 6.5MB) НЕ влизат в install списъка —
    те се кешират при първото отваряне, за да е бърза инсталацията. */
-const ASSETS = ["./assets/golos-text-cyrillic-400-normal-BwL4n7Pb.woff","./assets/golos-text-cyrillic-400-normal-C7us6pn1.woff2","./assets/golos-text-cyrillic-500-normal-BSLQUuP1.woff2","./assets/golos-text-cyrillic-500-normal-hXinzVVQ.woff","./assets/golos-text-cyrillic-700-normal-BKmY45Ip.woff2","./assets/golos-text-cyrillic-700-normal-ClsrbE7_.woff","./assets/golos-text-latin-400-normal-Coi1FYaD.woff2","./assets/golos-text-latin-400-normal-DOuJOmdK.woff","./assets/golos-text-latin-500-normal-BQo4s7Kn.woff","./assets/golos-text-latin-500-normal-BznAvurO.woff2","./assets/golos-text-latin-700-normal-CxmN_Nfd.woff2","./assets/golos-text-latin-700-normal-DAuVRgMH.woff","./assets/index-BMhNcs1D.css","./assets/index-CB78HlLS.js","./icons/icon-192.png","./icons/icon-512.png","./index.html","./manifest.webmanifest","./manual-mokka-my16-bg.pdf","./protokol-ptp.pdf"];
-const CACHE = "blitz-3076d566eff1";
-const LAZY = /manual-.*\.pdf$/;
+const ASSETS = ["./assets/golos-text-cyrillic-400-normal-C7us6pn1.woff2","./assets/golos-text-cyrillic-500-normal-BSLQUuP1.woff2","./assets/golos-text-cyrillic-700-normal-BKmY45Ip.woff2","./assets/golos-text-latin-400-normal-Coi1FYaD.woff2","./assets/golos-text-latin-500-normal-BznAvurO.woff2","./assets/golos-text-latin-700-normal-CxmN_Nfd.woff2","./assets/index-BPGMWrIk.css","./assets/index-D3O64cT-.js","./assets/logbook-B8LiF7lg.js","./icons/icon-192.png","./icons/icon-512.png","./index.html","./manifest.webmanifest","./manual-mokka-my16-bg.pdf","./protokol-ptp.pdf"];
+const CACHE = "blitz-33c0ad3d9858";
+/* PDF-ите и шрифтовете не се променят между билдове. Държат се в отделен кеш с
+   постоянно име, за да не се теглят 7 MB наново при всеки деплой. */
+const STATIC = 'blitz-static-v1';
+const LAZY = /\.pdf$/;
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS.filter((a) => !LAZY.test(a)))));
@@ -13,7 +16,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k !== CACHE && k !== STATIC).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -32,7 +35,8 @@ self.addEventListener('fetch', (e) => {
         // Успешен GET от нашия origin се запазва → второто отваряне е offline.
         if (e.request.method === 'GET' && res.ok && res.type === 'basic') {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+          const bucket = LAZY.test(url.pathname) ? STATIC : CACHE;
+          caches.open(bucket).then((c) => c.put(e.request, copy)).catch(() => {});
         }
         return res;
       });
