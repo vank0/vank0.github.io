@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Blitz</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Blitz" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#EFF1F4" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101216" />
+  <script>
+    // Тема преди първото боядисване — без FOUC.
+    try {
+      var t = localStorage.getItem('blitz-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
+  <script type="module" crossorigin src="./assets/index-B08SPohy.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CbErN5qk.css">
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
