@@ -2,8 +2,8 @@
    инжектират от Vite плъгина на build (public/ се копира дословно).
    Големите файлове (ръководството, 6.5MB) НЕ влизат в install списъка —
    те се кешират при първото отваряне, за да е бърза инсталацията. */
-const ASSETS = ["./assets/golos-text-cyrillic-400-normal-BwL4n7Pb.woff","./assets/golos-text-cyrillic-400-normal-C7us6pn1.woff2","./assets/golos-text-cyrillic-500-normal-BSLQUuP1.woff2","./assets/golos-text-cyrillic-500-normal-hXinzVVQ.woff","./assets/golos-text-cyrillic-700-normal-BKmY45Ip.woff2","./assets/golos-text-cyrillic-700-normal-ClsrbE7_.woff","./assets/golos-text-latin-400-normal-Coi1FYaD.woff2","./assets/golos-text-latin-400-normal-DOuJOmdK.woff","./assets/golos-text-latin-500-normal-BQo4s7Kn.woff","./assets/golos-text-latin-500-normal-BznAvurO.woff2","./assets/golos-text-latin-700-normal-CxmN_Nfd.woff2","./assets/golos-text-latin-700-normal-DAuVRgMH.woff","./assets/index-CXdunLcK.js","./assets/index-D06coK_r.css","./icons/icon-192.png","./icons/icon-512.png","./index.html","./manifest.webmanifest","./manual-mokka-my16-bg.pdf","./protokol-ptp.pdf"];
-const CACHE = "blitz-7d799f0f1fee";
+const ASSETS = ["./assets/golos-text-cyrillic-400-normal-BwL4n7Pb.woff","./assets/golos-text-cyrillic-400-normal-C7us6pn1.woff2","./assets/golos-text-cyrillic-500-normal-BSLQUuP1.woff2","./assets/golos-text-cyrillic-500-normal-hXinzVVQ.woff","./assets/golos-text-cyrillic-700-normal-BKmY45Ip.woff2","./assets/golos-text-cyrillic-700-normal-ClsrbE7_.woff","./assets/golos-text-latin-400-normal-Coi1FYaD.woff2","./assets/golos-text-latin-400-normal-DOuJOmdK.woff","./assets/golos-text-latin-500-normal-BQo4s7Kn.woff","./assets/golos-text-latin-500-normal-BznAvurO.woff2","./assets/golos-text-latin-700-normal-CxmN_Nfd.woff2","./assets/golos-text-latin-700-normal-DAuVRgMH.woff","./assets/index-BeM2QiQH.js","./assets/index-D06coK_r.css","./icons/icon-192.png","./icons/icon-512.png","./index.html","./manifest.webmanifest","./manual-mokka-my16-bg.pdf","./protokol-ptp.pdf"];
+const CACHE = "blitz-065f3abcf12b";
 const LAZY = /manual-.*\.pdf$/;
 
 self.addEventListener('install', (e) => {
