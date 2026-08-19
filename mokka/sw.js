@@ -2,8 +2,8 @@
    инжектират от Vite плъгина на build (public/ се копира дословно).
    Големите файлове (ръководството, 6.5MB) НЕ влизат в install списъка —
    те се кешират при първото отваряне, за да е бърза инсталацията. */
-const ASSETS = ["./assets/golos-text-cyrillic-400-normal-C7us6pn1.woff2","./assets/golos-text-cyrillic-500-normal-BSLQUuP1.woff2","./assets/golos-text-cyrillic-700-normal-BKmY45Ip.woff2","./assets/golos-text-latin-400-normal-Coi1FYaD.woff2","./assets/golos-text-latin-500-normal-BznAvurO.woff2","./assets/golos-text-latin-700-normal-CxmN_Nfd.woff2","./assets/index-DHVqTaiR.css","./assets/index-dMVzZbN0.js","./assets/logbook-BFZQWDbp.js","./icons/icon-192.png","./icons/icon-512.png","./index.html","./manifest.webmanifest","./manual-mokka-my16-bg.pdf","./protokol-ptp.pdf"];
-const CACHE = "blitz-c9c687e79186";
+const ASSETS = ["./assets/golos-text-cyrillic-400-normal-C7us6pn1.woff2","./assets/golos-text-cyrillic-500-normal-BSLQUuP1.woff2","./assets/golos-text-cyrillic-700-normal-BKmY45Ip.woff2","./assets/golos-text-latin-400-normal-Coi1FYaD.woff2","./assets/golos-text-latin-500-normal-BznAvurO.woff2","./assets/golos-text-latin-700-normal-CxmN_Nfd.woff2","./assets/index-1dJQxj_q.js","./assets/index-DHVqTaiR.css","./assets/logbook-z5rP_FbZ.js","./icons/icon-192.png","./icons/icon-512.png","./index.html","./manifest.webmanifest","./manual-mokka-my16-bg.pdf","./protokol-ptp.pdf"];
+const CACHE = "blitz-1403f1871db9";
 /* PDF-ите и шрифтовете не се променят между билдове. Държат се в отделен кеш с
    постоянно име, за да не се теглят 7 MB наново при всеки деплой. */
 const STATIC = 'blitz-static-v1';
