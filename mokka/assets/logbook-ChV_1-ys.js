@@ -1,4 +1,4 @@
-import{f as m,e as w,c as y,a as p,v as j,b as B,s as k,d as z,g as M,h as f,i as P,S as D,j as A,k as F}from"./index-D5V0ax8U.js";const e=t=>String(t??"").replace(/[&<>"]/g,l=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[l]),S=`
+import{f as m,e as w,c as y,a as p,v as j,b as M,s as k,d as B,g as z,h as f,i as P,S as D,j as A,k as F}from"./index-gqk8YDtY.js";const e=t=>String(t??"").replace(/[&<>"]/g,l=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[l]),S=`
 @page { size: A4; margin: 14mm 14mm 16mm; }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -69,12 +69,12 @@ td.r, th.r { text-align: right; }
         <dt>Гориво</dt><dd>${t.car.lpg?"бензин + газ (LPG)":"бензин"}</dd>
       </dl>
     </div>
-    <div class="sub">Издадена от Blitz · ${e(m(l,l))}</div>
-  </section>`}function O(t,l){var u;const d=y(t),s=j(t.fuel,t.car.lpg?"lpg":((u=t.fuel[0])==null?void 0:u.fuelType)??"petrol"),c=s.length?s.reduce((i,n)=>i+n.l100,0)/s.length:null,o=t.fuel.reduce((i,n)=>i+n.cents,0),r=t.service.records.reduce((i,n)=>i+(n.cents??0),0),h=B(t.fuel),b=k(t.fuel)[0],g=d&&b?d.odo-b.odo:0,v=z(t,l).filter(i=>i.spec.bg==="required");return`<section class="page">
+    <div class="sub">Издадена от My Mokka · ${e(m(l,l))}</div>
+  </section>`}function O(t,l){var u;const d=y(t),s=j(t.fuel,t.car.lpg?"lpg":((u=t.fuel[0])==null?void 0:u.fuelType)??"petrol"),c=s.length?s.reduce((i,n)=>i+n.l100,0)/s.length:null,o=t.fuel.reduce((i,n)=>i+n.cents,0),r=t.service.records.reduce((i,n)=>i+(n.cents??0),0),h=M(t.fuel),b=k(t.fuel)[0],g=d&&b?d.odo-b.odo:0,v=B(t,l).filter(i=>i.spec.bg==="required");return`<section class="page">
     <h2>Обобщение</h2>
     <div class="stats">
       <div class="stat"><div class="lbl">Изминати (води се)</div><div class="val mono">${e(p(g))}</div></div>
-      <div class="stat"><div class="lbl">Среден разход</div><div class="val mono">${c!=null?e(M(c)):"—"}</div></div>
+      <div class="stat"><div class="lbl">Среден разход</div><div class="val mono">${c!=null?e(z(c)):"—"}</div></div>
       <div class="stat"><div class="lbl">Гориво общо</div><div class="val mono">${e(f(o))}</div></div>
       <div class="stat"><div class="lbl">Обслужване общо</div><div class="val mono">${e(f(r))}</div></div>
     </div>
