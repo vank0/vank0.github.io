@@ -2,10 +2,11 @@
    инжектират от Vite плъгина на build (public/ се копира дословно).
    Големите файлове (ръководството, 6.5MB) НЕ влизат в install списъка —
    те се кешират при първото отваряне, за да е бърза инсталацията. */
-const ASSETS = ["./assets/golos-text-cyrillic-400-normal-C7us6pn1.woff2","./assets/golos-text-cyrillic-500-normal-BSLQUuP1.woff2","./assets/golos-text-cyrillic-700-normal-BKmY45Ip.woff2","./assets/golos-text-latin-400-normal-Coi1FYaD.woff2","./assets/golos-text-latin-500-normal-BznAvurO.woff2","./assets/golos-text-latin-700-normal-CxmN_Nfd.woff2","./assets/index-DHVqTaiR.css","./assets/index-bFBSqlml.js","./assets/logbook-DtBUofVk.js","./icons/icon-192.png","./icons/icon-512.png","./index.html","./lights/CREDITS.md","./lights/abs.svg","./lights/airbag.svg","./lights/brake.svg","./lights/charge.svg","./lights/esp.svg","./lights/mil.svg","./lights/oil.svg","./lights/steering.svg","./lights/tpms.svg","./manifest.webmanifest","./manual-mokka-my16-bg.pdf","./protokol-ptp.pdf"];
-const CACHE = "blitz-82af5cacb080";
-/* PDF-ите и шрифтовете не се променят между билдове. Държат се в отделен кеш с
-   постоянно име, за да не се теглят 7 MB наново при всеки деплой. */
+const ASSETS = ["./assets/golos-text-cyrillic-400-normal-C7us6pn1.woff2","./assets/golos-text-cyrillic-500-normal-BSLQUuP1.woff2","./assets/golos-text-cyrillic-700-normal-BKmY45Ip.woff2","./assets/golos-text-latin-400-normal-Coi1FYaD.woff2","./assets/golos-text-latin-500-normal-BznAvurO.woff2","./assets/golos-text-latin-700-normal-CxmN_Nfd.woff2","./assets/index-CpZRoX_c.js","./assets/index-sm5TIDm0.css","./assets/logbook-w5nVrmO5.js","./icons/icon-192.png","./icons/icon-512.png","./index.html","./lights/CREDITS.md","./lights/tell-tales.ttf","./manifest.webmanifest","./manual-mokka-my16-bg.pdf","./protokol-ptp.pdf"];
+const CACHE = "blitz-a4fb05543fdc";
+/* PDF-ите не се променят между билдове. Държат се в отделен кеш с постоянно име,
+   за да не се теглят 7 MB наново при всеки деплой. Шрифтовете НЕ са тук: малкият
+   (tell-tales.ttf) се precache-ва при install, а едрите се кешират нормално. */
 const STATIC = 'blitz-static-v1';
 const LAZY = /\.pdf$/;
 

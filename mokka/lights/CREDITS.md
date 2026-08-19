@@ -1,27 +1,63 @@
-# Пиктограмите на лампите от таблото
+# `tell-tales.ttf` — откъде идват символите на лампите
 
-Свалени от [Wikimedia Commons, категория „Dashboard SVG icons“](https://commons.wikimedia.org/wiki/Category:Dashboard_SVG_icons)
-и изчистени само от metadata — формите и стиловете са както в оригинала.
+**Това НЕ е свободен ресурс.** Файлът е сглобен от глифове, извадени от
+символните шрифтове, вградени в ръководството на автомобила
+(`public/manual-mokka-my16-bg.pdf`, Opel Mokka MY16, българско издание).
+Шрифтовете са собственост на Opel Automobile GmbH и в PDF-а са вложени
+като subset-и — правото да се ползват е правото да се чете ръководството.
 
-| файл | оригинал | автор | лиценз |
-|---|---|---|---|
-| oil.svg | Kontrollleuchte Oeldruck.svg | Chris828 | Public domain |
-| charge.svg | Kontrollleuchte Generator.svg | Chris828 | Public domain |
-| brake.svg | Kontrollleuchte Parkbremse.svg | Chris828 | Public domain |
-| airbag.svg | Kontrollleuchte Airbag.svg | Chris828 | Copyrighted free use |
-| mil.svg | Motorkontrollleuchte.svg | Chris828 | Public domain |
-| tpms.svg | Warnlampe Druckverlust.svg | Chris828 | Copyrighted free use |
-| abs.svg | Antilock Braking System.svg | Chris828 | Public domain |
-| steering.svg | Kontrollleuchte Lenkhilfe.svg | Chris828 | CC0 |
-| esp.svg | Kontrollleuchte ESP.svg | Chris828 | Public domain |
+Тук стоят, защото Blitz е лична притурка към **един** автомобил, чийто
+собственик има това ръководство: символите на таблото му се показват от
+собствения му наръчник. Това е **допустимата лична употреба и нищо повече**.
 
-Нула CC BY-SA файлове: ISO серията на Commons (B01 Brake failure, B05 ABS…) е
-CC BY-SA 3.0, тоест копилефт — не влиза в това repo.
+> Ако Blitz някога стане продукт, публичен магазин или нещо, което се
+> разпространява на трети хора — **този файл е първото, което се маха.**
+> Заедно с него: `@font-face` блокът в `src/styles/app.css` и таблицата
+> `LIGHT_GLYPH` в `src/components/LightIcon.tsx`. Заместител: собствени
+> рисунки или платен ISO 2575 лиценз.
 
-`steering.svg` носи два варианта един до друг в един файл; viewBox-ът в
-`src/components/lightPaths.ts` е свит до левия.
+## Как е направен
 
-Гаечният ключ („Уговорете обслужване“) НЕ идва оттам — в категорията няма такъв
-символ; той е начертан в `src/components/LightIcon.tsx`.
+PDF-ът носи 15 вградени TrueType шрифта (`/FontFile2`), всички с
+`Identity-H` кодиране. Символите на лампите не са картинки, а глифове в три
+от тях. Извадени са с чист Python (regex по обектите + `zlib.decompress`),
+после подредени в един нов шрифт: subset-ите от PDF-а нямат `cmap` и `name`,
+затова браузърът не може да ги ползва както са — тези две таблици са
+написани наново, а всеки глиф е вписан в един и същ квадрат (960 от 1000
+em единици, центриран, със запазена пропорция).
 
-Рисунките от самия ISO 2575 не са ползвани — стандартът е платен.
+Код точките са **същите букви**, с които PDF-ът адресира глифовете (според
+`/ToUnicode` на съответния шрифт) — нарочно, за да е проследимо всяко
+съответствие.
+
+| ред | код точка | шрифт в PDF-а | glyph id | символ |
+|---|---|---|---|---|
+| `oil` | U+0049 `I` | MJUIDZ+GrafikNormal | 40 | кана за масло с капка |
+| `brake` | U+0052 `R` | MJUIDZ+GrafikNormal | 49 | удивителна в кръг между скоби |
+| `mil` | U+005A `Z` | MJUIDZ+GrafikNormal | 57 | очертан двигател |
+| `esp` | U+0062 `b` | MJUIDZ+Insignia_OM | 69 | кола с криви следи |
+| `steering` | U+0063 `c` | MJUIDZ+Insignia_OM | 70 | волан с удивителна |
+| `service` | U+0067 `g` | MJUIDZ+Insignia_OM | 74 | силует на автомобил |
+| `charge` | U+0070 `p` | MJUIDZ+GrafikNormal | 78 | акумулатор с + и − |
+| `abs` | U+0075 `u` | MJUIDZ+GrafikNormal | 83 | ABS в кръг между скоби |
+| `airbag` | U+0076 `v` | MJUIDZ+GrafikNormal | 84 | седнала фигура с възглавница |
+| `tpms` | U+0077 `w` | MJUIDZ+GrafikNormal1 | 79 | удивителна в разрез на гума |
+
+Съответствията не са гадани: за всеки ред текстът в самия PDF стои плътно
+до глифа (шаблонът е „*заглавие* → символ → „свети в жълто“), а страници
+94–99 (печатни) са рендирани и сверени на око.
+
+`GrafikNormal` и `GrafikNormal1` са два subset-а на един и същ оригинален
+шрифт — глифът за гумата (`w`) го има само във втория, затова се ползват и
+двата.
+
+## Какво се промени спрямо преди
+
+Всички десет реда вече идват от ръководството. Свалените от Wikimedia
+Commons SVG-та (Chris828, PD/CC0) и четирите ръчно начертани пиктограми са
+**изтрити** — заедно с `src/components/lightPaths.ts`. Нищо не е останало
+от стария набор.
+
+Едно съответствие се оказа сбъркано в стария набор: за
+„Уговорете скорошно сервизно обслужване“ се рисуваше **гаечен ключ**, а
+ръководството (печатна стр. 96) показва **силует на автомобил**.
