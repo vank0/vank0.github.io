@@ -9,6 +9,9 @@
   <meta name="apple-mobile-web-app-title" content="My Mokka" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <!-- Без този ред браузърът иска /favicon.ico от корена на origin-а и хваща
+       иконата на друго PWA (vank0.github.io държи десетина). -->
+  <link rel="icon" type="image/svg+xml" href="./icons/mark.svg" />
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#EFF1F4" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101216" />
   <script>
@@ -18,8 +21,8 @@
       if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
     } catch (e) {}
   </script>
-  <script type="module" crossorigin src="./assets/index-gqk8YDtY.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-sm5TIDm0.css">
+  <script type="module" crossorigin src="./assets/index-BW2k7ysz.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BJOYvmpv.css">
 </head>
 <body>
   <div id="root"></div>
