@@ -1,4 +1,4 @@
-import{f as m,e as j,c as k,a as h,v as z,b as B,s as x,d as M,g as D,h as $,i as P,S as v,j as A,k as F}from"./index-Czq64wnA.js";const e=t=>String(t??"").replace(/[&<>"]/g,l=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[l]),L=`
+import{f as m,e as j,c as k,a as p,v as z,d as B,r as M,b as D,s as x,g as P,h as A,i as f,j as F,S as u,k as L,l as S}from"./index-CNvO2xoJ.js";const e=t=>String(t??"").replace(/[&<>"]/g,l=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[l]),O=`
 @page { size: A4; margin: 14mm 14mm 16mm; }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -53,8 +53,8 @@ td.r, th.r { text-align: right; }
 }
 .badge { display: inline-block; border: 0.6pt solid #16181B; border-radius: 6pt;
          padding: 0.5mm 2mm; font-size: 8pt; }
-`,S='<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="#FDDC00"/><path fill="#16181B" transform="translate(12 12) scale(0.82) translate(-12 -12)" d="M3 4H7.2L12 13.2 16.8 4H21v16h-3.4V9.4l-4.5 8.2h-2.2L6.4 9.4V20H3z"/></svg>';function O(t,l){const d=j(t.car.engineId),s=k(t);return`<section class="page cover">
-    <div class="pub">${S}<span>${e(v.appName)}</span></div>
+`,C='<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="#FDDC00"/><path fill="#16181B" transform="translate(12 12) scale(0.82) translate(-12 -12)" d="M3 4H7.2L12 13.2 16.8 4H21v16h-3.4V9.4l-4.5 8.2h-2.2L6.4 9.4V20H3z"/></svg>';function I(t,l){const d=j(t.car.engineId),s=k(t);return`<section class="page cover">
+    <div class="pub">${C}<span>${e(u.appName)}</span></div>
     <div class="mid">
       <h1>Сервизна книжка</h1>
       <div class="sub" style="margin-bottom:8mm">Opel Mokka · ${e(d.label)}${t.car.lpg?" · с газова уредба (LPG)":""}</div>
@@ -62,21 +62,21 @@ td.r, th.r { text-align: right; }
       <dl class="kv" style="margin-top:10mm">
         ${t.car.vin?`<dt>VIN</dt><dd class="mono">${e(t.car.vin)}</dd>`:""}
         ${t.car.firstReg?`<dt>Първа регистрация</dt><dd>${e(m(t.car.firstReg,l))}</dd>`:""}
-        <dt>Километраж</dt><dd class="mono">${e(s?h(s.odo):h(t.car.odoStart))}${s?` <span class="sub">(${e(m(s.date,l))})</span>`:""}</dd>
+        <dt>Километраж</dt><dd class="mono">${e(s?p(s.odo):p(t.car.odoStart))}${s?` <span class="sub">(${e(m(s.date,l))})</span>`:""}</dd>
         <dt>Гориво</dt><dd>${t.car.lpg?"бензин + газ (LPG)":"бензин"}</dd>
       </dl>
     </div>
-    <div class="sub">Издадена от ${e(v.appName)} · ${e(m(l,l))} — личен инструмент
+    <div class="sub">Издадена от ${e(u.appName)} · ${e(m(l,l))} — личен инструмент
       на собственика. Не е официална сервизна книжка на Opel.</div>
-  </section>`}function T(t,l){var u;const d=k(t),s=z(t.fuel,t.car.lpg?"lpg":((u=t.fuel[0])==null?void 0:u.fuelType)??"petrol"),c=s.length?s.reduce((o,n)=>o+n.l100,0)/s.length:null,i=t.fuel.reduce((o,n)=>o+n.cents,0),r=t.service.records.reduce((o,n)=>o+(n.cents??0),0),p=B(t.fuel),b=x(t.fuel)[0],g=d&&b?d.odo-b.odo:0,f=M(t,l).filter(o=>o.spec.bg==="required");return`<section class="page">
+  </section>`}function N(t,l){const d=k(t),s=z(t.fuel,B(t)),c=s.length?s.reduce((o,r)=>o+r.l100,0)/s.length:null,i=t.fuel.reduce((o,r)=>o+r.cents,0),n=t.service.records.reduce((o,r)=>o+M(r),0),h=D(t.fuel),b=x(t.fuel)[0],g=d&&b?d.odo-b.odo:0,v=P(t,l).filter(o=>o.spec.bg==="required");return`<section class="page">
     <h2>Обобщение</h2>
     <div class="stats">
-      <div class="stat"><div class="lbl">Изминати (води се)</div><div class="val mono">${e(h(g))}</div></div>
-      <div class="stat"><div class="lbl">Среден разход</div><div class="val mono">${c!=null?e(D(c)):"—"}</div></div>
-      <div class="stat"><div class="lbl">Гориво общо</div><div class="val mono">${e($(i))}</div></div>
-      <div class="stat"><div class="lbl">Обслужване общо</div><div class="val mono">${e($(r))}</div></div>
+      <div class="stat"><div class="lbl">Изминати (води се)</div><div class="val mono">${e(p(g))}</div></div>
+      <div class="stat"><div class="lbl">Среден разход</div><div class="val mono">${c!=null?e(A(c)):"—"}</div></div>
+      <div class="stat"><div class="lbl">Гориво общо</div><div class="val mono">${e(f(i))}</div></div>
+      <div class="stat"><div class="lbl">Обслужване общо</div><div class="val mono">${e(f(n))}</div></div>
     </div>
-    <div class="note">Цена на километър от горивото: ${p!=null?`<b class="mono">${(p/100).toFixed(3).replace(".",",")} €/км</b>`:"—"} ·
+    <div class="note">Цена на километър от горивото: ${h!=null?`<b class="mono">${(h/100).toFixed(3).replace(".",",")} €/км</b>`:"—"} ·
       Записи за гориво: ${t.fuel.length} · Обслужвания: ${t.service.records.length}</div>
 
     <h3>Срокове и документи</h3>
@@ -85,7 +85,7 @@ td.r, th.r { text-align: right; }
       <tbody>
         <tr><td>ГТП (технически преглед)</td><td>${t.deadlines.gtp.validTo?`валиден до <b>${e(m(t.deadlines.gtp.validTo,l))}</b>`:"—"}</td></tr>
         <tr><td>Гражданска отговорност</td><td>${t.deadlines.go?`полица от ${e(m(t.deadlines.go.start,l))}, ${e(t.deadlines.go.installments)} вноски`:"—"}</td></tr>
-        <tr><td>Данък МПС</td><td>${Object.entries(t.deadlines.tax.years).map(([o,n])=>`${e(o)}: ${n==="none"?"неплатен":n==="first-paid"?"1-ва вноска":"платен"}`).join(" · ")||"—"}</td></tr>
+        <tr><td>Данък МПС</td><td>${Object.entries(t.deadlines.tax.years).map(([o,r])=>`${e(o)}: ${r==="none"?"неплатен":r==="first-paid"?"1-ва вноска":"платен"}`).join(" · ")||"—"}</td></tr>
         ${t.car.lpg&&t.deadlines.lpgBottle?`<tr><td>Газова бутилка</td><td>произведена ${e(m(t.deadlines.lpgBottle.mfgDate,l))} · ${t.deadlines.lpgBottle.inTitle?"вписана в талона":"НЕ е вписана в талона"}</td></tr>`:""}
       </tbody>
     </table>
@@ -94,19 +94,19 @@ td.r, th.r { text-align: right; }
     <table>
       <thead><tr><th>Позиция</th><th>Състояние</th></tr></thead>
       <tbody>
-        ${f.map(o=>`<tr><td>${e(o.spec.label)}</td><td>${e(o.statusText)}</td></tr>`).join("")}
+        ${v.map(o=>`<tr><td>${e(o.spec.label)}</td><td>${e(o.statusText)}</td></tr>`).join("")}
       </tbody>
     </table>
-  </section>`}function C(t,l){const d=P(t.car.engineId,t.car.lpg),s=i=>{var r;return((r=d.find(p=>p.id===i))==null?void 0:r.label)??i},c=[...t.service.records].sort((i,r)=>i.date<r.date?-1:1);return`<section class="page">
+  </section>`}function T(t,l){const d=F(t.car.engineId,t.car.lpg),s=i=>{var n;return((n=d.find(h=>h.id===i))==null?void 0:n.label)??i},c=[...t.service.records].sort((i,n)=>i.date<n.date?-1:1);return`<section class="page">
     <h2>История на обслужването</h2>
     ${c.length?`<table>
       <thead><tr><th>Дата</th><th class="r">Км</th><th>Извършено</th><th>Сервиз</th><th class="r">Цена</th></tr></thead>
       <tbody>${c.map(i=>`<tr>
         <td class="mono">${e(m(i.date,l))}</td>
-        <td class="r mono">${i.odo!=null?e(h(i.odo)):""}</td>
+        <td class="r mono">${i.odo!=null?e(p(i.odo)):""}</td>
         <td>${e(s(i.itemId))}${i.note?`<div class="sub">${e(i.note)}</div>`:""}</td>
         <td>${e(i.shop??"")}</td>
-        <td class="r mono">${i.cents!=null?e($(i.cents)):""}</td>
+        <td class="r mono">${i.cents!=null?e(f(i.cents)):""}</td>
       </tr>`).join("")}</tbody>
     </table>`:'<div class="sub">Няма вписани обслужвания.</div>'}
 
@@ -115,37 +115,37 @@ td.r, th.r { text-align: right; }
       <thead><tr><th>Позиция</th><th class="r">Интервал (км)</th><th class="r">Интервал (месеци)</th></tr></thead>
       <tbody>${d.filter(i=>i.kind!=="reference").map(i=>`<tr>
         <td>${e(i.label)}</td>
-        <td class="r mono">${i.km?e(h(i.km)):"—"}</td>
+        <td class="r mono">${i.km?e(p(i.km)):"—"}</td>
         <td class="r mono">${i.months??"—"}</td>
       </tr>`).join("")}</tbody>
     </table>
     <div class="note">Интервалите са консервативни и важат за избрания двигател. При каране на газ свещите и филтрите се сменят по-рано.</div>
-  </section>`}function I(t,l){const d=[...t.fuel.map(a=>({date:a.date,odo:a.odo,src:"зареждане"})),...t.odoPings.map(a=>({date:a.date,odo:a.odo,src:"отчет"})),...t.service.records.filter(a=>a.odo!=null).map(a=>({date:a.date,odo:a.odo,src:"сервиз"}))].sort((a,y)=>a.date<y.date?-1:1);if(!d.length)return"";const s=d.map(a=>a.odo),c=Math.min(...s),i=Math.max(...s),r=Date.parse(d[0].date),p=Date.parse(d[d.length-1].date),b=170,g=60,f=a=>p===r?0:(Date.parse(a)-r)/(p-r)*b,u=a=>i===c?g:g-(a-c)/(i-c)*g,o=d.map((a,y)=>`${y?"L":"M"}${f(a.date).toFixed(1)},${u(a.odo).toFixed(1)}`).join(""),n=new Map;for(const a of d)n.set(a.date.slice(0,7),a);const w=[...n.values()];return`<section class="page">
+  </section>`}function q(t,l){const d=[...t.fuel.map(a=>({date:a.date,odo:a.odo,src:"зареждане"})),...t.odoPings.map(a=>({date:a.date,odo:a.odo,src:"отчет"})),...t.service.records.filter(a=>a.odo!=null).map(a=>({date:a.date,odo:a.odo,src:"сервиз"}))].sort((a,$)=>a.date<$.date?-1:1);if(!d.length)return"";const s=d.map(a=>a.odo),c=Math.min(...s),i=Math.max(...s),n=Date.parse(d[0].date),h=Date.parse(d[d.length-1].date),b=170,g=60,v=a=>h===n?0:(Date.parse(a)-n)/(h-n)*b,o=a=>i===c?g:g-(a-c)/(i-c)*g,r=d.map((a,$)=>`${$?"L":"M"}${v(a.date).toFixed(1)},${o(a.odo).toFixed(1)}`).join(""),y=new Map;for(const a of d)y.set(a.date.slice(0,7),a);const w=[...y.values()];return`<section class="page">
     <h2>Километраж във времето</h2>
     <div class="sub">Всяка точка е запис по време на ползване (зареждане, отчет или обслужване).</div>
     <svg viewBox="0 0 ${b} ${g+8}" style="width:100%;height:46mm;margin:4mm 0">
-      <path d="${o}" fill="none" stroke="#16181B" stroke-width="0.8"/>
-      ${d.map(a=>`<circle cx="${f(a.date).toFixed(1)}" cy="${u(a.odo).toFixed(1)}" r="0.9" fill="#16181B"/>`).join("")}
+      <path d="${r}" fill="none" stroke="#16181B" stroke-width="0.8"/>
+      ${d.map(a=>`<circle cx="${v(a.date).toFixed(1)}" cy="${o(a.odo).toFixed(1)}" r="0.9" fill="#16181B"/>`).join("")}
     </svg>
     <table>
       <thead><tr><th>Месец</th><th class="r">Километраж</th><th>Източник</th></tr></thead>
-      <tbody>${w.map(a=>`<tr><td class="mono">${e(a.date)}</td><td class="r mono">${e(h(a.odo))}</td><td class="sub">${e(a.src)}</td></tr>`).join("")}</tbody>
+      <tbody>${w.map(a=>`<tr><td class="mono">${e(a.date)}</td><td class="r mono">${e(p(a.odo))}</td><td class="sub">${e(a.src)}</td></tr>`).join("")}</tbody>
     </table>
-  </section>`}function N(t,l){const d=x(t.fuel).reverse().slice(0,40);return d.length?`<section class="page">
+  </section>`}function H(t,l){const d=x(t.fuel).reverse().slice(0,40);return d.length?`<section class="page">
     <h2>Зареждания (последни ${d.length})</h2>
     <table>
       <thead><tr><th>Дата</th><th class="r">Км</th><th>Гориво</th><th class="r">Литри</th><th class="r">Цена/л</th><th class="r">Сума</th><th>Станция</th></tr></thead>
       <tbody>${d.map(s=>`<tr>
         <td class="mono">${e(m(s.date,l))}</td>
-        <td class="r mono">${e(h(s.odo))}</td>
-        <td>${e(v.fuel.types[s.fuelType])}${s.full?"":' <span class="badge">частично</span>'}</td>
-        <td class="r mono">${s.liters!=null?e(A(s.liters)):""}</td>
-        <td class="r mono">${s.priceMilli!=null?e(F(s.priceMilli)):""}</td>
-        <td class="r mono">${e($(s.cents))}</td>
+        <td class="r mono">${e(p(s.odo))}</td>
+        <td>${e(u.fuel.types[s.fuelType])}${s.full?"":' <span class="badge">частично</span>'}</td>
+        <td class="r mono">${s.liters!=null?e(L(s.liters)):""}</td>
+        <td class="r mono">${s.priceMilli!=null?e(S(s.priceMilli)):""}</td>
+        <td class="r mono">${e(f(s.cents))}</td>
         <td>${e(s.station??"")}</td>
       </tr>`).join("")}</tbody>
     </table>
-  </section>`:""}function q(t,l){const d=t.tires.sets;return d.length?`<section class="page">
+  </section>`:""}function R(t,l){const d=t.tires.sets;return d.length?`<section class="page">
     <h2>Гуми</h2>
     <table>
       <thead><tr><th>Комплект</th><th>Сезон</th><th class="r">Грайфер</th><th>Измерено</th><th>Смени</th><th>Бележка</th></tr></thead>
@@ -158,7 +158,7 @@ td.r, th.r { text-align: right; }
         <td>${e(s.note??"")}</td>
       </tr>`).join("")}</tbody>
     </table>
-  </section>`:""}function H(t){let d="";for(let s=0;s<t;s++)d+=`<section class="page">
+  </section>`:""}function E(t){let d="";for(let s=0;s<t;s++)d+=`<section class="page">
       <h2>Вписване на обслужване</h2>
       <table>
         <thead><tr><th style="width:22mm">Дата</th><th class="r" style="width:20mm">Км</th><th>Извършена дейност</th><th style="width:30mm">Сервиз</th><th class="r" style="width:18mm">Цена</th></tr></thead>
@@ -175,14 +175,14 @@ td.r, th.r { text-align: right; }
           <div class="sigline" style="margin-top:6mm"></div>
         </div>
       </div>
-    </section>`;return d}function R(){return`<section class="page">
+    </section>`;return d}function G(){return`<section class="page">
     <h2>Бележки</h2>
     <table><tbody class="blank">${Array.from({length:18},()=>"<tr><td></td></tr>").join("")}</tbody></table>
-  </section>`}function G(t,l,d=4){const s=[O(t,l),T(t,l),C(t,l),I(t),N(t,l),q(t,l),H(d),R()].filter(Boolean).join(`
+  </section>`}function V(t,l,d=4){const s=[I(t,l),N(t,l),T(t,l),q(t),H(t,l),R(t,l),E(d),G()].filter(Boolean).join(`
 `);return`<!doctype html>
 <html lang="bg"><head><meta charset="utf-8">
-<title>Сервизна книжка (${e(v.appName)}) · Opel Mokka${t.car.plate?` ${e(t.car.plate)}`:""}</title>
-<style>${L}</style></head>
+<title>Сервизна книжка (${e(u.appName)}) · Opel Mokka${t.car.plate?` ${e(t.car.plate)}`:""}</title>
+<style>${O}</style></head>
 <body>${s}
-<div class="foot"><span>Сервизна книжка (${e(v.appName)}) · Opel Mokka${t.car.plate?` · ${e(t.car.plate)}`:""}</span><span>${e(m(l,l))}</span></div>
-</body></html>`}export{G as buildLogbook};
+<div class="foot"><span>Сервизна книжка (${e(u.appName)}) · Opel Mokka${t.car.plate?` · ${e(t.car.plate)}`:""}</span><span>${e(m(l,l))}</span></div>
+</body></html>`}export{V as buildLogbook};
