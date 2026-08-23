@@ -1,0 +1,1 @@
+function e(e){return e.startsWith(`demo-`)||e.startsWith(`imp:`)}function t(t,n){return!n||e(n)?[]:t.filter(e=>typeof e.accountId!=`string`||e.accountId===n).map(e=>e.id??e.key).filter(e=>e!=null)}export{t as n,e as t};
