@@ -20,6 +20,20 @@
  * where a rename in db.ts breaks the reminder silently at 6am.
  */
 
+/**
+ * Bumped whenever this file's PUSH behaviour changes in a way the page needs to
+ * know about. `PUSH_SW_EXPECTED` in shared/lib/push.ts must match.
+ *
+ * It exists because vite-plugin-pwa is on `registerType: "prompt"`: an installed
+ * app keeps running the OLD worker until its owner accepts the update banner.
+ * Version 1 returned WITHOUT showing anything whenever a window was visible —
+ * so on a device that has not updated, a test notification fired from the
+ * Settings screen could not possibly appear, no matter how healthy the rest of
+ * the chain was. The page pings for this number before sending, so the answer
+ * is "your device is running an older version" instead of silence.
+ */
+const PUSH_SW_VERSION = 2;
+
 const PUSH_COPY = {
   en: {
     rest: { title: "Rest over", body: "Next set." },
@@ -174,4 +188,14 @@ self.addEventListener("pushsubscriptionchange", (event) => {
       }
     })(),
   );
+});
+
+/** Who is handling pushes on this device, so the page can tell the difference
+ *  between a broken chain and an app that has not updated yet. */
+self.addEventListener("message", (event) => {
+  const msg = event.data;
+  if (!msg || msg.type !== "gymlog-push-ping") return;
+  const reply = { type: "gymlog-push-pong", version: PUSH_SW_VERSION, kinds: Object.keys(PUSH_COPY.en) };
+  if (event.ports && event.ports[0]) event.ports[0].postMessage(reply);
+  else if (event.source) event.source.postMessage(reply);
 });
