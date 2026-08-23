@@ -1,1 +1,0 @@
-import{t as e}from"./db-CbX7DCty.js";import{Xi as t,Zi as n}from"./gymos-BB4X1dAu.js";async function r(t){let r=await e.sessions.where(`accountId`).equals(t).filter(e=>e.endedAt!=null).sortBy(`startedAt`);return n(r)}async function i(e){return t(await r(e))}export{i as n,r as t};
