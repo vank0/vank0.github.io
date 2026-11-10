@@ -1,0 +1,271 @@
+:root {
+  --ink: #0d1333;
+  --face: #111938;
+  --face-inner: #141c42;
+  --brass: #e4c98e;
+  --paper: #eef0f7;
+  --muted: #9ba4c9;
+  --night: #0a0e26;
+  --astro: #17204f;
+  --nautical: #26387d;
+  --blue: #3f6fd8;
+  --golden: #f0a640;
+  --day: #9cd3f2;
+  --cond: 'Barlow Condensed', 'Avenir Next Condensed', system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+/* --glow follows the current band, so the page carries the sky's mood. */
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--ink) radial-gradient(120% 90% at 30% 10%,
+    color-mix(in srgb, var(--glow, var(--astro)) 24%, var(--ink)) 0%, var(--ink) 60%) fixed;
+  color: var(--paper);
+  font: 400 16px/1.5 'Barlow', system-ui, sans-serif;
+}
+
+main {
+  display: grid;
+  gap: 28px;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+@media (min-width: 880px) {
+  main {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+    gap: 56px;
+    padding: 32px;
+  }
+  .dial-wrap { position: sticky; top: 32px; }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+[data-band='night'] { --c: var(--night); }
+[data-band='astro'] { --c: var(--astro); }
+[data-band='nautical'] { --c: var(--nautical); }
+[data-band='blue'] { --c: var(--blue); }
+[data-band='golden'] { --c: var(--golden); }
+[data-band='day'] { --c: var(--day); }
+
+/* Dial */
+.dial { display: block; width: 100%; max-width: min(100%, calc(100dvh - 64px)); height: auto; margin: 0 auto; }
+.face { fill: var(--face); }
+.inner { fill: var(--face-inner); }
+.ring-edge { fill: none; stroke: rgb(255 255 255 / 0.14); stroke-width: 1; }
+.tick { stroke: var(--muted); stroke-width: 1; opacity: 0.5; }
+.tick.major { stroke: var(--paper); stroke-width: 2; opacity: 0.9; }
+.band { fill: none; stroke: var(--c); stroke-width: 40; }
+.moon-arc { fill: none; stroke: #dfe6ff; stroke-width: 3; opacity: 0.55; }
+
+.num {
+  font: 500 13px var(--cond);
+  fill: var(--paper);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.num.cardinal { font-size: 17px; font-weight: 600; }
+.num.on-light { fill: #18204a; }
+
+.event { stroke: var(--paper); stroke-width: 1.5; }
+.event-name { font: 400 9px 'Barlow', sans-serif; fill: var(--muted); text-anchor: middle; }
+.event-time { font: 500 14px var(--cond); fill: var(--paper); text-anchor: middle; }
+.now-mark { fill: var(--brass); }
+body:not(.previewing) .now-mark { display: none; }
+
+.hand { fill: var(--brass); filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.55)); }
+.hand-sec line { stroke: var(--paper); stroke-width: 1.2; }
+.hand-sec circle { fill: var(--paper); }
+.cap { fill: var(--brass); stroke: var(--ink); stroke-width: 2; }
+.previewing .hand-sec { display: none; }
+
+.halo { opacity: 0.2; }
+.sun-halo { fill: #ffd36b; }
+.rays line { stroke: #ffd36b; stroke-width: 2; stroke-linecap: round; }
+.sun-disc { fill: #ffd36b; stroke: #fff2c4; stroke-width: 1; }
+.moon-halo { fill: #dfe6ff; opacity: 0.14; }
+.moon-dark { fill: #1d2550; stroke: rgb(255 255 255 / 0.35); stroke-width: 0.75; }
+.moon-lit { fill: #f1ecd9; }
+#moon.below { opacity: 0.45; }
+.hit { fill: none; stroke: transparent; stroke-width: 86; pointer-events: stroke; touch-action: none; cursor: grab; }
+.hit:active { cursor: grabbing; }
+
+/* Panel */
+.panel p { margin: 0; }
+.panel h2 { margin: 36px 0 12px; font: 600 15px/1.2 'Barlow', system-ui, sans-serif; }
+.time {
+  font: 500 clamp(56px, 14vw, 84px) / 1 var(--cond);
+  font-variant-numeric: tabular-nums;
+}
+.previewing .time { color: var(--brass); }
+.panel .date { color: var(--muted); margin: 6px 0 18px; }
+.tz-note { color: var(--brass); }
+
+.now { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 500; }
+.note { color: var(--muted); padding-left: 22px; }
+.line { color: var(--muted); }
+.panel .msg { font-size: 14px; color: var(--muted); }
+.note:empty, .msg:empty { display: none; }
+
+.swatch {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+
+/* Controls */
+input {
+  min-width: 0;
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--paper);
+  background: var(--face);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 6px;
+}
+button {
+  padding: 9px 12px;
+  font: 500 15px 'Barlow', system-ui, sans-serif;
+  color: var(--brass);
+  background: transparent;
+  border: 1px solid var(--brass);
+  border-radius: 6px;
+  cursor: pointer;
+}
+button[type='submit'] { color: var(--ink); background: var(--brass); }
+:is(summary, input, button):focus-visible { outline: 2px solid var(--golden); outline-offset: 2px; }
+
+.scrub { display: grid; gap: 12px; margin-bottom: 24px; }
+.scrub-row { display: flex; gap: 8px; }
+.scrub-row input { flex: 1; }
+body:not(.previewing) #now-btn { visibility: hidden; }
+.panel .hint { font-size: 14px; color: var(--muted); }
+.icon-btn { display: grid; place-items: center; width: 40px; padding: 0; flex: none; }
+.icon-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chip { display: inline-flex; flex: 1; align-items: center; justify-content: center; gap: 8px; border-color: rgb(255 255 255 / 0.2); color: var(--paper); }
+
+/* Slider track is painted with the day's bands in paintSlider(). */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: var(--face);
+  cursor: pointer;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--brass);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+input[type='range']::-moz-range-thumb {
+  width: 8px;
+  height: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--brass);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+input[type='range']::-moz-range-track { background: transparent; }
+
+/* Sky chart */
+.sky { display: block; width: 100%; max-width: 240px; margin: 0 auto 12px; }
+.sky-horizon { fill: var(--face); stroke: rgb(255 255 255 / 0.22); }
+.sky-ring { fill: none; stroke: rgb(255 255 255 / 0.08); }
+.sky-card { font: 500 13px var(--cond); fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
+.sky-path { stroke: var(--c); stroke-width: 3; stroke-linecap: round; }
+.sky-event { fill: var(--paper); }
+.sky-sun { fill: #ffd36b; stroke: #fff2c4; stroke-width: 1.5; }
+.sky-moon { fill: #f1ecd9; stroke: var(--ink); stroke-width: 1.5; }
+
+/* Today */
+.timeline { list-style: none; padding: 0; margin: 20px 0 0; }
+.timeline li { border-bottom: 1px solid rgb(255 255 255 / 0.07); }
+.row-btn {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 0;
+  font: inherit;
+  color: var(--muted);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+.row-btn:hover, .timeline li[aria-current] .row-btn { color: var(--paper); }
+.timeline li[aria-current] .row-btn { font-weight: 500; }
+.range { font: 500 17px var(--cond); font-variant-numeric: tabular-nums; }
+
+/* Week */
+.week { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.week caption { caption-side: bottom; padding-top: 8px; font-size: 13px; color: var(--muted); text-align: left; }
+.week th, .week td {
+  padding: 6px 4px;
+  font: 500 15px var(--cond);
+  color: var(--paper);
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid rgb(255 255 255 / 0.07);
+}
+.week thead th { font: 400 13px 'Barlow', system-ui, sans-serif; color: var(--muted); }
+.week :is(th, td):first-child { padding-left: 0; text-align: left; }
+.week tbody th button {
+  padding: 0;
+  font: inherit;
+  color: var(--brass);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.week:not(.with-clouds) .cloud-col { display: none; }
+.moon-cell { color: var(--muted); }
+.mini-moon { width: 13px; height: 13px; vertical-align: -2px; }
+.check { display: flex; gap: 8px; align-items: flex-start; margin: 16px 0 10px; font-size: 14px; color: var(--muted); }
+.check input { margin: 3px 0 0; padding: 0; accent-color: var(--golden); }
+#ics { margin-top: 6px; }
+
+/* Place */
+.search { display: flex; gap: 8px; margin: 12px 0; }
+.search input { flex: 1; }
+.results { display: grid; gap: 6px; margin: 0 0 12px; padding: 0; list-style: none; }
+.results button { width: 100%; text-align: left; color: var(--paper); border-color: rgb(255 255 255 / 0.2); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+summary { cursor: pointer; color: var(--muted); }
+#loc-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 8px; }
+#loc-form button { grid-column: span 2; }
+label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.panel .msg { margin-top: 8px; }
+.display-btn { margin-top: 36px; width: 100%; }
+
+/* Display mode: dial only, full screen, screen kept awake. */
+.exit-display { position: fixed; top: 16px; right: 16px; display: none; opacity: 0.45; background: var(--ink); }
+.exit-display:is(:hover, :focus-visible) { opacity: 1; }
+.display .exit-display { display: block; }
+.display .panel { display: none; }
+.display main { grid-template-columns: 1fr; place-items: center; min-height: 100dvh; padding: 2vmin; }
+.display .dial-wrap { position: static; width: 100%; }
+.display .dial { max-width: min(96vw, 96dvh); }

@@ -1,0 +1,13 @@
+{
+  "name": "Sky clock",
+  "short_name": "Sky clock",
+  "description": "24-hour clock showing today’s daylight, golden and blue hours, sun and moon.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d1333",
+  "theme_color": "#0d1333",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
