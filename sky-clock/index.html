@@ -1,156 +1,20 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="preload">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0d1333">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1230">
   <title>Sky clock</title>
   <meta name="description" content="24-hour clock showing today’s daylight, golden and blue hours, sun and moon.">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-180.png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Barlow:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css">
-  <script type="module" src="app.js"></script>
+  <script type="module" crossorigin src="./assets/index-CVp5UaRb.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-DN1TCW_I.js">
+  <link rel="modulepreload" crossorigin href="./assets/toast-CBEhSObD.js">
+  <link rel="stylesheet" crossorigin href="./assets/index-DZ9S98-4.css">
 </head>
 <body>
-<main>
-  <h1 class="sr-only">Sky clock</h1>
-
-  <div class="dial-wrap">
-    <svg class="dial" viewBox="-200 -200 400 400" role="img"
-         aria-label="24-hour clock. The ring shows the day’s night, twilight, blue hour, golden hour and daylight; the thin inner arc shows when the moon is up.">
-      <circle class="face" r="199"/>
-      <g id="ticks"></g>
-      <g id="bands"></g>
-      <circle class="ring-edge" r="132"/>
-      <circle class="ring-edge" r="172"/>
-      <circle class="inner" r="131"/>
-      <g id="moon-arc"></g>
-      <g id="numerals"></g>
-      <g id="events"></g>
-      <g id="now-mark" class="now-mark"><path d="M0-173L-5-182H5Z"/></g>
-
-      <g id="hand-hour" class="hand"><path d="M-4.5 18L-3-118L0-140L3-118L4.5 18Z"/></g>
-      <g id="body">
-        <g id="sun">
-          <circle class="halo sun-halo" r="17"/>
-          <g class="rays">
-            <line y1="-11.5" y2="-15.5"/><line y1="-11.5" y2="-15.5" transform="rotate(45)"/>
-            <line y1="-11.5" y2="-15.5" transform="rotate(90)"/><line y1="-11.5" y2="-15.5" transform="rotate(135)"/>
-            <line y1="-11.5" y2="-15.5" transform="rotate(180)"/><line y1="-11.5" y2="-15.5" transform="rotate(225)"/>
-            <line y1="-11.5" y2="-15.5" transform="rotate(270)"/><line y1="-11.5" y2="-15.5" transform="rotate(315)"/>
-          </g>
-          <circle class="sun-disc" r="8.5"/>
-        </g>
-        <g id="moon" display="none">
-          <circle class="halo moon-halo" r="17"/>
-          <circle class="moon-dark" r="11"/>
-          <g id="moon-rot"><path id="moon-lit" class="moon-lit"/></g>
-        </g>
-      </g>
-      <g id="hand-min" class="hand"><path d="M-3 20L-1.6-176L0-186L1.6-176L3 20Z"/></g>
-      <g id="hand-sec" class="hand-sec">
-        <line y1="32" y2="-194"/>
-        <circle cy="26" r="3.5"/>
-      </g>
-      <circle class="cap" r="5.5"/>
-      <circle id="hit" class="hit" r="157" aria-hidden="true"/>
-    </svg>
-  </div>
-
-  <section class="panel">
-    <p class="time" id="time">--:--:--</p>
-    <p class="date"><span id="date"></span> <span class="tz-note" id="tz-note"></span></p>
-
-    <div class="scrub">
-      <input type="range" id="scrub-time" min="0" max="1439" step="1" aria-label="Time of day">
-      <div class="scrub-row">
-        <button type="button" class="icon-btn" id="prev-day" aria-label="Previous day">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
-        </button>
-        <input type="date" id="scrub-date" aria-label="Date">
-        <button type="button" class="icon-btn" id="next-day" aria-label="Next day">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
-        </button>
-        <button type="button" id="now-btn">Back to now</button>
-      </div>
-      <div class="scrub-row">
-        <button type="button" class="chip" data-jump="golden" data-band="golden"><span class="swatch"></span>Next golden hour</button>
-        <button type="button" class="chip" data-jump="blue" data-band="blue"><span class="swatch"></span>Next blue hour</button>
-      </div>
-      <p class="msg" id="jump-msg" role="status"></p>
-      <p class="hint">Drag the slider or around the dial to see another time.</p>
-    </div>
-
-    <p class="now" id="now"><span class="swatch"></span><span id="band"></span></p>
-    <p class="note" id="next"></p>
-
-    <h2>Sky</h2>
-    <svg id="sky" class="sky" viewBox="-124 -124 248 248" role="img"
-         aria-label="Sky chart: the sun’s path today seen from above, north up, with the sun and moon now.">
-      <circle class="sky-horizon" r="100"/>
-      <circle class="sky-ring" r="66.7"/>
-      <circle class="sky-ring" r="33.3"/>
-      <line class="sky-ring" y1="-100" y2="100"/>
-      <line class="sky-ring" x1="-100" x2="100"/>
-      <text class="sky-card" y="-112">N</text>
-      <text class="sky-card" x="112">E</text>
-      <text class="sky-card" y="112">S</text>
-      <text class="sky-card" x="-112">W</text>
-      <g id="sky-path"></g>
-      <circle id="sky-moon" class="sky-moon" r="5"/>
-      <circle id="sky-sun" class="sky-sun" r="6.5"/>
-    </svg>
-    <p class="line" id="sun-pos"></p>
-    <p class="line" id="moon-pos"></p>
-
-    <h2>Today</h2>
-    <p class="line" id="sun-line"></p>
-    <p class="line" id="noon-line"></p>
-    <p class="line" id="daylight-line"></p>
-    <p class="line" id="moon-line"></p>
-    <p class="line" id="moon-times"></p>
-    <ol class="timeline" id="timeline" aria-label="Today’s light. Choose one to preview it."></ol>
-
-    <h2>Next 7 days</h2>
-    <table class="week" id="week">
-      <caption>Golden hour is when the evening one starts. Choose a day to preview it.</caption>
-      <thead>
-        <tr><th scope="col">Day</th><th scope="col">Sunrise</th><th scope="col">Sunset</th><th scope="col">Golden</th><th scope="col">Moon</th><th scope="col" class="cloud-col">Clouds</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <label class="check"><input type="checkbox" id="clouds-on"> Show cloud cover at sunset. This asks Open-Meteo for the place’s forecast.</label>
-    <p class="msg" id="clouds-msg" role="status"></p>
-    <button type="button" id="ics">Add golden and blue hours to my calendar</button>
-
-    <h2>Place</h2>
-    <p id="loc-label"></p>
-    <form id="search-form" class="search" role="search">
-      <input type="search" name="q" placeholder="Search for a city" aria-label="City name" required>
-      <button type="submit">Search</button>
-    </form>
-    <ul class="results" id="results"></ul>
-    <div class="row">
-      <button type="button" id="locate">Use my location</button>
-      <button type="button" id="share">Copy link</button>
-    </div>
-    <details id="loc">
-      <summary>Enter coordinates</summary>
-      <form id="loc-form">
-        <label>Latitude <input name="lat" type="number" step="any" min="-90" max="90" required></label>
-        <label>Longitude <input name="lon" type="number" step="any" min="-180" max="180" required></label>
-        <button type="submit">Save location</button>
-      </form>
-    </details>
-    <p class="msg" id="loc-msg" role="status"></p>
-
-    <button type="button" class="display-btn" id="display-btn">Display mode</button>
-  </section>
-  <button type="button" class="exit-display" id="exit-display">Exit display mode</button>
-</main>
+<div id="root"></div>
 </body>
 </html>
