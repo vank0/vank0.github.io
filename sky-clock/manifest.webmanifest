@@ -1,14 +1,29 @@
 {
+  "id": "./",
   "name": "Sky clock",
   "short_name": "Sky clock",
-  "description": "24-hour clock showing today’s daylight, golden and blue hours, sun and moon.",
+  "description": "A 24-hour clock of the day's light over your place: golden and blue hours, the sun, the moon and the stars. Works offline.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
   "background_color": "#0b1230",
   "theme_color": "#0b1230",
+  "categories": ["utilities", "weather", "education"],
   "share_target": { "action": "./", "method": "GET", "enctype": "application/x-www-form-urlencoded", "params": { "title": "title", "text": "text", "url": "url" } },
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screens/phone.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "The day's light round 24 hours, on a phone" },
+    { "src": "screens/wide.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "The clock with Today's details beside it" }
+  ],
+  "shortcuts": [
+    { "name": "Prints", "url": "./?open=prints", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }
