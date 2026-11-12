@@ -1,7 +1,18 @@
-// Offline support. This file is a template: `vite build` fills in the placeholders below
-// (see vite.config.js) and writes the result to dist/sw.js. It is not used in development.
-const CACHE = 'sky-clock-3e58883bfe';
-const PRECACHE = ["./","assets/bg-BshAxzcg.js","assets/cormorant-garamond-italic-cyrillic-C5ZlGLFt.woff2","assets/cormorant-garamond-italic-latin-C-nL33vl.woff2","assets/cormorant-garamond-italic-latin-ext-PWzi_-0y.woff2","assets/cormorant-garamond-normal-cyrillic-BWCqVJN0.woff2","assets/cormorant-garamond-normal-latin-CUoBjw-S.woff2","assets/cormorant-garamond-normal-latin-ext-ltf1AbuM.woff2","assets/events-worker-B-mOYPID.js","assets/great-vibes-cyrillic-Dy8dZvp5.woff2","assets/great-vibes-latin-Bcoi9gjv.woff2","assets/index-BDzMbVB1.js","assets/index-D_oaLX_A.css","assets/orloj-fonts-CHIjyb0W.css","assets/rolldown-runtime-DN1TCW_I.js","assets/start-z9qCjqVL.js","assets/sunstone-art-DE0tiKQ9.js","assets/toast-CGfcAIDT.js","icon-180.png","icon-192.png","icon-512.png","icon-maskable-192.png","icon-maskable-512.png","icon-maskable.svg","icon.svg","index.html","manifest.webmanifest","textures/256_moon.jpg","textures/256_sun.jpg","textures/4k_stars_milky_way.jpg"];
+/**
+ * @context Offline support. This file is a template: `vite build` fills in the placeholders
+ *   below (see vite.config.js) and writes the result to dist/sw.js. It is not used in
+ *   development. The page speaks to it from features/platform/offline.js.
+ * @validation Read as text by the build and never bundled: no imports, and nothing a browser
+ *   cannot run as it stands. Only the app's own GET requests are answered; forecasts and city
+ *   search always go to the network. Messages in: { type: 'pictures' } or
+ *   { type: 'keep-pictures' }; out: { type: 'pictures', kept, total }, with failed: true on a miss.
+ * @ai_agent_instruction The build fills in only the first occurrence of each placeholder, so
+ *   a placeholder's name must never be written in a comment above the line that uses it (this
+ *   header names none). The handler for requests tries, in order: the large pictures, the
+ *   hashed files under /assets/, then the network first. It runs only in `pnpm preview`.
+ */
+const CACHE = 'sky-clock-f0b2546b8c';
+const PRECACHE = ["./","assets/Gallery-Djlh-fzT.js","assets/bg-CVh1MFlf.js","assets/camera-BxLhIS8X.js","assets/camera-D1tArkK_.js","assets/cormorant-garamond-italic-cyrillic-C5ZlGLFt.woff2","assets/cormorant-garamond-italic-latin-C-nL33vl.woff2","assets/cormorant-garamond-italic-latin-ext-PWzi_-0y.woff2","assets/cormorant-garamond-normal-cyrillic-BWCqVJN0.woff2","assets/cormorant-garamond-normal-latin-CUoBjw-S.woff2","assets/cormorant-garamond-normal-latin-ext-ltf1AbuM.woff2","assets/eggs-D-8cx6Uk.js","assets/events-worker-B7RdTC89.js","assets/folds-DSahkQpo.js","assets/great-vibes-cyrillic-Dy8dZvp5.woff2","assets/great-vibes-latin-Bcoi9gjv.woff2","assets/guide-CumOPyPF.js","assets/hooks-BDTncS8j.js","assets/index-CAqBoDAA.js","assets/index-D_oaLX_A.css","assets/orloj-fonts-CHIjyb0W.css","assets/perspective-D0Da3o2m.js","assets/photo-week-CBiBi5tb.js","assets/place-Df5tu29F.js","assets/prefs-DBjFukRq.js","assets/rolldown-runtime-DN1TCW_I.js","assets/start-Q1i15sqF.js","assets/sunstone-art-DE0tiKQ9.js","assets/timeline-BmK_10rN.js","assets/toast-DUrCt7Dl.js","assets/view-groups-Dj425mSG.js","icon-180.png","icon-192.png","icon-512.png","icon-maskable-192.png","icon-maskable-512.png","icon-maskable.svg","icon.svg","index.html","manifest.webmanifest","textures/256_moon.jpg","textures/256_sun.jpg","textures/4k_stars_milky_way.jpg"];
 // The large pictures (the globes' and planets' textures, the Orloj's calendar plate): kept as they
 // are first used, or all at once when the page asks. Their own cache outlives new versions, so a
 // new version does not download 13 MB again.
