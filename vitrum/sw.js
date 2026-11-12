@@ -1,6 +1,6 @@
 // Template: vite.config.js fills in the file list and the version at build time.
-const CACHE = 'vitrum-ad70d2f943';
-const FILES = ["./","assets/dist-BgOywc73.js","assets/index-B6m7R-UJ.js","assets/index-DePwpA9X.css","assets/libraw-CKnqEbQ6.wasm","assets/libraw-CrO9cM8O.js","assets/worker-ChbM-AHb.js","icon-180.png","icon-192.png","icon-512.png","icon.svg","index.html","manifest.webmanifest"];
+const CACHE = 'vitrum-325a262861';
+const FILES = ["./","assets/dist-BgOywc73.js","assets/index-AoWmtmf3.js","assets/index-Y9ii52JC.css","assets/libraw-CKnqEbQ6.wasm","assets/libraw-CrO9cM8O.js","assets/worker-ChbM-AHb.js","icon-180.png","icon-192.png","icon-512.png","icon.svg","index.html","manifest.webmanifest"];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(FILES)).then(() => self.skipWaiting()));
