@@ -21,6 +21,18 @@ ddcolor-tiny-512-w8.onnx
   MODIFIED: from the int8 ONNX export toolsmonk/ddcolor-tiny (Hugging Face), the remaining float convolution weights
   were quantised to int8 per output channel (weight-only) to bring the file under 100 MB. Nothing else was changed.
 
+depth-anything-v2-small-q8.onnx
+  Depth Anything V2, Small (Lihe Yang et al., https://github.com/DepthAnything/Depth-Anything-V2). Apache License 2.0
+  (the Small model; the larger ones are not used: their licence is non-commercial). ONNX export, quantized:
+  onnx-community/depth-anything-v2-small on Hugging Face. sha256 fcf51f1b230362b28690bb9d1809bf0431f29cad20534e3f589bd7285547f20d.
+
+clip-b32-vision-q8.onnx, clip-b32-text-q8.onnx, clip-b32-tokenizer.json
+  CLIP ViT-B/32 (Alec Radford et al., OpenAI, https://github.com/openai/CLIP). MIT License, Copyright (c) 2021 OpenAI.
+  ONNX export, quantized: Xenova/clip-vit-base-patch32 on Hugging Face. sha256 vision
+  583fd1110a514667812fee7d684952aaf82a99b959760c8d7dca7e0ab9839299, text 73baab855d406190da9faa498cfedf65f15cf309f4cc7385b7b032e6d08e5c3a,
+  tokenizer f7f3b7af117d467b58374797691a6438d3e6b9e9cef800dfd5dced7f697a90cd. Used for what a photo shows (search,
+  similar photos, keywords, grouping by look), never to tell people apart.
+
 modnet-fp16.onnx
   MODNet (Zhanghan Ke et al., https://github.com/ZHKKKe/MODNet). Apache License 2.0.
   ONNX export: Xenova/modnet (fp16), Hugging Face.
