@@ -9,30 +9,43 @@
 </style>
 <p id="say">…</p>
 <script>
-// Vitrum's own sign-in page. Google sends the person back here with a token; it goes to the app on a channel of this
-// origin, because the app's isolation (which the RAW decoder needs) cuts the usual link between a page and its pop-up.
+// Vitrum's own sign-in page. Google sends the person back here with a token; it goes to the app through this origin's
+// storage, because the app's isolation (which the RAW decoder needs) cuts the usual link between a page and its pop-up.
+// Opened as a pop-up it closes itself; gone to as a full page (`back`: the installed phone app) it returns to the app.
 // Implicit flow, no client secret: a browser app has nowhere to keep one. The token leaves the address bar at once.
 (() => {
   const CLIENT = '435734456667-5sp5j37ss0m0vokmkbqgk0o8ljggie93.apps.googleusercontent.com';
+  // every permission Vitrum asks for, held here and not taken from the address, so a crafted link cannot ask for more
+  // (tests/account.ts checks it against scopeText(ALL) in src/lib/grant.ts)
+  const SCOPE = 'openid email profile https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.freebusy https://www.googleapis.com/auth/photoslibrary.appendonly https://www.googleapis.com/auth/photospicker.mediaitems.readonly';
   const bg = (localStorage.getItem('vitrum:lang') || '"bg"').includes('bg');
   const say = (en, bgText) => { document.getElementById('say').textContent = bg ? bgText : en; };
-  const here = location.origin + location.pathname, channel = new BroadcastChannel('vitrum-google');
-  const back = new URLSearchParams(location.hash.slice(1));
-  if (back.has('access_token') || back.has('error')) {
-    const asked = sessionStorage.getItem('vitrum-google-state');
+  const here = location.origin + location.pathname;
+  const got = new URLSearchParams(location.hash.slice(1));
+  if (got.has('access_token') || got.has('error')) {
+    const asked = sessionStorage.getItem('vitrum-google-state'), back = sessionStorage.getItem('vitrum-google-back');
     history.replaceState(null, '', here);
-    if (!asked || back.get('state') !== asked) { say('Vitrum did not ask for this sign-in.', 'Vitrum не е поискал този вход.'); return; }
-    sessionStorage.removeItem('vitrum-google-state');
-    channel.postMessage({ id: asked, token: back.get('access_token'), expires: Number(back.get('expires_in') || 0), scope: back.get('scope') || '', error: back.get('error') });
+    if (!asked || got.get('state') !== asked) { say('Vitrum did not ask for this sign-in.', 'Vitrum не е поискал този вход.'); return; }
+    sessionStorage.removeItem('vitrum-google-state'); sessionStorage.removeItem('vitrum-google-back');
+    localStorage.setItem('vitrum:google-answer', JSON.stringify({ id: asked, token: got.get('access_token'), expires: Number(got.get('expires_in') || 0), scope: got.get('scope') || '', error: got.get('error'), at: Date.now() }));
+    // a full-page trip goes back to the app, and only to an address under Vitrum's own (never an open redirect: the
+    // origin alone is shared with other apps of the same site). Read as the browser would, so '..' cannot climb out
+    let home = null;
+    try { const to = back && new URL(back).href; if (to && to.startsWith(new URL('./', location.href).href)) home = to; } catch { /* not an address */ }
+    if (home) { location.replace(home); return; }
     say('Done. This window closes by itself.', 'Готово. Прозорецът се затваря сам.');
-    setTimeout(() => window.close(), 400);
+    // a window the browser will not let a page close stays open: say so
+    setTimeout(() => { window.close(); setTimeout(() => say('You can close this window.', 'Можеш да затвориш този прозорец.'), 300); }, 400);
     return;
   }
   const q = new URLSearchParams(location.search), id = q.get('id');
   if (!id) { say('Open Vitrum and connect Google from there.', 'Отвори Vitrum и свържи Google оттам.'); return; }
   sessionStorage.setItem('vitrum-google-state', id);
+  // kept for the way back: this tab's sessionStorage outlives the trip to Google. A pop-up starts with a copy of the
+  // app tab's, so an old one is cleared
+  if (q.get('back')) sessionStorage.setItem('vitrum-google-back', q.get('back')); else sessionStorage.removeItem('vitrum-google-back');
   say('Opening Google…', 'Отварям Google…');
-  const ask = { client_id: CLIENT, redirect_uri: here, response_type: 'token', scope: q.get('scope') || 'openid email', include_granted_scopes: 'true', state: id };
+  const ask = { client_id: CLIENT, redirect_uri: here, response_type: 'token', scope: SCOPE, include_granted_scopes: 'true', state: id };
   if (q.get('hint')) ask.login_hint = q.get('hint');
   if (q.get('prompt')) ask.prompt = q.get('prompt');
   location.replace(`https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(ask)}`);
