@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vitrum · Google</title>
+<style>
+  body { margin: 0; display: grid; place-items: center; min-height: 100vh; font: 15px/1.5 system-ui, sans-serif; background: #141416; color: #d8d8dc; text-align: center; }
+  p { max-width: 32ch; padding: 0 20px; }
+</style>
+<p id="say">…</p>
+<script>
+// Vitrum's own sign-in page. Google sends the person back here with a token; it goes to the app on a channel of this
+// origin, because the app's isolation (which the RAW decoder needs) cuts the usual link between a page and its pop-up.
+// Implicit flow, no client secret: a browser app has nowhere to keep one. The token leaves the address bar at once.
+(() => {
+  const CLIENT = '435734456667-5sp5j37ss0m0vokmkbqgk0o8ljggie93.apps.googleusercontent.com';
+  const bg = (localStorage.getItem('vitrum:lang') || '"bg"').includes('bg');
+  const say = (en, bgText) => { document.getElementById('say').textContent = bg ? bgText : en; };
+  const here = location.origin + location.pathname, channel = new BroadcastChannel('vitrum-google');
+  const back = new URLSearchParams(location.hash.slice(1));
+  if (back.has('access_token') || back.has('error')) {
+    const asked = sessionStorage.getItem('vitrum-google-state');
+    history.replaceState(null, '', here);
+    if (!asked || back.get('state') !== asked) { say('Vitrum did not ask for this sign-in.', 'Vitrum не е поискал този вход.'); return; }
+    sessionStorage.removeItem('vitrum-google-state');
+    channel.postMessage({ id: asked, token: back.get('access_token'), expires: Number(back.get('expires_in') || 0), scope: back.get('scope') || '', error: back.get('error') });
+    say('Done. This window closes by itself.', 'Готово. Прозорецът се затваря сам.');
+    setTimeout(() => window.close(), 400);
+    return;
+  }
+  const q = new URLSearchParams(location.search), id = q.get('id');
+  if (!id) { say('Open Vitrum and connect Google from there.', 'Отвори Vitrum и свържи Google оттам.'); return; }
+  sessionStorage.setItem('vitrum-google-state', id);
+  say('Opening Google…', 'Отварям Google…');
+  const ask = { client_id: CLIENT, redirect_uri: here, response_type: 'token', scope: q.get('scope') || 'openid email', include_granted_scopes: 'true', state: id };
+  if (q.get('hint')) ask.login_hint = q.get('hint');
+  if (q.get('prompt')) ask.prompt = q.get('prompt');
+  location.replace(`https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(ask)}`);
+})();
+</script>
+</html>
