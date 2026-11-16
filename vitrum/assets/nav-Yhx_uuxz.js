@@ -1,0 +1,1 @@
+import{nn as e,pn as t}from"./state-SKPYMEn4.js";import{u as n}from"./i18n-DanXrVDv.js";var r=n({job:null}),i=()=>matchMedia(`(max-width: 900px)`).matches,a=n=>{r.set({job:n}),i()&&t.set({rightOpen:!1,leftOpen:!1}),e(`agenda`)};export{a as openShootDay,r as shootDay};
