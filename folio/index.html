@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Folio</title>
+    <meta name="description" content="Explore Wikipedia by globe, by date and by connection, then read it in comfort." />
+    <meta name="theme-color" content="#071d49" />
+    <style>html{background:#071d49}</style>
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="preconnect" href="https://en.wikipedia.org" crossorigin />
+    <link rel="preconnect" href="https://thumb.wikimedia.org" />
+    <script>
+      // Pick the theme before the first paint so a dark reader never sees a white flash.
+      try {
+        var t = (JSON.parse(localStorage.getItem('folio:settings') || '{}').theme) || 'auto'
+        if (t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.dataset.theme = t
+      } catch (e) {}
+    </script>
+    <script type="module" crossorigin src="./assets/index-l_BD_UVh.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BMlcGjAJ.css">
+  </head>
+  <body>
+    <div id="folio-root"></div>
+  </body>
+</html>
