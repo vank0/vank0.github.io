@@ -3,7 +3,21 @@
 // ponytail: old hashed assets are never pruned. Bump the name to drop them all.
 const SHELL = 'folio-shell-v1'
 
-self.addEventListener('install', () => self.skipWaiting())
+// The first visit is served before this worker is in charge, so nothing of it passes through
+// `fetch` below. Store the page and the files it names now, or a first-time visitor who then
+// goes offline has nothing to open. Later chunks and fonts are stored as they are used.
+self.addEventListener('install', event => {
+  event.waitUntil(
+    (async () => {
+      const cache = await caches.open(SHELL)
+      const page = await fetch('./', { cache: 'no-cache' })
+      await cache.put('./', page.clone())
+      const named = [...(await page.text()).matchAll(/(?:src|href)="(\.\/[^"]+)"/g)].map(m => m[1])
+      await Promise.allSettled(named.map(url => cache.add(url)))
+      await self.skipWaiting()
+    })(),
+  )
+})
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches
