@@ -226,6 +226,12 @@ h1 em {
 }
 .orb-blobs {
   position: absolute; inset: var(--rim); border-radius: 50%; overflow: hidden; transform: translateZ(0);
+  /* Safari ignores a rounded overflow clip for children that are blurred, blended and animated,
+     and shows the whole square. A clip-path and a mask are both honoured there; both are set
+     because this could not be tested in Safari from here. */
+  clip-path: circle(50%);
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 calc(100% - .5px), #0000 100%);
+          mask-image: radial-gradient(circle closest-side, #000 calc(100% - .5px), #0000 100%);
   opacity: var(--blob, 0); transition: opacity .5s;
 }
 .orb-blobs i {
