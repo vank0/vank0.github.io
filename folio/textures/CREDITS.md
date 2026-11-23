@@ -39,3 +39,4 @@ The Space view credits them under the picture.
 - Creatures near a point: iNaturalist observers, photos CC0 / CC BY / CC BY-SA, credited on each.
 - Themed places on the Atlas: Wikidata (CC0).
 - `earth-night-2k.jpg`: the Earth's city lights, Solar System Scope (CC BY 4.0), based on NASA's Black Marble.
+- `earth-night-4k.jpg`: the Earth's city lights at 4K, Solar System Scope (CC BY 4.0), based on NASA's Black Marble; the same map the web clock uses.
