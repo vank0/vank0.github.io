@@ -298,7 +298,8 @@ h1 em {
   scale: calc(1 + .1 * var(--arm));
   box-shadow: var(--shadow-fab);
   transition: transform .3s var(--ease-spring), opacity .2s, --peek .3s ease;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent; touch-action: none;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;   /* a long press is hold-to-talk, never a text selection */
 }
 .fab:hover { --peek: 1; transform: translateY(-2px) scale(1.04); }
 .fab:active { transform: scale(.94); transition-duration: .1s; }
@@ -565,6 +566,9 @@ mark { color: var(--on-active); background: var(--mark); border-radius: 5px; box
 .voice-text { margin: 6px 0 0; min-height: 1.45em; }
 .voice-hint { margin: 4px 0 0; font-size: 12px; color: var(--ink-3); }
 .aura[data-via="key"] .via-mic, .aura[data-via="mic"] .via-key { display: none; }
+/* hints name the keyboard or the touchscreen, whichever this device has */
+@media (pointer: coarse) { .on-key { display: none; } }
+@media not all and (pointer: coarse) { .on-touch { display: none; } }
 
 .compose-bar { display: flex; align-items: center; gap: 2px; padding: 6px 8px 8px; }
 .sel { position: relative; }
@@ -667,7 +671,7 @@ mark { color: var(--on-active); background: var(--mark); border-radius: 5px; box
       <li><h3>Hover the bubble</h3><p>It grows upward and deals out four starter prompts. Clicking one sends it straight away, without stopping in the text field.</p></li>
       <li><h3>Click anywhere</h3><p>The bubble leaves and stays gone until you <a href="">reload the page</a>.</p></li>
       <li><h3>Click the sparkles</h3><p>The chat grows out of the button with the cursor already in the text field.</p></li>
-      <li><h3>Hold <kbd>Space</kbd></h3><p>The ring fills for a moment, then it listens. Let go and the answer comes back in the same bubble, read aloud. With the chat open, it lands in the chat instead.</p></li>
+      <li><h3>Hold <kbd>Space</kbd></h3><p>On a phone, press and hold the button instead. The ring fills for a moment, then it listens. Let go and the answer comes back in the same bubble, read aloud. With the chat open, it lands in the chat instead.</p></li>
       <li><h3>Tap <kbd>Space</kbd></h3><p>A short tap is ignored and scrolls the page as usual, so an accidental press never opens anything.</p></li>
       <li><h3>Pick an expert, a model, an effort</h3><p>The expert in the chat header changes the starter prompts and the voice. One menu holds the models, grouped by provider, and the effort: model changes how much it says, effort how long it thinks.</p></li>
       <li><h3>Type <kbd>/</kbd></h3><p>A slash at the start of a message lists the skills. Arrow keys choose, <kbd>Enter</kbd> completes, and the skill stays highlighted in the field. The Skills button does the same.</p></li>
@@ -693,7 +697,7 @@ mark { color: var(--on-active); background: var(--mark); border-radius: 5px; box
       <button class="teaser-head" type="button" id="teaserHead"><i data-i="spark"></i><span>How can I help?</span></button>
       <div class="teaser-more"><div>
         <div class="prompts" data-prompts></div>
-        <p class="hint">or hold <kbd>Space</kbd> to talk</p>
+        <p class="hint"><span class="on-key">or hold <kbd>Space</kbd> to talk</span><span class="on-touch">or hold the button to talk</span></p>
       </div></div>
     </div>
   </div>
@@ -732,7 +736,7 @@ mark { color: var(--on-active); background: var(--mark); border-radius: 5px; box
             <h2>How can I help?</h2>
             <p id="emptySub"></p>
             <div class="prompts" data-prompts></div>
-            <p class="hint">or hold <kbd>Space</kbd> to talk · <kbd>/</kbd> for skills</p>
+            <p class="hint"><span class="on-key">or hold <kbd>Space</kbd> to talk · </span><span class="on-touch">or tap the mic to talk · </span><kbd>/</kbd> for skills</p>
           </div>
           <div id="msgs" role="log" aria-live="polite"></div>
         </div>
@@ -1010,6 +1014,11 @@ function sync() {
   root.dataset.busy = !!gen || speaking;
   root.dataset.speaking = speaking;
   statusEl.textContent = voice === 'listening' ? 'Listening…' : gen ? 'Thinking…' : speaking ? 'Speaking…' : 'Ready';
+}
+let primed = false;
+function primeSpeech() {                    // iOS speaks only after a page has spoken inside a tap, and answers arrive seconds later
+  if (primed || !('speechSynthesis' in window)) return;
+  primed = true; speechSynthesis.speak(new SpeechSynthesisUtterance(''));
 }
 function say(text, done) {                  // read an answer aloud; done() runs once it ends or is cut short
   if (!store.speak || !('speechSynthesis' in window)) return done();
@@ -1344,7 +1353,33 @@ document.addEventListener('click', e => {
   if (p) { openChat(); send(p.dataset.prompt); }           // sent directly, never parked in the text field
 });
 $('#teaserHead').addEventListener('click', () => openChat());
-fab.addEventListener('click', () => isOpen() ? closeChat() : openChat());
+/* Press and hold the button: the touch (and mouse) twin of holding Space. A press is decided on
+   release (short = tap, opens or closes the chat), so the click that may follow is ignored. */
+let hold = null, holdEnd = -1e9;
+fab.addEventListener('pointerdown', e => {
+  if (!e.isPrimary || e.button !== 0) return;
+  hold = { id: e.pointerId, talk: voice === 'off' && !isOpen() };   // with the chat open the button only closes it
+  if (hold.talk) { root.dataset.via = 'hold'; arm(); }
+});
+function endHold(e) {
+  if (e.pointerId !== hold?.id) return;
+  const { talk } = hold;
+  hold = null; holdEnd = performance.now();
+  if (e.type === 'pointercancel') return talk && cancelVoice();
+  if (talk && voice !== 'arming') { primeSpeech(); return finish(); }   // held long enough: send what was heard
+  if (talk) cancelVoice();
+  isOpen() ? closeChat() : openChat();                                   // a tap
+}
+fab.addEventListener('pointerup', endHold);
+fab.addEventListener('pointercancel', endHold);
+// No text selection, loupe, callout or Android menu on a long press. Pointer events still arrive;
+// the click does not, which is why a tap is handled in endHold.
+fab.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+fab.addEventListener('contextmenu', e => e.preventDefault());
+fab.addEventListener('click', e => {        // keyboard (Enter, a Space tap) and screen readers
+  if (performance.now() - holdEnd < 700) return e.stopPropagation();
+  isOpen() ? closeChat() : openChat();
+});
 $('#btnClose').addEventListener('click', closeChat);
 $('#btnNew').addEventListener('click', () => { stop(); currentId = null; renderMsgs(); setHistory(false); input.focus(); });
 btnHistory.addEventListener('click', () => setHistory(chat.dataset.history !== 'true'));
@@ -1355,7 +1390,7 @@ historyEl.addEventListener('click', e => {
 });
 btnSend.addEventListener('click', () => gen ? stop() : send(input.value));
 btnMic.addEventListener('click', () => {
-  if (voice === 'off') { root.dataset.via = 'mic'; listen(); }   // a click is deliberate, so no hold delay
+  if (voice === 'off') { root.dataset.via = 'mic'; primeSpeech(); listen(); }   // a click is deliberate, so no hold delay
   else if (voice === 'listening') finish();
 });
 input.addEventListener('input', () => { sync(); updateAc(); });
