@@ -26,3 +26,15 @@ large enough to need it.
   running left), scaled down from the 8K original.
 
 The Space view credits them under the picture.
+
+## Living sources (fetched while reading, credited beside each)
+
+- The Sun this hour: NASA Solar Dynamics Observatory (public domain).
+- The Earth from space: NASA EPIC camera, DSCOVR (public domain).
+- Pictures from space: NASA Image and Video Library (public domain).
+- Space weather: NOAA Space Weather Prediction Center (public domain).
+- Earthquakes: US Geological Survey (public domain). Natural events: NASA EONET (public domain).
+- Space Station position: wheretheiss.at. People in space: corquaid's ISS APIs.
+- Weather at a point: Open-Meteo (CC BY 4.0).
+- Creatures near a point: iNaturalist observers, photos CC0 / CC BY / CC BY-SA, credited on each.
+- Themed places on the Atlas: Wikidata (CC0).
