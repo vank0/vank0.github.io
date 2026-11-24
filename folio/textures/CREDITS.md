@@ -24,6 +24,8 @@ large enough to need it.
 - `2k_saturn_ring_alpha.png`: Saturn's rings from 1.236 to 2.327 planet radii, inner edge on the left.
 - `4k_stars_milky_way.jpg`: the Milky Way in galactic coordinates (centre in the middle, longitude
   running left), scaled down from the 8K original.
+- `moon-512.jpg` (512 × 256): `2k_moon.jpg` scaled down (`sips -Z 512 -s formatOptions 72`), for the
+  small Moon pictures of tonight's phase (`src/MoonPhoto.tsx`), drawn on cards across the app.
 
 The Space view credits them under the picture.
 
