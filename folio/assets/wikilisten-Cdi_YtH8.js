@@ -1,0 +1,1 @@
+import{Nt as e}from"./index-ChPD5LCJ.js";import t from"./WikiLive-zO0NZFG1.js";import{t as n}from"./jsx-runtime-LKYXHABd.js";var r=e(),i=n(),a=!1;function o(){if(a)return;a=!0;let e=document.createElement(`div`);document.body.append(e);let n=(0,r.createRoot)(e);n.render((0,i.jsx)(t,{floating:!0,onClose:()=>(n.unmount(),e.remove(),a=!1)}))}export{o as listenToWikipedia};
