@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Gladiator</title>
+<!--
+  Where Supabase Auth sends someone connecting an AI app (Claude, Gemini):
+  <site>/oauth/consent?authorization_id=…  The app itself lives one level up
+  and routes by hash, so this page only forwards there, query intact. It is
+  kept out of the service worker on purpose (vite.config.ts): the cached app
+  shell served at this path would load its relative assets from the wrong
+  folder and render nothing.
+-->
+<script>
+  var root = location.pathname.replace(/\/oauth\/consent(\/.*)?$/, "/").replace(/\/+$/, "/");
+  location.replace(root + "#/oauth/consent" + location.search);
+</script>
+</head>
+<body style="font-family: system-ui, sans-serif; background: #0b1020; color: #eef2ff; padding: 24px">
+<noscript>Gladiator needs JavaScript to finish connecting your AI app.</noscript>
+</body>
+</html>
