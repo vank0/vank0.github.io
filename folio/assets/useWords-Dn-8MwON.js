@@ -1,0 +1,1 @@
+import{t as e}from"./react-DlmbjZJV.js";import{i as t}from"./i18n-DlPykgwl.js";var n=e();function r(e,r){let[,i]=(0,n.useState)(0);(0,n.useEffect)(()=>{let n=!0;return t(e,r).then(()=>n&&i(e=>e+1)),()=>{n=!1}},[e])}export{r as t};
