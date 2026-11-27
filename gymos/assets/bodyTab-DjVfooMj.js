@@ -1,1 +1,0 @@
-function e(e){return e===`calculations`?`tools`:e===`health`?`health`:`body`}export{e as t};
