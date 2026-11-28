@@ -1,0 +1,1 @@
+import{Wt as e,wn as t}from"./gymos-P_n3CBW1.js";import{o as n}from"./plannedWorkoutsDb-C9IAR1u1.js";import{Q as r}from"./index-DztMhrJ_.js";function i(){let i=t(),a=r();return{start:t=>a(async()=>{let r=await n(t);return r.ok?r.sessionId:(e({variant:`error`,message:i(`sched.routineGone`,`That routine was deleted.`)}),null)})}}export{i as t};
