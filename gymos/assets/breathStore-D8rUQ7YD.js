@@ -1,0 +1,1 @@
+import{r as e}from"./rolldown-runtime-hePW80VL.js";import{v as t}from"./react-D7Gq2U9M.js";var n=e(t(),1),r=null,i=new Set,a=()=>i.forEach(e=>e());function o(e,t={}){r={protocol:e,...t},a()}function s(){r=null,a()}function c(){return(0,n.useSyncExternalStore)(e=>(i.add(e),()=>i.delete(e)),()=>r,()=>r)}export{o as n,c as r,s as t};
